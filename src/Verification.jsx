@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Verification() {
-  const [showOTP, setShowOTP] = useState(false);
+  const [showOTP, setShowOTP] = useState(false);   // hello guys this is the verification page, where the user will enter their details and then receive an OTP to verify their identity before proceeding to add a problem. The form collects basic information like name, email, mobile number, year, and section. Upon submitting the form, an OTP modal appears where the user can enter the OTP they received. Once they submit the OTP, they are navigated to the add problem page.
   const navigate = useNavigate();
   const inputs = useRef([]);
 
