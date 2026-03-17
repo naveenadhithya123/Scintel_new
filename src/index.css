@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+html {
+  scroll-behavior: smooth;
+  /* Prevents the "bounce" scroll on iOS that can break fixed layouts */
+  overscroll-behavior-y: none; 
+}
+
+/* Prevent animation flicker & hardware accelerate transitions */
+* {
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* OxygenOS Fluid Physics Class */
+.smooth-transform {
+  transform: translateZ(0);
+  will-change: transform, opacity;
+  transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Global Scrollbar Reset (Ensures gray-scrollbar works everywhere) */
+.gray-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #9ca3af #f1f1f1;
+}
+
+.gray-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.gray-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.gray-scrollbar::-webkit-scrollbar-thumb {
+  background: #9ca3af;
+  border-radius: 10px;
+  border: 1px solid #f1f1f1; /* Adds a tiny gap to look cleaner */
+}
+
+.gray-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* Prevent text selection during fast clicking/scrolling for a native app feel */
+.select-none {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Improve tap highlight on mobile (OxygenOS style) */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
