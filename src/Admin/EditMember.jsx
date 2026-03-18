@@ -8,7 +8,7 @@ export default function EditMember() {
 
   return (
 
-    <div className="flex h-screen bg-[#f4f7f9]">
+    <div className="flex h-screen bg-[#f4f7f9]">  // Container for the entire page, using flexbox to create a sidebar and main content area, with a light background color
 
       {/* Sidebar */}
       <AdminSidebar />
