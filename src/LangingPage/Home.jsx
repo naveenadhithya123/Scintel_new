@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import clgimg from './assets/kiot img.jpeg';
+import clgimg from './kiot img.jpeg';
 
 function Home() {
   // Fix: Removed 'setMenuOpen' to prevent the "unused variable" error
