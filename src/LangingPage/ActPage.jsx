@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from "react-router-dom";
 
+const API_URL = "http://localhost:3000/api/activities";
+    const response = await fetch(API_URL);
+    const activitiesData = await response.json();
+
 function Activities() {
   const navigate = useNavigate();
   const [loaded, setLoaded] = useState(false);
@@ -29,7 +33,7 @@ function Activities() {
     };
   }, []);
 
-  const activitiesData = [
+  const activities = [
     { id: 1, year: "2025-26", count: 10 },
     { id: 2, year: "2024-25", count: 10 },
     { id: 3, year: "2023-24", count: 10 },
@@ -43,6 +47,8 @@ function Activities() {
     { id: 11, year: "2021-22", count: 10 },
     { id: 12, year: "2021-22", count: 10 },
   ];
+
+  
 
   return (
     <>
@@ -99,7 +105,7 @@ function Activities() {
             <div className="flex-1 overflow-y-auto gray-scrollbar p-2 overscroll-auto touch-pan-y">
               {activitiesData.map((item, index) => (
                 <div 
-                  key={item.id} 
+                  key={item.index} 
                   className={`group/row relative grid grid-cols-1 md:grid-cols-12 gap-4 px-6 py-4 border-b border-gray-50 items-center rounded-xl 
                     transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]
                     hover:bg-[#F5F9FA] hover:shadow-md hover:-translate-y-1 hover:scale-[1.005] hover:border-gray-200
@@ -111,14 +117,14 @@ function Activities() {
                   {/* Year */}
                   <div className="md:col-span-4 flex flex-col md:items-center">
                     <span className="md:hidden text-[10px] font-bold text-[#388E9C] uppercase mb-1 tracking-wider">Year</span>
-                    <span className="text-sm font-semibold text-[#3C3E40] group-hover/row:text-[#023347] transition-colors">{item.year}</span>
+                    <span className="text-sm font-semibold text-[#3C3E40] group-hover/row:text-[#023347] transition-colors">{item.batch}</span>
                   </div>
                   
                   {/* Activities */}
                   <div className="md:col-span-4 flex flex-col md:items-center">
                     <span className="md:hidden text-[10px] font-bold text-[#388E9C] uppercase mb-1 tracking-wider">Activities</span>
                     <span className="text-sm font-medium text-[#3C3E40] bg-gray-50 px-3 py-1 rounded-full group-hover/row:bg-white group-hover/row:shadow-sm transition-all">
-                      {item.count}
+                      {item.activity_count}
                     </span>
                   </div>
                   
