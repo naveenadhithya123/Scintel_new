@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AdminSidebar from './AdminSidebar';
 
 const ProblemAdmin = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('Problems List');
   const [activeSidebar, setActiveSidebar] = useState('Problems');
   const [selectedProblem, setSelectedProblem] = useState(null);
@@ -26,14 +28,16 @@ const ProblemAdmin = () => {
   ]);
 
   const handleSidebarClick = (name) => {
-    setActiveSidebar(name);
-    setIsMenuOpen(false); // Close menu on mobile after selection
-    if (name === 'Problems') {
-      setSelectedProblem(null);
-      setActiveTab('Problems List');
-    }
-  };
+  setActiveSidebar(name);
+  setIsMenuOpen(false);
 
+  if (name === "Announcement") navigate("/admin");
+  if (name === "Activities") navigate("/admin/activities");
+  if (name === "Members") navigate("/admin/members");
+  if (name === "Glories") navigate("/admin/glories");
+  if (name === "Problems") navigate("/admin/problems");
+  if (name === "Suggestion") navigate("/admin/suggestion");
+};
   const handleAddToList = (request) => {
     const newProblem = { id: Date.now(), type: 'problem', name: request.title, status: 'Open to Built', detailedDescription: request.detailedDescription };
     setProblemData([newProblem, ...problemData]);
