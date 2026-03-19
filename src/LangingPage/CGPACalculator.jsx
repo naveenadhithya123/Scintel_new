@@ -1,81 +1,79 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom"; // ✅ ADDED
+import { useNavigate, useParams } from "react-router-dom"; 
 
-export default function CGPACalculator() {
+export default function ProblemDetails() {
+  const { id } = useParams(); // Get the dynamic ID from the URL
+  const navigate = useNavigate();
   const sectionRef = useRef(null);
+  
+  const [problem, setProblem] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
-  const navigate = useNavigate(); // ✅ ADDED
 
-  // Scroll to top when opened
+  // 1. Fetch details for the specific ID
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
-  // Intersection animation (same behavior)
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsVisible(entry.isIntersecting),
-      { threshold: 0.1 }
-    );
-
-    if (sectionRef.current) observer.observe(sectionRef.current);
-
-    return () => {
-      if (sectionRef.current) observer.unobserve(sectionRef.current);
+    const fetchDetail = async () => {
+      try {
+        setLoading(true);
+        // FETCHING FROM YOUR API IMAGE: http://localhost:3000/api/current-problem/:id
+        const response = await fetch(`http://localhost:3000/api/current-problem/${id}`);
+        const data = await response.json();
+        setProblem(data);
+        window.scrollTo(0, 0);
+      } catch (error) {
+        console.error("Error fetching detail:", error);
+      } finally {
+        setLoading(false);
+      }
     };
-  }, []);
+    if (id) fetchDetail();
+  }, [id]);
 
-  const points = [
-    "I don’t clearly understand the exact formula used for SGPA and CGPA calculation.",
-    "Each subject has different credits, and multiplying credit with grade points manually often leads to mistakes.",
-    "I usually depend on a basic calculator or Excel sheet, which is time-consuming and stressful.",
-    "Even a small calculation error changes my overall CGPA and gives me the wrong expectation.",
-    "I cannot easily track how my CGPA has improved or declined semester by semester.",
-    "There is no simple way for me to know what grades I need in the upcoming semesters to reach my target CGPA.",
-    "Different grading systems (10-point scale, 4-point scale, percentage-based system) make the process even more confusing.",
-    "I have no visual insights to identify my weak subjects or strong performance areas.",
-    "Since CGPA plays a major role in placements, higher studies, and scholarships, incorrect calculation affects my academic planning.",
-    "I need a smart system where I can enter my subjects, credits, and grades, and it automatically calculates SGPA, CGPA, shows performance trends, and predicts what I need to score in the future to achieve my academic goals."
-  ];
+  // Animation logic
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => setIsVisible(entry.isIntersecting), { threshold: 0.1 });
+    if (sectionRef.current) observer.observe(sectionRef.current);
+    return () => { if (sectionRef.current) observer.unobserve(sectionRef.current); };
+  }, [loading]);
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center text-gray-400">Loading details...</div>;
+  if (!problem) return <div className="min-h-screen flex items-center justify-center">Problem not found.</div>;
 
   return (
-    <div
-      ref={sectionRef}
-      className="min-h-screen bg-[#F5F9FA] py-16 px-6 flex justify-center"
-    >
+    <div ref={sectionRef} className="min-h-screen bg-[#F5F9FA] py-16 px-6 flex justify-center select-none font-sans">
       <div className="w-full max-w-6xl">
-
-        {/* Page Title */}
-        <h1 className="text-3xl font-bold text-[#023347] mb-10">
-          CGPA Calculator
-        </h1>
+        
+        {/* Back Button and Title */}
+        <div className="flex flex-col mb-10">
+          <button onClick={() => navigate(-1)} className="text-[#388E9C] font-bold text-sm mb-2 hover:underline w-fit">← Back to List</button>
+          <h1 className="text-3xl font-bold text-[#023347]">
+            {problem.title}
+          </h1>
+          <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Category: {problem.category}</span>
+        </div>
 
         {/* Card */}
-        <div
-          className={`bg-white rounded-3xl shadow-sm border border-gray-100 p-12 transition-all duration-700 ${
-            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
-          }`}
-        >
-
-          {/* Section Title */}
-          <h2 className="text-xl font-semibold text-[#023347] mb-8">
+        <div className={`bg-white rounded-3xl shadow-sm border border-gray-100 p-8 md:p-12 transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
+          
+          <h2 className="text-xl font-semibold text-[#023347] mb-8 border-b pb-4">
             Detailed Description
           </h2>
 
-          {/* Description Points */}
-          <div className="space-y-6 text-[#3C3E40] text-[15px] leading-relaxed">
-            {points.map((point, index) => (
-              <p key={index}>{point}</p>
-            ))}
+          <div className="text-[#3C3E40] text-[16px] leading-relaxed">
+            {/* If your backend returns a single string with newlines, 
+               we use white-space: pre-line. If it's an array, you'd .map it.
+            */}
+            <p className="whitespace-pre-line">
+              {problem.detailed_description}
+            </p>
           </div>
 
-          {/* Lock Button */}
           <div className="flex justify-end mt-12">
             <button
-              onClick={() => navigate("/verification-mentor")}  // ✅ ADDED
-              className="bg-[#0B1C3D] text-white px-8 py-3 rounded-xl font-semibold shadow-md hover:bg-[#142d63] transition duration-300"
+              onClick={() => navigate("/verification-mentor")} 
+              className="bg-[#0B1C3D] text-white px-10 py-3 rounded-xl font-semibold shadow-md hover:bg-[#142d63] transition duration-300"
             >
-              Lock
+              Lock Statement
             </button>
           </div>
 

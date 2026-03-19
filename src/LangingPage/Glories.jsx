@@ -1,38 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 
+const API_URL = "http://localhost:3000/api/glories";
+    const response = await fetch(API_URL);
+    const glories = await response.json();
 
-const glories = [
-  {
-    img: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600&q=80',
-    name: 'Name',
-    desc: 'Student have developed the web application for solving the problem of CGPA calculation.'
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=600&q=80',
-    name: 'Name',
-    desc: 'Student have developed the web application for solving the problem of CGPA calculation.'
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=600&q=80',
-    name: 'Name',
-    desc: 'Student have developed the web application for solving the problem of CGPA calculation.'
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&q=80',
-    name: 'Name',
-    desc: 'Student have developed the web application for solving the problem of CGPA calculation.'
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&q=80',
-    name: 'Name',
-    desc: 'Student have developed the web application for solving the problem of CGPA calculation.'
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1484417894907-623942c8ee29?w=600&q=80',
-    name: 'Name',
-    desc: 'Student have developed the web application for solving the problem of CGPA calculation.'
-  },
-];
 
 function Glories() {
   const [loaded, setLoaded] = useState(false);
@@ -122,11 +93,11 @@ function Glories() {
                 {/* Image Section - PLUS ICON REMOVED */}
                 <div 
                   className="w-full h-56 overflow-hidden relative cursor-zoom-in"
-                  onClick={() => setSelectedImage(item.img)}
+                  onClick={() => setSelectedImage(item.image_url)}
                 >
                   <img
-                    src={item.img}
-                    alt={item.name}
+                    src={item.image_url}
+                    alt={item.title}
                     className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                   />
                   {/* Subtle Gradient Overlay only */}
@@ -137,10 +108,10 @@ function Glories() {
                 <div className="px-6 py-6 flex-1 flex flex-col justify-between">
                   <div>
                     <h2 className="text-xl font-bold text-[#023347] mb-3 group-hover:text-[#388E9C] transition-colors duration-300">
-                      {item.name}
+                      {item.title}
                     </h2>
                     <p className="text-sm text-[#3C3E40] leading-relaxed opacity-80 group-hover:opacity-100 transition-opacity">
-                      {item.desc}
+                      {item.description}
                     </p>
                   </div>
                 </div>
