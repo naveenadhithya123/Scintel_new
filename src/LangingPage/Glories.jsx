@@ -1,21 +1,30 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-const API_URL = "http://localhost:3000/api/glories";
-    const response = await fetch(API_URL);
-    const glories = await response.json();
-
-
 function Glories() {
-  const [loaded, setLoaded] = useState(false);
+  const [glories, setGlories] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(null); // Lightbox State
 
   // Animation Refs & State
   const sectionRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
 
-  // 1. Trigger Initial Load
+  // 1. Fetch Data from API
   useEffect(() => {
-    setTimeout(() => setLoaded(true), 100);
+    const fetchGlories = async () => {
+      try {
+        const API_URL = "http://localhost:3000/api/glories";
+        const response = await fetch(API_URL);
+        const data = await response.json();
+        setGlories(data);
+      } catch (error) {
+        console.error("Error fetching glories:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGlories();
   }, []);
 
   // 2. Intersection Observer for Scroll Reveal
@@ -41,7 +50,6 @@ function Glories() {
       {/* --- IMAGE LIGHTBOX OVERLAY --- */}
       {selectedImage && (
         <div 
-          id="glories"
           className="fixed inset-0 z-[5000] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 cursor-zoom-out animate-in fade-in duration-300"
           onClick={() => setSelectedImage(null)}
         >
@@ -51,7 +59,9 @@ function Glories() {
             className="max-w-full max-h-[95vh] rounded-md shadow-2xl object-contain transform transition-transform duration-300 scale-100" 
           />
           <button className="absolute top-6 right-6 text-white/80 bg-white/10 hover:bg-white/20 hover:text-white rounded-full p-3 transition-colors backdrop-blur-sm">
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
       )}
@@ -59,8 +69,7 @@ function Glories() {
       <div 
         ref={sectionRef}
         id="glories" 
-        // Standard Background Color #F5F9FA
-        className="min-h-screen bg-[#F5F9FA] flex flex-col font-sans py-12 perspective-[1000px]"
+        className="min-h-screen bg-[#F5F9FA] flex flex-col font-sans py-12 perspective-[1000px] select-none"
       >
         <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
           
@@ -77,56 +86,53 @@ function Glories() {
         
           {/* Grid Container */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {glories.map((item, index) => (
-              <div
-                key={index}
-                // Card Animation & Physics
-                className={`group relative bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm flex flex-col
-                  transform-gpu transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]
-                  hover:-translate-y-2 hover:shadow-2xl hover:border-[#388E9C]/20 hover:scale-[1.02]
-                  active:scale-[0.98]
-                  ${isVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-24 scale-95"}
-                `}
-                style={{ transitionDelay: `${index * 100}ms` }}
-              >
-                
-                {/* Image Section - PLUS ICON REMOVED */}
-                <div 
-<<<<<<< HEAD
-                   className="w-full aspect-[16/9] overflow-hidden relative cursor-zoom-in"
-                  onClick={() => setSelectedImage(item.img)}
-=======
-                  className="w-full h-56 overflow-hidden relative cursor-zoom-in"
-                  onClick={() => setSelectedImage(item.image_url)}
->>>>>>> c513c759def982ae61f1703c0d117956dc9c5317
+            {loading ? (
+              <div className="col-span-full text-center py-20 text-gray-400 italic">Loading our achievements...</div>
+            ) : (
+              glories.map((item, index) => (
+                <div
+                  key={item.id || index}
+                  className={`group relative bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm flex flex-col
+                    transform-gpu transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]
+                    hover:-translate-y-2 hover:shadow-2xl hover:border-[#388E9C]/20 hover:scale-[1.02]
+                    active:scale-[0.98]
+                    ${isVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-24 scale-95"}
+                  `}
+                  style={{ transitionDelay: `${index * 100}ms` }}
                 >
-                  <img
-                    src={item.image_url}
-                    alt={item.title}
-                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-                  />
-                  {/* Subtle Gradient Overlay only */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                </div>
+                  
+                  {/* Image Section */}
+                  <div 
+                    className="w-full aspect-[16/9] overflow-hidden relative cursor-zoom-in bg-gray-100"
+                    onClick={() => setSelectedImage(item.image_url || item.img)}
+                  >
+                    <img
+                      src={item.image_url || item.img}
+                      alt={item.title}
+                      className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  </div>
 
-                {/* Content Section */}
-                <div className="px-6 py-6 flex-1 flex flex-col justify-between">
-                  <div>
-                    <h2 className="text-xl font-bold text-[#023347] mb-3 group-hover:text-[#388E9C] transition-colors duration-300">
-                      {item.title}
-                    </h2>
-                    <p className="text-sm text-[#3C3E40] leading-relaxed opacity-80 group-hover:opacity-100 transition-opacity">
-                      {item.description}
-                    </p>
+                  {/* Content Section */}
+                  <div className="px-6 py-6 flex-1 flex flex-col justify-between">
+                    <div>
+                      <h2 className="text-xl font-bold text-[#023347] mb-3 group-hover:text-[#388E9C] transition-colors duration-300">
+                        {item.title}
+                      </h2>
+                      <p className="text-sm text-[#3C3E40] leading-relaxed opacity-80 group-hover:opacity-100 transition-opacity">
+                        {item.description}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>
     </>
-  )
+  );
 }
 
 export default Glories;

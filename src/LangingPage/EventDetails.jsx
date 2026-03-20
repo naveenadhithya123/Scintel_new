@@ -1,28 +1,21 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useLocation, useParams, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 
-function EventDetails() {
-  const { id } = useParams(); // Successfully gets the activity_id from URL
-  const navigate = useNavigate();
+const EventDetails = () => {
+  const { id } = useParams(); 
   const [eventData, setEventData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [isVisible, setIsVisible] = useState(false);
-  const sectionRef = useRef(null);
-  const location = useLocation();
 
   useEffect(() => {
     const fetchEvent = async () => {
       try {
         setLoading(true);
-        // CHANGE: Dynamic ID used in the URL
+        // Using your localhost API structure
         const response = await fetch(`http://localhost:3000/api/activities/event/${id}`);
         const data = await response.json();
-        
-        // Handle if API returns an array or single object
-        setEventData(Array.isArray(data) ? data[0] : data);
-      } catch (err) {
-        console.error("Error fetching event:", err);
+        setEventData(data);
+      } catch (error) {
+        console.error("Error fetching event:", error);
       } finally {
         setLoading(false);
       }
@@ -31,99 +24,100 @@ function EventDetails() {
     if (id) fetchEvent();
   }, [id]);
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-  }, [location]);
+  if (loading) return <div className="p-10 text-center font-bold">Loading Event Details...</div>;
+  if (!eventData) return <div className="p-10 text-center">Event not found.</div>;
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsVisible(entry.isIntersecting),
-      { threshold: 0.1 }
-    );
-    if (sectionRef.current) observer.observe(sectionRef.current);
-    return () => { if (sectionRef.current) observer.unobserve(sectionRef.current); };
-  }, [loading]);
-
-  if (loading) return <div className="min-h-screen flex items-center justify-center font-sans text-gray-500">Loading detailed info...</div>;
-  if (!eventData) return <div className="min-h-screen flex items-center justify-center">Event not found.</div>;
-
+  // Transform single string values into arrays for the gallery
+  const photos = eventData.event_image_url ? [eventData.event_image_url] : [];
+  
   return (
-    <>
-      <style>{`
-        .gray-scrollbar::-webkit-scrollbar { width: 6px; }
-        .gray-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-        .gray-scrollbar::-webkit-scrollbar-thumb { background: #9ca3af !important; border-radius: 10px; }
-      `}</style>
+    <div className="max-w-5xl mx-auto p-6 md:p-12 bg-white text-slate-800">
+      
+      {/* 1. Header & Description (Always Visible) */}
+      <section className="mb-10">
+        <h1 className="text-3xl font-bold text-[#0a2e3f] mb-2">{eventData.title}</h1>
+        <p className="text-sm font-semibold text-blue-600 mb-6 italic tracking-wide">Batch: {eventData.batch}</p>
+        <h2 className="text-lg font-bold text-[#0a2e3f] mb-2">Description</h2>
+        <p className="text-sm text-gray-600 leading-relaxed max-w-3xl">{eventData.description}</p>
+      </section>
 
-      {selectedImage && (
-        <div className="fixed inset-0 z-[5000] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 cursor-zoom-out" onClick={() => setSelectedImage(null)}>
-          <img src={selectedImage} alt="Full View" className="max-w-full max-h-[95vh] rounded-2xl object-contain" />
-        </div>
+      {/* 2. Resource Person - Conditional Rendering */}
+      {eventData.resource_person_name && (
+        <section className="mb-10 animate-fade-in">
+          <h2 className="text-lg font-bold text-[#0a2e3f] mb-4">Resource Person</h2>
+          <div className="flex flex-col md:flex-row gap-8">
+            <div className="w-full md:w-1/2 aspect-video bg-[#0a2e3f] rounded-lg overflow-hidden">
+              <img 
+                src={`/images/${eventData.resource_person_image_url}`} 
+                alt={eventData.resource_person_name} 
+                className="w-full h-full object-cover"
+                onError={(e) => e.target.style.display = 'none'} 
+              />
+            </div>
+            <div className="md:w-1/2">
+              <h3 className="text-md font-bold text-[#0a2e3f]">{eventData.resource_person_name}</h3>
+              <p className="text-xs text-gray-600 mt-3 leading-relaxed">{eventData.resource_person_description}</p>
+            </div>
+          </div>
+        </section>
       )}
 
-      <div ref={sectionRef} className='min-h-screen bg-[#F5F9FA] flex flex-col py-12 select-none font-sans'>
-        <div className='w-full max-w-6xl mx-auto px-6 md:px-12'>
-          
-          <div className="pb-8 overflow-hidden">
-            <button onClick={() => navigate(-1)} className="text-[#388E9C] font-bold text-sm mb-4 hover:underline">← Back to Gallery</button>
-            <h1 className={`text-[40px] font-extrabold text-[#023347] transition-all duration-1000 ${isVisible ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0"}`}>
-              {eventData.title}
-            </h1>
-            <p className="text-sm text-gray-400 font-semibold tracking-wide uppercase">Batch: {eventData.batch}</p>
+      {/* 3. Participants */}
+      <section className="mb-10">
+        <h2 className="text-lg font-bold text-[#0a2e3f] mb-1">Participants</h2>
+        <p className="text-sm text-gray-500">{eventData.participants} Students</p>
+      </section>
+
+      {/* 4. Event Gallery */}
+      {photos.length > 0 && (
+        <section className="mb-10">
+          <h2 className="text-lg font-bold text-[#0a2e3f] mb-4">Photos</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {photos.map((photo, index) => (
+              <div key={index} className="aspect-video bg-[#0a2e3f] rounded-lg overflow-hidden">
+                 <img src={`/images/${photo}`} alt="Event Gallery" className="w-full h-full object-cover" />
+              </div>
+            ))}
           </div>
+        </section>
+      )}
 
-          <div className="space-y-8">
-            <div className={`bg-white rounded-3xl shadow-sm p-8 transition-all duration-1000 delay-100 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}>
-              <section className='mb-8'>
-                <h2 className='text-xl font-bold text-[#023347] mb-3'>Description</h2>
-                <p className='text-gray-600 text-sm leading-relaxed'>{eventData.description}</p>
-              </section>
-              <section>
-                <h2 className='text-xl font-bold text-[#023347] mb-2'>Target Audience</h2>
-                <div className="inline-block bg-[#F5F9FA] px-4 py-2 rounded-lg border border-gray-100">
-                   <p className='text-[#3C3E40] text-sm font-semibold'>{eventData.participants}</p>
-                </div>
-              </section>
+      {/* 5. Winner Section - Conditional Rendering */}
+      {eventData.winner_name && (
+        <section className="mb-10 animate-fade-in">
+          <h2 className="text-lg font-bold text-[#0a2e3f] mb-4">Winner</h2>
+          <div className="flex flex-col md:flex-row gap-8">
+            <div className="w-full md:w-1/2 aspect-video bg-[#0a2e3f] rounded-lg overflow-hidden">
+              <img src={`/images/${eventData.winner_image}`} alt={eventData.winner_name} className="w-full h-full object-cover" />
             </div>
-
-            <div className={`bg-white rounded-3xl shadow-sm p-8 transition-all duration-1000 delay-200 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}>
-              <h2 className='text-xl font-bold text-[#023347] mb-6'>Resource Person</h2>
-              <div className='flex flex-col md:flex-row gap-8 items-start'>
-                <div className='w-full md:w-56 h-56 rounded-2xl overflow-hidden shadow-md bg-gray-100'>
-                   <img 
-                     src={eventData.resource_person_image_url || "https://via.placeholder.com/400"} 
-                     alt={eventData.resource_person_name} 
-                     className="w-full h-full object-cover"
-                   />
-                </div>
-                <div className='flex flex-col justify-center pt-2'>
-                  <h3 className='text-[#023347] font-bold text-2xl mb-3'>{eventData.resource_person_name}</h3>
-                  <p className='text-gray-500 text-sm leading-relaxed'>{eventData.resource_person_description}</p>
-                </div>
-              </div>
+            <div className="md:w-1/2">
+              <h3 className="text-md font-bold text-[#0a2e3f]">{eventData.winner_name}</h3>
+              <h4 className="text-xs font-bold mt-4 uppercase tracking-wider text-gray-400">Feedback</h4>
+              <p className="text-xs text-gray-600 mt-1 italic">"{eventData.winner_description}"</p>
             </div>
+          </div>
+        </section>
+      )}
 
-            <div className={`bg-white rounded-3xl shadow-sm p-8 transition-all duration-1000 delay-400 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}>
-              <div className="flex items-center gap-3 mb-6">
-                <span className="text-2xl">🏆</span>
-                <h2 className='text-xl font-bold text-[#023347]'>Winner</h2>
-              </div>
-              <div className='flex flex-col md:flex-row gap-8 items-start'>
-                <div className='w-full md:w-56 h-44 rounded-2xl overflow-hidden shadow-md bg-gray-100'>
-                  <img src={eventData.winner_image || "https://via.placeholder.com/400"} alt="Winner" className="w-full h-full object-cover" />
-                </div>
-                <div className='flex flex-col justify-center pt-1'>
-                  <h3 className='text-[#023347] font-bold text-2xl mb-1'>{eventData.winner_name}</h3>
-                  <p className='text-[#388E9C] text-xs font-bold mb-3 uppercase tracking-wider bg-[#F5F9FA] px-2 py-1 rounded inline-block w-fit'>Feedback: {eventData.testimonials_feedback}</p>
-                  <p className='text-gray-500 text-sm leading-relaxed'>{eventData.winner_description}</p>
-                </div>
+      {/* 6. Testimonials - Conditional Rendering */}
+      {eventData.testimonials_name && (
+        <section>
+          <h2 className="text-lg font-bold text-[#0a2e3f] mb-4">Testimonials</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-[#f8fafc] p-6 rounded-xl border border-gray-100 flex flex-col justify-between shadow-sm">
+              <p className="text-[11px] leading-relaxed font-medium text-gray-700">
+                {eventData.testimonials_feedback}
+              </p>
+              <div className="mt-6 text-right">
+                <p className="text-[10px] font-bold text-[#0a2e3f] leading-none">-{eventData.testimonials_name}</p>
+                <p className="text-[9px] font-bold text-gray-400 mt-1">{eventData.testimonials_class}</p>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </>
+        </section>
+      )}
+    </div>
   );
-}
+};
 
 export default EventDetails;

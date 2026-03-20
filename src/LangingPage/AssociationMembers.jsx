@@ -2,28 +2,20 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function AssociationMembers() {
-<<<<<<< HEAD
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("2022-23");
-  const batch = batchData[activeTab];
-  
-  const [loaded, setLoaded] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null); 
-  
-=======
+
   // --- STATE FOR BACKEND DATA ---
-  const [batches, setBatches] = useState([]); // List of years/titles (Image 4)
-  const [activeTab, setActiveTab] = useState(""); // Selected year (e.g., "2023")
-  const [batchDetails, setBatchDetails] = useState(null); // Info + Members (Image 5)
+  const [batches, setBatches] = useState([]); // List of years/titles for tabs
+  const [activeTab, setActiveTab] = useState(""); // Currently selected year
+  const [batchDetails, setBatchDetails] = useState(null); // Contains { batch_info, members }
   const [loading, setLoading] = useState(true);
 
   // --- UI STATES ---
   const [selectedImage, setSelectedImage] = useState(null);
->>>>>>> c513c759def982ae61f1703c0d117956dc9c5317
   const sectionRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
 
-  // 1. FETCH ALL BATCHES (Tabs)
+  // 1. FETCH ALL BATCHES (To generate Tabs)
   useEffect(() => {
     const fetchBatches = async () => {
       try {
@@ -41,17 +33,14 @@ export default function AssociationMembers() {
     fetchBatches();
   }, []);
 
-  // 2. FETCH SPECIFIC BATCH DETAILS (When Tab Changes)
+  // 2. FETCH SPECIFIC BATCH DETAILS (When user clicks a Tab)
   useEffect(() => {
     const fetchMembers = async () => {
       if (!activeTab) return;
       setLoading(true);
       try {
-        // FIXED: Removed the ":" from the URL string to match your screenshot
         const response = await fetch(`http://localhost:3000/api/association-batch/${activeTab}`);
         const data = await response.json();
-
-        // data looks like: { batch_info: {...}, members: [...] }
         setBatchDetails(data);
       } catch (error) {
         console.error("Error fetching members:", error);
@@ -84,21 +73,23 @@ export default function AssociationMembers() {
       {/* --- IMAGE LIGHTBOX --- */}
       {selectedImage && (
         <div 
-<<<<<<< HEAD
-          id="members"
-=======
->>>>>>> c513c759def982ae61f1703c0d117956dc9c5317
           className="fixed inset-0 z-[5000] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 cursor-zoom-out animate-in fade-in duration-300"
           onClick={() => setSelectedImage(null)}
         >
-          <img src={selectedImage} alt="Full View" className="max-w-full max-h-[95vh] rounded-md shadow-2xl object-contain" />
+          <img 
+            src={selectedImage} 
+            alt="Full View" 
+            className="max-w-full max-h-[95vh] rounded-md shadow-2xl object-contain" 
+          />
         </div>
       )}
 
-      <div ref={sectionRef} id="associationMembers" className="min-h-screen bg-[#F5F9FA] flex flex-col font-sans py-12 relative z-40 select-none">
-        
+      <div 
+        ref={sectionRef} 
+        id="associationMembers" 
+        className="min-h-screen bg-[#F5F9FA] flex flex-col font-sans py-12 relative z-40 select-none"
+      >
         <div className="px-6 md:px-12 max-w-7xl mx-auto w-full flex flex-col">
-<<<<<<< HEAD
           
           {/* Header */}
           <div className="pb-6 overflow-hidden flex items-center justify-between">
@@ -107,39 +98,25 @@ export default function AssociationMembers() {
                 isVisible ? "translate-y-0 opacity-100 blur-0" : "translate-y-20 opacity-0 blur-sm"
               }`}
             >
-=======
-          <div className="pb-6 overflow-hidden">
-            <h1 className={`text-[40px] font-extrabold text-[#023347] mb-3 transform transition-all duration-1000 ${isVisible ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0"}`}>
->>>>>>> c513c759def982ae61f1703c0d117956dc9c5317
               Association Members
             </h1>
 
             <button
               onClick={() => navigate('/')}
               className={`flex items-center gap-2 bg-[#023347] text-white px-6 py-2 rounded-xl text-xs font-bold shadow-sm 
-                transition-all duration-300 ease-out
-                hover:bg-[#388E9C] hover:shadow-lg hover:scale-105 active:scale-95
+                transition-all duration-300 ease-out hover:bg-[#388E9C] hover:shadow-lg hover:scale-105 active:scale-95
                 transform ${isVisible ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0"}
               `}
-              style={{ transitionDuration: "1000ms", transitionTimingFunction: "cubic-bezier(0.22,1,0.36,1)" }}
+              style={{ transitionDuration: "1000ms" }}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-3.5 h-3.5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M19 12H5M5 12l7 7M5 12l7-7" />
               </svg>
               Back
             </button>
           </div>
 
-          {/* --- TOP INFO SECTION --- */}
+          {/* --- TOP INFO SECTION (Group Photo + Description) --- */}
           {batchDetails?.batch_info && (
             <div className={`flex flex-col md:flex-row gap-8 mb-6 items-start transition-all duration-1000 delay-100 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}>
               <div className="relative group w-full md:w-72 aspect-video rounded-2xl overflow-hidden shadow-md cursor-zoom-in shrink-0 bg-gray-200">
@@ -157,7 +134,7 @@ export default function AssociationMembers() {
             </div>
           )}
 
-          {/* --- TABS --- */}
+          {/* --- TABS (Year Selection) --- */}
           <div className={`flex gap-6 md:gap-8 mb-6 border-b border-gray-200 overflow-x-auto transition-all duration-1000 delay-200 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
             {batches.map((tab) => (
               <button
@@ -183,33 +160,21 @@ export default function AssociationMembers() {
               ))}
             </div>
 
-<<<<<<< HEAD
-            {/* SCROLLABLE LIST AREA */}
-            <div key={activeTab} className="flex-1 overflow-y-auto gray-scrollbar p-2 overscroll-auto touch-pan-y"> 
-              {batch.members.map((member, idx) => (
-                <div
-                  key={idx}
-                  className={`group/row relative grid grid-cols-1 md:grid-cols-4 gap-4 px-6 py-4 border-b border-gray-50 items-center rounded-xl 
-                    transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]
-                    hover:bg-[#F5F9FA] hover:shadow-md hover:-translate-y-1 hover:scale-[1.005] hover:border-gray-200
-                    ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}
-                  `}
-                  style={{ transitionDelay: `${idx * 50}ms` }}
-                >
-                  <div className="text-center flex flex-col md:block">
-                    <span className="md:hidden text-[10px] text-[#388E9C] font-bold uppercase mb-1">Name</span>
-                    <span className="text-sm font-semibold text-[#3C3E40] group-hover/row:text-[#023347] transition-colors">{member.name}</span>
-=======
             {/* Table Body */}
-            <div className="flex-1 overflow-y-auto gray-scrollbar p-2"> 
+            <div className="flex-1 overflow-y-auto gray-scrollbar p-2 overscroll-auto touch-pan-y"> 
               {loading ? (
                 <div className="flex items-center justify-center h-full text-gray-400">Loading members...</div>
               ) : batchDetails?.members?.length > 0 ? (
                 batchDetails.members.map((member, idx) => (
-                  <div key={idx} className="group/row relative grid grid-cols-1 md:grid-cols-3 gap-4 px-6 py-4 border-b border-gray-50 items-center rounded-xl transition-all duration-500 hover:bg-[#F5F9FA] hover:shadow-md">
+                  <div 
+                    key={idx} 
+                    className={`group/row relative grid grid-cols-1 md:grid-cols-3 gap-4 px-6 py-4 border-b border-gray-50 items-center rounded-xl transition-all duration-500 hover:bg-[#F5F9FA] hover:shadow-md
+                      ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+                    style={{ transitionDelay: `${idx * 30}ms` }}
+                  >
                     <div className="text-center flex flex-col md:block">
                       <span className="md:hidden text-[10px] text-[#388E9C] font-bold uppercase mb-1">Name</span>
-                      <span className="text-sm font-semibold text-[#3C3E40]">{member.name}</span>
+                      <span className="text-sm font-semibold text-[#3C3E40] group-hover/row:text-[#023347] transition-colors">{member.name}</span>
                     </div>
                     <div className="text-center flex flex-col md:block">
                       <span className="md:hidden text-[10px] text-[#388E9C] font-bold uppercase mb-1">Reg No</span>
@@ -217,9 +182,8 @@ export default function AssociationMembers() {
                     </div>
                     <div className="text-center flex flex-col md:block">
                       <span className="md:hidden text-[10px] text-[#388E9C] font-bold uppercase mb-1">Role</span>
-                      <span className="text-sm font-medium text-[#3C3E40] bg-gray-50 px-3 py-1 rounded-full inline-block">{member.role}</span>
+                      <span className="text-sm font-medium text-[#3C3E40] bg-gray-50 px-3 py-1 rounded-full inline-block group-hover/row:bg-white transition-all">{member.role}</span>
                     </div>
->>>>>>> c513c759def982ae61f1703c0d117956dc9c5317
                   </div>
                 ))
               ) : (
