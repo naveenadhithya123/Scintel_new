@@ -5,7 +5,8 @@ const UpcomingCelebration = sequelize.define("UpcomingCelebration", {
 
   event_id: {
     type: DataTypes.INTEGER,
-    primaryKey: true
+    primaryKey: true,
+    autoIncrement: true   // ✅ IMPORTANT (add this)
   },
 
   event_title: {
@@ -16,6 +17,10 @@ const UpcomingCelebration = sequelize.define("UpcomingCelebration", {
   event_description: {
     type: DataTypes.TEXT,
     allowNull: false
+  },
+
+  short_description: {     // ✅ NEW FIELD
+    type: DataTypes.TEXT
   },
 
   brochure_url: {

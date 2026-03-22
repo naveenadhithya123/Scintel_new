@@ -15,7 +15,7 @@ import ActivitiesAdmin from './Admin/ActivitiesAdmin';
 import GloriesAdmin from './Admin/GloriesAdmin'
 import SuggestionAdmin from './Admin/SuggestionAdmin'
 import EventsGrid from "./Admin/EventsGrid";
-import { AddEvent, EditEvent } from "./Admin/EventPages";
+import { AddEvent, EditEvent, AddNewYear } from "./Admin/EventPages";
 
 function App() {
   return (
@@ -29,7 +29,7 @@ function App() {
 
       <Route path="/add-batch" element={<AddBatch />} />
 
-      <Route path="/edit-batch" element={<EditBatch />} />
+      <Route path="/admin/edit-batch" element={<EditBatch />} />
 
       <Route path="/add-member" element={<AddMember />} />
 
@@ -47,6 +47,8 @@ function App() {
       <Route path="/admin/glories" element={<GloriesAdmin />} />
 
       <Route path="/admin/suggestion" element={<SuggestionAdmin />} />
+
+      <Route path="/admin/activities/add-new-year" element={<AddNewYear />} />
     </Routes>
   )
 }

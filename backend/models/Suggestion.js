@@ -30,7 +30,7 @@ const Suggestion = sequelize.define("Suggestion", {
 
   proof_url: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: true   // ✅ changed
   },
 
   priority: {

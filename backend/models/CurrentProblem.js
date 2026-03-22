@@ -14,12 +14,14 @@ const CurrentProblem = sequelize.define("CurrentProblem", {
   detailed_description: DataTypes.TEXT,
 
   creator_user_id: DataTypes.INTEGER,
+  solver_user_id: DataTypes.INTEGER,
 
-  solver_user_id: DataTypes.INTEGER
+  // ✅ New column added
+  mentor: DataTypes.STRING
 
 }, {
   tableName: "current_problems",
   timestamps: false
 });
 
-export default CurrentProblem;  
+export default CurrentProblem;

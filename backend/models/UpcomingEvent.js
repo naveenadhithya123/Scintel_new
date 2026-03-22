@@ -5,7 +5,8 @@ const UpcomingEvent = sequelize.define("UpcomingEvent", {
 
   event_id: {
     type: DataTypes.INTEGER,
-    primaryKey: true
+    primaryKey: true,
+    autoIncrement: true 
   },
 
   event_title: {

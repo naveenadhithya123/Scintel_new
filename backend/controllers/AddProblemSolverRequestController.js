@@ -10,11 +10,12 @@ export const addProblemSolverRequest = async (req, res) => {
             email,
             phone_number,
             year,
-            section
+            section,
+            mentor // ✅ added
         } = req.body;
 
         // ✅ Validation
-        if (!problem_id || !name || !email || !phone_number || !year || !section) {
+        if (!problem_id || !name || !email || !phone_number || !year || !section || !mentor) {
             return res.status(400).json({
                 message: "All fields are required"
             });
@@ -41,7 +42,7 @@ export const addProblemSolverRequest = async (req, res) => {
             });
         }
 
-        // ✅ Step 2: Insert request ONLY
+        // ✅ Step 2: Insert request (including mentor)
         const [insertResult] = await sequelize.query(`
             INSERT INTO problem_solver_requests
             (
@@ -50,7 +51,8 @@ export const addProblemSolverRequest = async (req, res) => {
                 email,
                 phone_number,
                 year,
-                section
+                section,
+                mentor
             )
             VALUES
             (
@@ -59,7 +61,8 @@ export const addProblemSolverRequest = async (req, res) => {
                 :email,
                 :phone_number,
                 :year,
-                :section
+                :section,
+                :mentor
             )
             RETURNING *
         `, {
@@ -69,7 +72,8 @@ export const addProblemSolverRequest = async (req, res) => {
                 email,
                 phone_number,
                 year,
-                section
+                section,
+                mentor // ✅ added
             }
         });
 
@@ -87,4 +91,4 @@ export const addProblemSolverRequest = async (req, res) => {
             error: "Internal Server Error"
         });
     }
-};  
+};

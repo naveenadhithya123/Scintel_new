@@ -21,6 +21,12 @@ const AssociationMember = sequelize.define("AssociationMember", {
   role: {
     type: DataTypes.STRING,
     allowNull: false
+  },
+
+  
+  year: {
+    type: DataTypes.STRING,
+    allowNull: true   // change to false if required
   }
 
 }, {

@@ -1,16 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import AdminSidebar from './AdminSidebar';
 
-const initialEvents = [
-  { id: 1, title: 'Tech Talk 4.0', description: 'Student have developed the web application for solving the problem of CGPA calculation.' },
-  { id: 2, title: 'Tech Talk 4.0', description: 'Student have developed the web application for solving the problem of CGPA calculation.' },
-  { id: 3, title: 'Tech Talk 4.0', description: 'Student have developed the web application for solving the problem of CGPA calculation.' },
-  { id: 4, title: 'Tech Talk 4.0', description: 'Student have developed the web application for solving the problem of CGPA calculation.' },
-  { id: 5, title: 'Tech Talk 4.0', description: 'Student have developed the web application for solving the problem of CGPA calculation.' },
-  { id: 6, title: 'Tech Talk 4.0', description: 'Student have developed the web application for solving the problem of CGPA calculation.' },
-];
-
+/* ── Delete Modal Component ── */
 function DeleteModal({ open, onConfirm, onCancel }) {
   if (!open) return null;
   return (
@@ -27,7 +19,6 @@ function DeleteModal({ open, onConfirm, onCancel }) {
         }}
         onClick={e => e.stopPropagation()}
       >
-        {/* Icon */}
         <div style={{
           width: 56, height: 56, borderRadius: '50%',
           backgroundColor: '#fef2f2',
@@ -41,16 +32,12 @@ function DeleteModal({ open, onConfirm, onCancel }) {
             <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
           </svg>
         </div>
-
-        {/* Text */}
         <h3 style={{ fontSize: 17, fontWeight: 700, color: '#0d2233', marginBottom: 8 }}>
           Delete Event?
         </h3>
         <p style={{ fontSize: 13, color: '#64748b', marginBottom: 28, lineHeight: 1.5 }}>
           Are you sure you want to delete this event?<br />This action cannot be undone.
         </p>
-
-        {/* Buttons */}
         <button
           onClick={onConfirm}
           style={{
@@ -77,97 +64,174 @@ function DeleteModal({ open, onConfirm, onCancel }) {
   );
 }
 
+const StyledBackButton = ({ onClick }) => (
+    <button
+      onClick={onClick}
+      style={{
+        display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#083A4B',
+        color: 'white', padding: '8px 20px', borderRadius: '10px', fontSize: '12px',
+        fontWeight: '700', border: 'none', cursor: 'pointer', transition: 'all 0.3s ease'
+      }}
+      onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#388E9C'}
+      onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#083A4B'}
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M19 12H5M5 12l7 7M5 12l7-7" />
+      </svg>
+      Back
+    </button>
+);
+
 export default function EventsGrid() {
-  // Captures the dynamic year from the URL (e.g. "2024-25")
   const { year } = useParams();
   const navigate = useNavigate();
-  const [events, setEvents] = useState(initialEvents);
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState(null);
 
+  const fetchEvents = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`http://localhost:3000/api/admin/activities/${year}`);
+      const result = await response.json();
+      
+      // result.data contains the array from your API screenshot
+      if (result.success && Array.isArray(result.data)) {
+        const formattedEvents = result.data.map(item => {
+          // Handle the comma-separated image string
+          const imageList = item.image ? item.image.split(',') : [];
+          const firstImage = imageList.length > 0 ? imageList[0].trim() : '';
+
+          return {
+            id: item.activity_id,
+            title: item.title,
+            description: item.description,
+            thumbnail: firstImage
+          };
+        });
+        setEvents(formattedEvents);
+      }
+    } catch (error) {
+      console.error("Error fetching events:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (year) fetchEvents();
+  }, [year]);
+
+  const handleDeleteConfirm = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/admin/activities/${deleteId}`, {
+        method: 'DELETE'
+      });
+      if (response.ok) {
+        setEvents(prev => prev.filter(e => e.id !== deleteId));
+      } else {
+        alert("Failed to delete event");
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setDeleteId(null);
+    }
+  };
+
   return (
-    <AdminSidebar>
-      <main style={{ flex: 1, padding: '32px 36px', backgroundColor: '#fff', minHeight: '100vh', overflowY: 'auto' }}>
+    <div style={{ display: 'flex' }}>
+      <AdminSidebar />
+      <main style={{ flex: 1, padding: '32px 36px', backgroundColor: '#F5F9FA', minHeight: '100vh', overflowY: 'auto' }}>
+        
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 }}>
           <h1 style={{ fontSize: 26, fontWeight: 700, color: '#0d2233' }}>
-            {decodeURIComponent(year || '')}
+            Batch {decodeURIComponent(year || '')}
           </h1>
-          <button
-            onClick={() => navigate(`/admin/activities/${year}/add-event`)}
-            style={{
-              padding: '9px 20px', borderRadius: 8, border: 'none',
-              backgroundColor: '#0d2233', color: '#fff',
-              fontWeight: 600, fontSize: 14, cursor: 'pointer',
-            }}
-          >
-            + Add Event
-          </button>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <StyledBackButton onClick={() => navigate('/admin/activities')} />
+            <button
+                onClick={() => navigate(`/admin/activities/${year}/add-event`)}
+                style={{
+                  padding: '9px 20px', borderRadius: 8, border: 'none',
+                  backgroundColor: '#0d2233', color: '#fff',
+                  fontWeight: 600, fontSize: 14, cursor: 'pointer',
+                }}
+            >
+                + Add Event
+            </button>
+          </div>
         </div>
 
-        {/* Grid */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: 24,
-        }}>
-          {events.map(event => (
-            <div
-              key={event.id}
-              style={{
-                backgroundColor: '#fff',
-                borderRadius: 10,
-                overflow: 'hidden',
-                border: '1px solid #e8edf2',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-              }}
-            >
-              {/* Image placeholder */}
-              <div style={{
-                width: '100%',
-                height: 160,
-                backgroundColor: '#3a4a5c',
-              }} />
+        {loading ? (
+          <p style={{ textAlign: 'center', color: '#64748b', marginTop: '50px' }}>Loading events...</p>
+        ) : events.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '100px 0' }}>
+             <p style={{ color: '#64748b' }}>No events found for this batch.</p>
+          </div>
+        ) : (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+            gap: 24,
+            maxWidth: '1200px' 
+          }}>
+            {events.map(event => (
+              <div
+                key={event.id}
+                style={{
+                  backgroundColor: '#fff', borderRadius: 12, overflow: 'hidden',
+                  border: '1px solid #e2e8ec', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+                  display: 'flex', flexDirection: 'column'
+                }}
+              >
+                {/* Thumbnail using the first image from the list */}
+                <div style={{
+                  width: '100%', height: 180, 
+                  backgroundColor: '#e2e8f0', 
+                  backgroundImage: `url(${event.thumbnail})`, 
+                  backgroundSize: 'cover', 
+                  backgroundPosition: 'center'
+                }} />
 
-              <div style={{ padding: '14px 16px 16px' }}>
-                <h3 style={{ fontSize: 16, fontWeight: 700, color: '#0d2233', marginBottom: 6 }}>
-                  {event.title}
-                </h3>
-                <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.5, marginBottom: 14 }}>
-                  {event.description}
-                </p>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button
-                    onClick={() => navigate(`/admin/activities/${year}/edit-event/${event.id}`)}                  
-                    style={{
-                      padding: '7px 20px', borderRadius: 7, border: 'none',
-                      backgroundColor: '#0d2233', color: '#fff',
-                      fontWeight: 600, fontSize: 13, cursor: 'pointer',
-                    }}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => setDeleteId(event.id)}
-                    style={{
-                      padding: '7px 18px', borderRadius: 7, border: 'none',
-                      backgroundColor: '#0d2233', color: '#fff',
-                      fontWeight: 600, fontSize: 13, cursor: 'pointer',
-                    }}
-                  >
-                    Delete
-                  </button>
+                <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  <h3 style={{ fontSize: 17, fontWeight: 700, color: '#0d2233', marginBottom: 10 }}>{event.title}</h3>
+                  <p style={{ 
+                    fontSize: 13, color: '#64748b', lineHeight: 1.6, marginBottom: 20, flex: 1,
+                    display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden'
+                  }}>
+                    {event.description}
+                  </p>
+                  
+                  <div style={{ display: 'flex', gap: 10 }}>
+                    <button
+                      onClick={() => navigate(`/admin/activities/${year}/edit-event/${event.id}`)}                  
+                      style={{
+                        flex: 1, padding: '10px 0', borderRadius: 8, border: '1px solid #e2e8f0',
+                        backgroundColor: '#fff', color: '#0d2233', fontWeight: 600, fontSize: 13, cursor: 'pointer',
+                      }}
+                    >Edit</button>
+                    <button
+                      onClick={() => setDeleteId(event.id)}
+                      style={{
+                        flex: 1, padding: '10px 0', borderRadius: 8, border: 'none',
+                        backgroundColor: '#ef4444', color: '#fff', fontWeight: 600, fontSize: 13, cursor: 'pointer',
+                      }}
+                    >Delete</button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </main>
 
       <DeleteModal
         open={deleteId !== null}
-        onConfirm={() => { setEvents(prev => prev.filter(e => e.id !== deleteId)); setDeleteId(null); }}
+        onConfirm={handleDeleteConfirm}
         onCancel={() => setDeleteId(null)}
       />
-    </AdminSidebar>
+    </div>
   );
 }

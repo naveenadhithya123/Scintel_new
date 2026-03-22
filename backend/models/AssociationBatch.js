@@ -1,35 +1,35 @@
-import { DataTypes } from "sequelize";
-import sequelize from "../config/database.js";
+  import { DataTypes } from "sequelize";
+  import sequelize from "../config/database.js";
 
-const AssociationBatch = sequelize.define("AssociationBatch", {
+  const AssociationBatch = sequelize.define("AssociationBatch", {
 
-  batch_id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true
-  },
+    batch_id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true
+    },
 
-  batch_year: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
+    batch_year: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
 
-  title: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
+    title: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
 
-  description: {
-    type: DataTypes.TEXT,
-    allowNull: false
-  },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
 
-  image_url: {
-    type: DataTypes.STRING
-  }
+    image_url: {
+      type: DataTypes.STRING
+    }
 
-}, {
-  tableName: "association_batch",
-  timestamps: false
-});
+  }, {
+    tableName: "association_batch",
+    timestamps: false
+  });
 
-export default AssociationBatch;
+  export default AssociationBatch;
