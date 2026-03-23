@@ -52,6 +52,7 @@ export default function Verification() {
     const otpValue = inputs.current.map(input => input.value).join("");
 
     try {
+      // Step 2: Verify OTP
       const verifyRes = await fetch("http://localhost:3000/api/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -60,16 +61,18 @@ export default function Verification() {
       const verifyData = await verifyRes.json();
 
       if (verifyData.verified) {
+        // ✅ FIXED: Added 'mentor' to the payload below
         const saveRes = await fetch("http://localhost:3000/api/add-problem-solver-request", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            problem_id: problem_id,
+            problem_id: problem_id, 
             name: formData.name,
             email: formData.email,
             phone_number: formData.phone_number,
             year: formData.year,
-            section: formData.section
+            section: formData.section,
+            mentor: formData.mentor // <--- THIS WAS MISSING
           }),
         });
 

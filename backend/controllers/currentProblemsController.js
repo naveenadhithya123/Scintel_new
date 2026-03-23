@@ -8,7 +8,11 @@ export const getAllCurrentProblems = async (req, res) => {
             SELECT 
                 problem_id,
                 title,
-                short_description
+                short_description,
+                CASE 
+                    WHEN solver_user_id IS NULL THEN 'Open to build'
+                    ELSE 'In progress'
+                END AS status
             FROM current_problems
             ORDER BY problem_id DESC
         `);

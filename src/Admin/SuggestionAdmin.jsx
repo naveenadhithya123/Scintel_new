@@ -1,362 +1,214 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AdminSidebar from "./AdminSidebar";
 
-const suggestions = [
-  {
-    title: "Frontend Workshop",
-    category: "Academics",
-    name: "Rithish Barath N",
-    year: "II",
-    email: "2k24cse160@kiot.ac.in",
-    mobile: "98989 92929",
-    section: "C",
-    type: "Suggestion",
-    priority: "Medium",
-    description:
-      "I don't clearly understand the exact formula used for SGPA and CGPA calculation. Each subject has different credits, and multiplying credit with grade points manually often leads to mistakes. I usually depend on a basic calculator or Excel sheet, which is time-consuming and stressful.",
-  },
-  {
-    title: "UI/UX Workshop",
-    category: "Social",
-    name: "Rithish Barath N",
-    year: "II",
-    email: "2k24cse160@kiot.ac.in",
-    mobile: "98989 92929",
-    section: "C",
-    type: "Suggestion",
-    priority: "Medium",
-    description:
-      "We need more hands-on UI/UX workshops to improve our design skills practically.",
-  },
-  {
-    title: "Backend Workshop",
-    category: "Social",
-    name: "Rithish Barath N",
-    year: "II",
-    email: "2k24cse160@kiot.ac.in",
-    mobile: "98989 92929",
-    section: "C",
-    type: "Suggestion",
-    priority: "Medium",
-    description:
-      "Backend development workshops would help students understand server-side programming better.",
-  },
-];
-
 export default function SuggestionAdmin() {
+  const [suggestionList, setSuggestionList] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // 1. Fetch all suggestions on load
+  useEffect(() => {
+    fetchSuggestions();
+  }, []);
+
+  const fetchSuggestions = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("http://localhost:3000/api/admin/suggestions");
+      const result = await response.json();
+      setSuggestionList(result.data || []);
+    } catch (error) {
+      console.error("Error fetching suggestions:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 2. Fetch specific detail
+  const handleViewDetail = async (id) => {
+    try {
+      setLoading(true);
+      const response = await fetch(`http://localhost:3000/api/admin/suggestions/${id}`);
+      const result = await response.json();
+      setSelectedItem(result.data);
+    } catch (error) {
+      alert("Error fetching details");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 3. Remove Suggestion (Calls your DeleteSpecificSuggestion Controller)
+  const handleRemove = async (id) => {
+    if (!window.confirm("Are you sure? This will delete the record and the image from Cloudinary.")) return;
+    
+    try {
+      setLoading(true);
+      const response = await fetch(`http://localhost:3000/api/admin/suggestions/${id}`, {
+        method: "DELETE",
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok) {
+        alert(result.message); // "Suggestion deleted successfully"
+        setSelectedItem(null);
+        fetchSuggestions(); 
+      } else {
+        alert(result.message || "Delete failed");
+      }
+    } catch (error) {
+      alert("Error connecting to server");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 4. Accept Suggestion (Calls your Admin_AcceptSuggestionMail Controller)
+  const handleAccept = async (email) => {
+    try {
+      setLoading(true);
+      const response = await fetch("http://localhost:3000/api/admin/suggestions/accept-mail", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      
+      const result = await response.json();
+
+      if (response.ok) {
+        alert("Success: " + result.message);
+      } else {
+        alert("Failed: " + result.message);
+      }
+    } catch (error) {
+      alert("Error connecting to mail server");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredList = suggestionList.filter(item => 
+    item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div
-      style={{
-        display: "flex",
-        height: "100vh",
-        backgroundColor: "#F5F9FA",
-        fontFamily: "'Segoe UI', sans-serif",
-      }}
-    >
+    <div style={{ display: "flex", height: "100vh", backgroundColor: "#F5F9FA", fontFamily: "'Inter', sans-serif" }}>
       <style>{`
-        /* ── Desktop table ── */
-        .sg-header-row {
-          display: grid;
-          grid-template-columns: 2fr 1fr 2fr 1fr 1.5fr;
-          padding: 11px 24px;
-          color: #3C3E40;
-          font-size: 13px;
-        }
-        .sg-data-row {
-          display: grid;
-          grid-template-columns: 2fr 1fr 2fr 1fr 1.5fr;
-          padding: 18px 24px;
-          align-items: center;
-          font-size: 13px;
-        }
-
-        /* Mobile cards hidden on desktop */
-        .sg-cards { display: none; }
-
-        /* Detail buttons */
-        .sg-detail-btns {
-          display: flex;
-          justify-content: flex-end;
-          gap: 12px;
-          margin-top: 40px;
-        }
-
-        /* ── MOBILE ── */
-        @media (max-width: 700px) {
-          .sg-main { padding: 20px 14px !important; }
-
-          /* Hide desktop layout */
-          .sg-desktop-header { display: none !important; }
-          .sg-data-row       { display: none !important; }
-
-          /* Show cards */
-          .sg-cards {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-          }
-
-          .sg-card {
-            background: #fff;
-            border-radius: 12px;
-            border: 1px solid #e2e8ec;
-            box-shadow: 0 1px 4px rgba(2,51,71,0.07);
-            padding: 16px;
-            overflow: hidden;
-          }
-
-          /* Title bar at top of card */
-          .sg-card-title {
-            font-size: 15px;
-            font-weight: 700;
-            color: #023347;
-            margin-bottom: 12px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #f0f4f5;
-          }
-
-          /* Each info row: label left, value right */
-          .sg-card-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 13px;
-            padding: 5px 0;
-            border-bottom: 1px solid #f9fafb;
-          }
-          .sg-card-row:last-of-type { border-bottom: none; }
-
-          .sg-card-label {
-            font-weight: 600;
-            color: #374151;
-            min-width: 80px;
-            flex-shrink: 0;
-          }
-
-          .sg-card-value {
-            color: #4b5563;
-            text-align: right;
-            word-break: break-word;
-          }
-
-          /* Action button */
-          .sg-card-action {
-            margin-top: 14px;
-          }
-          .sg-card-action button {
-            width: 100%;
-            padding: 10px;
-            font-size: 13px;
-          }
-
-          /* Detail page */
-          .sg-detail-btns {
-            flex-direction: column !important;
-          }
-          .sg-detail-btns button {
-            width: 100% !important;
-          }
-        }
+        .sg-main::-webkit-scrollbar { width: 6px; }
+        .sg-main::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .sg-header-row, .sg-data-row { display: grid; grid-template-columns: 2fr 1.2fr 1.5fr 0.8fr 1.2fr; padding: 14px 24px; }
+        .sg-data-row { align-items: center; border-bottom: 1px solid #f1f5f9; transition: background 0.2s; }
+        .sg-data-row:hover { background-color: #f8fafc; }
       `}</style>
 
-      {/* SIDEBAR */}
       <AdminSidebar />
 
-      {/* MAIN CONTENT */}
-      <main
-        className="sg-main"
-        style={{ flex: 1, padding: "28px 36px", overflowY: "auto" }}
-      >
+      <main className="sg-main" style={{ flex: 1, padding: "32px 40px", overflowY: "auto" }}>
         {selectedItem === null ? (
           <>
-            <h1
-              style={{
-                color: "#023347",
-                fontSize: "22px",
-                fontWeight: 700,
-                marginBottom: "20px",
-                letterSpacing: "-0.01em",
-              }}
-            >
-              Suggestions / Complaints
-            </h1>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <h1 style={{ color: "#023347", fontSize: "24px", fontWeight: 800 }}>Suggestions Dashboard</h1>
+              <input 
+                type="text" 
+                placeholder="Search title or user..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{ padding: '10px 16px', borderRadius: '10px', border: '1px solid #e2e8ec', width: '300px', outline: 'none' }}
+              />
+            </div>
 
-            {/* ── Desktop header ── */}
-            <div
-              className="sg-desktop-header"
-              style={{
-                backgroundColor: "#FFFFFF",
-                borderRadius: "12px",
-                border: "1.5px solid #2A8E9E",
-                marginBottom: "12px",
-              }}
-            >
-              <div className="sg-header-row">
-                <div>Title</div>
-                <div style={{ textAlign: "center" }}>Category</div>
-                <div style={{ textAlign: "center" }}>Name</div>
-                <div style={{ textAlign: "center" }}>Year</div>
-                <div style={{ textAlign: "center" }}>Action</div>
+            <div style={{ backgroundColor: "#FFFFFF", borderRadius: "16px", border: "1px solid #e2e8ec", overflow: 'hidden' }}>
+              <div className="sg-header-row" style={{ backgroundColor: "#F8FAFC", color: "#64748b", fontWeight: 700, fontSize: '12px' }}>
+                <div>TITLE</div>
+                <div style={{ textAlign: "center" }}>CATEGORY</div>
+                <div style={{ textAlign: "center" }}>SUBMITTED BY</div>
+                <div style={{ textAlign: "center" }}>YEAR</div>
+                <div style={{ textAlign: "center" }}>ACTION</div>
               </div>
-            </div>
 
-            {/* ── Desktop rows ── */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              {suggestions.map((item, idx) => (
-                <div
-                  key={idx}
-                  style={{
-                    backgroundColor: "#FFFFFF",
-                    borderRadius: "12px",
-                    border: "1px solid #e2e8ec",
-                    boxShadow: "0 1px 4px rgba(2,51,71,0.07)",
-                  }}
-                >
-                  <div className="sg-data-row">
-                    <div style={{ color: "#000000", fontWeight: 700 }}>
-                      {item.title}
-                    </div>
-                    <div style={{ color: "#3C3E40", textAlign: "center" }}>
-                      {item.category}
-                    </div>
-                    <div style={{ color: "#3C3E40", textAlign: "center" }}>
-                      {item.name}
-                    </div>
-                    <div style={{ color: "#3C3E40", textAlign: "center" }}>
-                      {item.year}
-                    </div>
-                    <div style={{ display: "flex", justifyContent: "center" }}>
-                      <button
-                        onClick={() => setSelectedItem(item)}
-                        style={{
-                          backgroundColor: "#023347",
-                          color: "#ffffff",
-                          fontSize: "12.5px",
-                          fontWeight: 600,
-                          padding: "8px 22px",
-                          borderRadius: "10px",
-                          border: "none",
-                          cursor: "pointer",
-                        }}
-                      >
-                        View Detail
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* ── Mobile cards ── */}
-            <div className="sg-cards">
-              {suggestions.map((item, idx) => (
-                <div key={idx} className="sg-card">
-                  <div className="sg-card-title">{item.title}</div>
-                  <div className="sg-card-row">
-                    <span className="sg-card-label">Category</span>
-                    <span className="sg-card-value">{item.category}</span>
-                  </div>
-                  <div className="sg-card-row">
-                    <span className="sg-card-label">Name</span>
-                    <span className="sg-card-value">{item.name}</span>
-                  </div>
-                  <div className="sg-card-row">
-                    <span className="sg-card-label">Year</span>
-                    <span className="sg-card-value">{item.year}</span>
-                  </div>
-                  <div className="sg-card-action">
-                    <button
-                      onClick={() => setSelectedItem(item)}
-                      style={{
-                        backgroundColor: "#023347",
-                        color: "#ffffff",
-                        fontWeight: 600,
-                        borderRadius: "10px",
-                        border: "none",
-                        cursor: "pointer",
-                        fontFamily: "inherit",
-                      }}
+              {loading && <div style={{padding: '20px', textAlign: 'center'}}>Processing...</div>}
+              
+              {!loading && filteredList.map((item) => (
+                <div key={item.suggestion_id} className="sg-data-row">
+                  <div style={{ color: "#0f172a", fontWeight: 600 }}>{item.title}</div>
+                  <div style={{ textAlign: "center" }}>{item.category}</div>
+                  <div style={{ textAlign: "center" }}>{item.name}</div>
+                  <div style={{ textAlign: "center" }}>{item.year}</div>
+                  <div style={{ display: "flex", justifyContent: "center" }}>
+                    <button 
+                      onClick={() => handleViewDetail(item.suggestion_id)}
+                      style={{ backgroundColor: "#023347", color: "#fff", padding: "8px 18px", borderRadius: "8px", border: "none", cursor: "pointer", fontWeight: 600 }}
                     >
-                      View Detail
+                      View
                     </button>
                   </div>
                 </div>
               ))}
             </div>
           </>
-
         ) : (
-          /* ── DETAIL PAGE ── */
-          <>
-            <h1
-              style={{
-                color: "#023347",
-                fontSize: "22px",
-                fontWeight: 700,
-                marginBottom: "20px",
-              }}
-            >
-              Suggestions / Complaints
-            </h1>
+          /* ── DETAIL VIEW ── */
+          <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+            <button onClick={() => setSelectedItem(null)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', marginBottom: '20px', fontWeight: 600 }}>
+               ← Back to List
+            </button>
 
-            <div
-              style={{
-                backgroundColor: "#FFFFFF",
-                borderRadius: "14px",
-                border: "1px solid #e2e8ec",
-                boxShadow: "0 1px 4px rgba(2,51,71,0.07)",
-                padding: "28px 32px",
-              }}
-            >
-              <h2 style={{ fontSize: "16px", fontWeight: 700 }}>
-                {selectedItem.title}
-              </h2>
-              <p
-                style={{
-                  color: "#3C3E40",
-                  fontSize: "13px",
-                  lineHeight: "1.7",
-                  marginTop: "12px",
-                }}
-              >
-                {selectedItem.description}
-              </p>
+            <div style={{ backgroundColor: "#FFFFFF", borderRadius: "20px", border: "1px solid #e2e8ec", padding: "40px" }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '30px' }}>
+                <div>
+                  <span style={{ fontSize: '12px', color: '#2A8E9E', fontWeight: 800 }}>{selectedItem.type}</span>
+                  <h2 style={{ fontSize: "28px", fontWeight: 800, color: '#023347' }}>{selectedItem.title}</h2>
+                </div>
+                <div style={{ backgroundColor: selectedItem.priority === 'High' ? '#FEE2E2' : '#E0F2F1', color: selectedItem.priority === 'High' ? '#B91C1C' : '#00796B', padding: '8px 20px', borderRadius: '12px', fontWeight: 700 }}>
+                  {selectedItem.priority}
+                </div>
+              </div>
 
-              <div className="sg-detail-btns">
-                <button
-                  onClick={() => setSelectedItem(null)}
-                  style={{
-                    backgroundColor: "#023347",
-                    color: "#ffffff",
-                    fontSize: "13px",
-                    fontWeight: 600,
-                    padding: "9px 28px",
-                    borderRadius: "10px",
-                    border: "none",
-                    cursor: "pointer",
-                  }}
+              <div style={{ backgroundColor: '#F8FAFC', padding: '25px', borderRadius: '15px', marginBottom: '30px' }}>
+                <p style={{ margin: 0, color: "#1e293b", lineHeight: "1.6", whiteSpace: 'pre-wrap' }}>{selectedItem.description}</p>
+              </div>
+
+              {/* IMAGE SECTION */}
+              <div style={{ marginBottom: '35px' }}>
+                <h4 style={{ fontSize: '13px', color: '#64748b', textTransform: 'uppercase', marginBottom: '15px' }}>Attachment</h4>
+                {selectedItem.proof_url ? (
+                  <div style={{ display: 'flex', gap: '25px', alignItems: 'center', background: '#fff', padding: '15px', borderRadius: '12px', border: '1px solid #e2e8ec' }}>
+                    <img src={selectedItem.proof_url} alt="Proof" style={{ width: '200px', borderRadius: '8px' }} />
+                    <a href={selectedItem.proof_url} target="_blank" rel="noreferrer" download style={{ backgroundColor: '#023347', color: '#fff', padding: '10px 20px', borderRadius: '8px', textDecoration: 'none', fontSize: '13px' }}>
+                      Download Image
+                    </a>
+                  </div>
+                ) : <p style={{color: '#94a3b8'}}>No attachment provided.</p>}
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', padding: '20px', backgroundColor: '#F8FAFC', borderRadius: '15px' }}>
+                <div><strong>Name:</strong> {selectedItem.name}</div>
+                <div><strong>Email:</strong> {selectedItem.email}</div>
+                <div><strong>Year/Sec:</strong> {selectedItem.year} - {selectedItem.section}</div>
+                <div><strong>Phone:</strong> {selectedItem.phone_number}</div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '15px', marginTop: '40px' }}>
+                <button 
+                  onClick={() => handleRemove(selectedItem.suggestion_id)}
+                  disabled={loading}
+                  style={{ backgroundColor: '#fff', color: '#ef4444', border: '1px solid #ef4444', padding: '12px 30px', borderRadius: '10px', cursor: 'pointer', fontWeight: 700 }}
                 >
-                  Back
+                  {loading ? "Deleting..." : "Delete Record"}
                 </button>
-                <button
-                  style={{
-                    backgroundColor: "#2A8E9E",
-                    color: "#ffffff",
-                    fontSize: "13px",
-                    fontWeight: 600,
-                    padding: "9px 28px",
-                    borderRadius: "10px",
-                    border: "none",
-                    cursor: "pointer",
-                  }}
+                <button 
+                  onClick={() => handleAccept(selectedItem.email)}
+                  disabled={loading}
+                  style={{ backgroundColor: '#2A8E9E', color: '#fff', border: 'none', padding: '12px 30px', borderRadius: '10px', cursor: 'pointer', fontWeight: 700 }}
                 >
-                  Accept
+                  {loading ? "Sending..." : "Mark as Resolved & Email User"}
                 </button>
               </div>
             </div>
-          </>
+          </div>
         )}
       </main>
     </div>

@@ -5,30 +5,70 @@ import AdminSidebar from "./AdminSidebar";
 export default function EditMember() {
   const navigate = useNavigate();
   const location = useLocation();
-  const index = location.state?.index;
+  
+  // Retrieve the member object passed from the EditBatch table
+  const memberToEdit = location.state?.member;
 
-  const [form, setForm] = useState({ name: "", reg: "", role: "", year: "" });
+  // Initialize form with existing member data or empty strings
+  const [form, setForm] = useState({
+    name: "",
+    register_number: "",
+    role: "",
+    year: "",
+    batch_year: ""
+  });
+  const [isSaving, setIsSaving] = useState(false);
 
-  // ✅ LOAD SELECTED MEMBER
   useEffect(() => {
-    const members = JSON.parse(localStorage.getItem("members")) || [];
-    if (index !== undefined && members[index]) {
-      setForm(members[index]);
+    if (memberToEdit) {
+      setForm({
+        name: memberToEdit.name || "",
+        register_number: memberToEdit.register_number || "",
+        role: memberToEdit.role || "",
+        year: memberToEdit.year || "",
+        batch_year: memberToEdit.batch_year || ""
+      });
     }
-  }, [index]);
+  }, [memberToEdit]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // ✅ SAVE UPDATED MEMBER
-  const handleSave = () => {
-    const members = JSON.parse(localStorage.getItem("members")) || [];
-    if (index !== undefined) {
-      members[index] = form;
-      localStorage.setItem("members", JSON.stringify(members));
+  const handleSave = async () => {
+    if (!form.register_number) {
+      alert("Register number is missing. Cannot update.");
+      return;
     }
-    navigate("/edit-batch");
+
+    setIsSaving(true);
+    try {
+      const res = await fetch(`http://localhost:3000/api/admin/association-members/${form.register_number}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          role: form.role,
+          year: form.year,
+          // We usually don't change reg number or batch_year in an edit, but we send them if the API requires
+          batch_year: form.batch_year 
+        })
+      });
+
+      if (res.ok) {
+        alert("Member updated successfully");
+        // Navigate back to EditBatch and pass the batch info so it knows which data to fetch
+        navigate("/edit-batch", { state: { batch: { batch_year: form.batch_year } } });
+      } else {
+        const err = await res.json();
+        alert(`Update failed: ${err.message || "Unknown error"}`);
+      }
+    } catch (error) {
+      console.error("Save error:", error);
+      alert("Server connection failed.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const inputStyle = {
@@ -41,6 +81,7 @@ export default function EditMember() {
     outline: "none",
     boxSizing: "border-box",
     color: "#111827",
+    background: "#fff"
   };
 
   const labelStyle = {
@@ -48,6 +89,20 @@ export default function EditMember() {
     color: "#4b5563",
     marginBottom: 8,
     fontSize: 14,
+    fontWeight: 500
+  };
+
+  const btnStyle = {
+    background: "#023347",
+    color: "#fff",
+    padding: "9px 24px",
+    borderRadius: 8,
+    border: "none",
+    fontWeight: 600,
+    fontSize: 14,
+    cursor: "pointer",
+    fontFamily: "inherit",
+    opacity: isSaving ? 0.7 : 1
   };
 
   return (
@@ -92,9 +147,7 @@ export default function EditMember() {
           Edit Member
         </h1>
 
-        {/* FORM */}
         <div className="em-form-grid">
-
           <div>
             <label style={labelStyle}>Name</label>
             <input
@@ -107,13 +160,12 @@ export default function EditMember() {
           </div>
 
           <div>
-            <label style={labelStyle}>Register Number</label>
+            <label style={labelStyle}>Register Number (Read-only)</label>
             <input
-              name="reg"
-              value={form.reg}
-              onChange={handleChange}
-              type="text"
-              style={inputStyle}
+              name="register_number"
+              value={form.register_number}
+              readOnly
+              style={{ ...inputStyle, background: "#f3f4f6", cursor: "not-allowed" }}
             />
           </div>
 
@@ -138,37 +190,25 @@ export default function EditMember() {
               style={inputStyle}
             />
           </div>
-
         </div>
 
-        {/* BUTTONS */}
         <div className="em-btn-row">
           <button
+            type="button"
             onClick={() => navigate(-1)}
-            style={{
-              background: "#023347", color: "#fff",
-              padding: "9px 24px", borderRadius: 8,
-              border: "none", fontWeight: 600,
-              fontSize: 14, cursor: "pointer",
-              fontFamily: "inherit",
-            }}
+            style={{ ...btnStyle, background: "#f3f4f6", color: "#374151", border: "1px solid #d1d5db" }}
           >
             Cancel
           </button>
           <button
+            type="button"
+            disabled={isSaving}
             onClick={handleSave}
-            style={{
-              background: "#023347", color: "#fff",
-              padding: "9px 24px", borderRadius: 8,
-              border: "none", fontWeight: 600,
-              fontSize: 14, cursor: "pointer",
-              fontFamily: "inherit",
-            }}
+            style={btnStyle}
           >
-            Save
+            {isSaving ? "Saving..." : "Save Changes"}
           </button>
         </div>
-
       </div>
     </AdminSidebar>
   );

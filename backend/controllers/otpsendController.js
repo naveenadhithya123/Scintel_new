@@ -19,12 +19,48 @@ export const sendOtp = async (req, res) => {
             expires: Date.now() + 5 * 60 * 1000
         };
 
-        await transporter.sendMail({
-            from: '"Scintel Verification" <yourgmail@gmail.com>',
-            to: email,
-            subject: "Scintel OTP Verification",
-            text: `Your OTP is ${otp}. It expires in 5 minutes.`
-        });
+await transporter.sendMail({
+    from: '"Scintel Verification" <yourrealemail@gmail.com>',
+    to: email,
+    subject: "Scintel OTP Verification",
+    html: `
+        <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
+            
+            <div style="max-width: 500px; margin: auto; background: #ffffff; padding: 30px; border-radius: 10px; text-align: center;">
+                
+                <h2 style="color: #333;">Scintel Verification</h2>
+                
+                <p style="color: #555; font-size: 16px;">
+                    Use the OTP below to verify your email address
+                </p>
+                
+                <div style="margin: 20px 0;">
+                    <span style="
+                        display: inline-block;
+                        padding: 15px 25px;
+                        font-size: 24px;
+                        letter-spacing: 5px;
+                        background: #4CAF50;
+                        color: #ffffff;
+                        border-radius: 8px;
+                        font-weight: bold;
+                    ">
+                        ${otp}
+                    </span>
+                </div>
+                
+                <p style="color: #777; font-size: 14px;">
+                    This OTP is valid for <b>5 minutes</b>.
+                </p>
+
+                <p style="color: #aaa; font-size: 12px; margin-top: 20px;">
+                    If you didn’t request this, you can safely ignore this email.
+                </p>
+
+            </div>
+        </div>
+    `
+});
 
         res.json({
             message: "OTP sent successfully"

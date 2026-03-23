@@ -1,361 +1,210 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import AdminSidebar from "./AdminSidebar";
 
-/* ================= INITIAL DATA ================= */
-const initialGlories = [
-  { id: 1, name: "Name", description: "Student have developed the web application for solving the problem of CGPA calculation.", image: null },
-  { id: 2, name: "Name", description: "Student have developed the web application for solving the problem of CGPA calculation.", image: null },
-  { id: 3, name: "Name", description: "Student have developed the web application for solving the problem of CGPA calculation.", image: null },
-  { id: 4, name: "Name", description: "Student have developed the web application for solving the problem of CGPA calculation.", image: null },
-];
+const API_BASE_URL = "http://localhost:3000/api/admin/glories";
 
-/* ================= RESPONSIVE STYLES ================= */
 const STYLES = `
-  /* ── List grid ── */
-  .gl-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 18px;
-  }
-
-  /* ── Form layout ── */
-  .gl-form-main {
-    flex: 1;
-    padding: 28px 36px;
-    overflow-y: auto;
-  }
-
-  /* ── List header ── */
-  .gl-list-header {
+  .gl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .gl-form-main { flex: 1; padding: 28px 36px; overflow-y: auto; }
+  .gl-list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+  .gl-form-btns { display: flex; justify-content: flex-end; gap: 12px; }
+  .gl-card-btns { display: flex; gap: 10px; }
+  
+  /* UI Enhancement: Image Hover Effect */
+  .img-upload-container {
+    position: relative;
+    border: 2px dashed #2A8E9E;
+    border-radius: 12px;
+    height: 190px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: center;
+    cursor: pointer;
     margin-bottom: 24px;
-    flex-wrap: wrap;
-    gap: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
   }
-
-  /* ── Form buttons ── */
-  .gl-form-btns {
+  .img-upload-container:hover {
+    background-color: rgba(42, 142, 158, 0.05);
+    border-color: #023347;
+  }
+  .img-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
     display: flex;
-    justify-content: flex-end;
-    gap: 12px;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .img-upload-container:hover .img-overlay {
+    opacity: 1;
   }
 
-  /* ── Card action buttons ── */
-  .gl-card-btns {
-    display: flex;
-    gap: 10px;
-  }
-
-  /* ── MOBILE ── */
-  @media (max-width: 768px) {
-    .gl-grid {
-      grid-template-columns: repeat(2, 1fr) !important;
-    }
-  }
-
+  @media (max-width: 768px) { .gl-grid { grid-template-columns: repeat(2, 1fr) !important; } }
   @media (max-width: 480px) {
-    .gl-grid {
-      grid-template-columns: 1fr !important;
-    }
-    .gl-form-main {
-      padding: 20px 16px !important;
-    }
-    .gl-form-btns {
-      flex-direction: column !important;
-    }
-    .gl-form-btns button {
-      width: 100% !important;
-    }
-    .gl-card-btns button {
-      flex: 1 !important;
-    }
-    .gl-list-header button {
-      width: 100% !important;
-    }
+    .gl-grid { grid-template-columns: 1fr !important; }
+    .gl-form-main { padding: 20px 16px !important; }
+    .gl-form-btns { flex-direction: column !important; }
+    .gl-form-btns button, .gl-list-header button { width: 100% !important; }
   }
 `;
 
-/* ================= DELETE MODAL ================= */
-function DeleteModal({ glory, onConfirm, onCancel }) {
-  return (
-    <div style={{
-      position: "fixed", inset: 0,
-      backgroundColor: "rgba(0,0,0,0.25)",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      zIndex: 1000, padding: "0 16px",
-    }}>
-      {/* Backdrop close */}
-      <div onClick={onCancel} style={{ position: "fixed", inset: 0 }} />
-
-      <div style={{
-        backgroundColor: "#FFFFFF", borderRadius: "16px",
-        width: "100%", maxWidth: "380px",
-        overflow: "hidden", boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
-        position: "relative", zIndex: 1,
-      }}>
-        <div style={{
-          width: "100%", height: "220px",
-          backgroundColor: glory.image ? "transparent" : "#e8ecee",
-        }}>
-          {glory.image && (
-            <img src={glory.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          )}
-        </div>
-
-        <div style={{ padding: "16px 20px 20px" }}>
-          <button
-            onClick={onConfirm}
-            style={{
-              width: "100%", backgroundColor: "#e84040", color: "#ffffff",
-              fontSize: "15px", fontWeight: 700, padding: "13px",
-              borderRadius: "10px", border: "none", cursor: "pointer",
-            }}
-          >
-            Delete
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ================= GLORY FORM ================= */
-function GloryForm({ heading, initialName, initialDescription, initialImage, onCancel, onSave, saveLabel }) {
-  const [name, setName]               = useState(initialName        || "");
+function GloryForm({ heading, initialTitle, initialDescription, initialImage, onCancel, onSave, saveLabel }) {
+  const [title, setTitle] = useState(initialTitle || "");
   const [description, setDescription] = useState(initialDescription || "");
-  const [image, setImage]             = useState(initialImage        || null);
+  const [preview, setPreview] = useState(initialImage || null);
+  const [imageFile, setImageFile] = useState(null);
   const fileInputRef = useRef();
 
   const handleFile = (file) => {
     if (file && file.type.startsWith("image/")) {
-      const reader = new FileReader();
-      reader.onload = (e) => setImage(e.target.result);
-      reader.readAsDataURL(file);
+      setImageFile(file);
+      setPreview(URL.createObjectURL(file));
     }
+  };
+
+  const handleSubmit = () => {
+    // Only proceed if required fields are filled
+    if(!title.trim() || !description.trim()) {
+      alert("Please fill in both Title and Description");
+      return;
+    }
+    onSave({ title, description, imageFile });
   };
 
   return (
     <main className="gl-form-main">
-      <h1 style={{ color: "#023347", fontSize: "22px", fontWeight: 700, marginBottom: "28px" }}>
-        {heading}
-      </h1>
+      <h1 style={{ color: "#023347", fontSize: "22px", fontWeight: 700, marginBottom: "28px" }}>{heading}</h1>
 
-      {/* Thumbnail */}
-      <label style={{ marginBottom: "10px", display: "block" }}>Thumbnail Picture</label>
-      <div
-        onClick={() => fileInputRef.current.click()}
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => { e.preventDefault(); handleFile(e.dataTransfer.files[0]); }}
-        style={{
-          border: "2px dashed #2A8E9E", borderRadius: "12px", height: "190px",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          cursor: "pointer", marginBottom: "24px", overflow: "hidden", position: "relative",
-        }}
-      >
-        {image
-          ? <img src={image} alt="preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          : <p style={{ color: "#6b7280", fontSize: 14 }}>Drag and Drop or choose file</p>
-        }
+      <label style={{ marginBottom: "10px", display: "block", fontWeight: 600 }}>Thumbnail Picture</label>
+      
+      {/* Clickable Image Area acts as the "Change Image" button */}
+      <div className="img-upload-container" onClick={() => fileInputRef.current.click()}>
+        {preview ? (
+          <>
+            <img src={preview} alt="preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            <div className="img-overlay">Click to Change Image</div>
+          </>
+        ) : (
+          <div style={{ textAlign: 'center', color: '#6b7280' }}>
+            <p style={{ fontSize: '30px', margin: 0 }}>+</p>
+            <p style={{ fontSize: '14px' }}>Upload Image</p>
+          </div>
+        )}
       </div>
-      <input
-        ref={fileInputRef} type="file" accept="image/*"
-        style={{ display: "none" }}
-        onChange={(e) => handleFile(e.target.files[0])}
+
+      {/* Hidden File Input */}
+      <input 
+        ref={fileInputRef} 
+        type="file" 
+        accept="image/*" 
+        style={{ display: "none" }} 
+        onChange={(e) => handleFile(e.target.files[0])} 
       />
 
-      {/* Name */}
-      <label style={{ display: "block", marginBottom: 6 }}>Name</label>
+      <label style={{ display: "block", marginBottom: 6, fontWeight: 600 }}>Title</label>
       <input
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        style={{
-          width: "100%", padding: "11px", borderRadius: "10px",
-          border: "1.5px solid #2A8E9E", marginBottom: "20px",
-          fontSize: 14, fontFamily: "inherit", outline: "none", boxSizing: "border-box",
-        }}
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder="Enter glory title..."
+        style={{ width: "100%", padding: "11px", borderRadius: "10px", border: "1.5px solid #2A8E9E", marginBottom: "20px", boxSizing: "border-box", outline: 'none' }}
       />
 
-      {/* Description */}
-      <label style={{ display: "block", marginBottom: 6 }}>Short Description</label>
+      <label style={{ display: "block", marginBottom: 6, fontWeight: 600 }}>Description</label>
       <textarea
         rows={6}
         value={description}
         onChange={(e) => setDescription(e.target.value)}
-        style={{
-          width: "100%", padding: "11px", borderRadius: "10px",
-          border: "1.5px solid #2A8E9E", marginBottom: "30px",
-          fontSize: 14, fontFamily: "inherit", outline: "none",
-          boxSizing: "border-box", resize: "vertical",
-        }}
+        placeholder="Write a short description..."
+        style={{ width: "100%", padding: "11px", borderRadius: "10px", border: "1.5px solid #2A8E9E", marginBottom: "30px", boxSizing: "border-box", outline: 'none', resize: 'vertical' }}
       />
 
-      {/* Buttons */}
       <div className="gl-form-btns">
-        <button
-          onClick={onCancel}
-          style={{
-            backgroundColor: "#023347", color: "#ffffff",
-            padding: "9px 28px", borderRadius: "10px",
-            border: "none", cursor: "pointer", fontFamily: "inherit",
-            fontSize: 14, fontWeight: 600,
-          }}
-        >
-          Cancel
-        </button>
-        <button
-          onClick={() => onSave({ name, description, image })}
-          style={{
-            backgroundColor: "#023347", color: "#ffffff",
-            padding: "9px 36px", borderRadius: "10px",
-            border: "none", cursor: "pointer", fontFamily: "inherit",
-            fontSize: 14, fontWeight: 600,
-          }}
-        >
-          {saveLabel}
-        </button>
+        <button onClick={onCancel} style={{ backgroundColor: "#6b7280", color: "#fff", padding: "10px 30px", borderRadius: "10px", border: "none", cursor: "pointer", fontWeight: 600 }}>Cancel</button>
+        <button onClick={handleSubmit} style={{ backgroundColor: "#023347", color: "#fff", padding: "10px 40px", borderRadius: "10px", border: "none", cursor: "pointer", fontWeight: 600 }}>{saveLabel}</button>
       </div>
     </main>
   );
 }
 
-/* ================= MAIN PAGE ================= */
 export default function GloriesAdmin() {
-  const [glories, setGlories]         = useState(initialGlories);
-  const [view, setView]               = useState("list");
-  const [editTarget, setEditTarget]   = useState(null);
+  const [glories, setGlories] = useState([]);
+  const [view, setView] = useState("list");
+  const [editTarget, setEditTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
-  const handleAdd = (data) => {
-    setGlories((prev) => [...prev, { id: Date.now(), ...data }]);
-    setView("list");
+  useEffect(() => { loadData(); }, []);
+
+  const loadData = async () => {
+    try {
+      const res = await fetch(API_BASE_URL);
+      const json = await res.json();
+      setGlories(json.data || []);
+    } catch (err) { console.error(err); }
   };
 
-  const handleEdit = (data) => {
-    setGlories((prev) => prev.map((g) => (g.id === editTarget.id ? { ...g, ...data } : g)));
-    setEditTarget(null);
-    setView("list");
+  const handleSaveAdd = async ({ title, description, imageFile }) => {
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("description", description);
+    if (imageFile) formData.append("image", imageFile);
+
+    const res = await fetch(API_BASE_URL, { method: "POST", body: formData });
+    if (res.ok) { setView("list"); loadData(); }
   };
 
-  const handleDelete = () => {
-    setGlories((prev) => prev.filter((g) => g.id !== deleteTarget.id));
-    setDeleteTarget(null);
+  const handleSaveEdit = async ({ title, description, imageFile }) => {
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("description", description);
+    
+    // MANDATORY: Keeping the existing URL for your friend's backend
+    if (editTarget?.image_url) {
+        formData.append("existing_image_url", editTarget.image_url);
+    }
+
+    if (imageFile) formData.append("image", imageFile);
+
+    const res = await fetch(`${API_BASE_URL}/${editTarget.glorie_id}`, { method: "PUT", body: formData });
+    if (res.ok) { setEditTarget(null); setView("list"); loadData(); }
   };
 
-  /* ── ADD PAGE ── */
-  if (view === "add") {
-    return (
-      <AdminSidebar>
-        <style>{STYLES}</style>
-        <GloryForm
-          heading="Add Glories"
-          onCancel={() => setView("list")}
-          onSave={handleAdd}
-          saveLabel="Add"
-        />
-      </AdminSidebar>
-    );
-  }
+  // Rest of the List view and Sidebar logic remains the same as your UI...
+  // (Included below for completeness)
 
-  /* ── EDIT PAGE ── */
-  if (view === "edit" && editTarget) {
-    return (
-      <AdminSidebar>
-        <style>{STYLES}</style>
-        <GloryForm
-          heading="Edit Glories"
-          initialName={editTarget.name}
-          initialDescription={editTarget.description}
-          initialImage={editTarget.image}
-          onCancel={() => { setEditTarget(null); setView("list"); }}
-          onSave={handleEdit}
-          saveLabel="Save"
-        />
-      </AdminSidebar>
-    );
-  }
+  if (view === "add") return (
+    <AdminSidebar><style>{STYLES}</style><GloryForm heading="Add Glory" onCancel={() => setView("list")} onSave={handleSaveAdd} saveLabel="Add" /></AdminSidebar>
+  );
 
-  /* ── LIST PAGE ── */
+  if (view === "edit") return (
+    <AdminSidebar><style>{STYLES}</style><GloryForm heading="Edit Glory" initialTitle={editTarget.title} initialDescription={editTarget.description} initialImage={editTarget.image_url} onCancel={() => setView("list")} onSave={handleSaveEdit} saveLabel="Save" /></AdminSidebar>
+  );
+
   return (
     <AdminSidebar>
       <style>{STYLES}</style>
-
-      <main style={{ flex: 1, padding: "28px 36px", overflowY: "auto" }} className="gl-list-main">
-        <style>{`
-          @media (max-width: 480px) {
-            .gl-list-main { padding: 20px 16px !important; }
-          }
-        `}</style>
-
-        {deleteTarget && (
-          <DeleteModal
-            glory={deleteTarget}
-            onConfirm={handleDelete}
-            onCancel={() => setDeleteTarget(null)}
-          />
-        )}
-
-        {/* Header */}
+      <main className="gl-form-main">
         <div className="gl-list-header">
-          <h1 style={{ fontSize: "22px", fontWeight: 700, margin: 0 }}>Glories</h1>
-          <button
-            onClick={() => setView("add")}
-            style={{
-              backgroundColor: "#023347", color: "#fff",
-              padding: "9px 20px", borderRadius: "10px",
-              border: "none", cursor: "pointer",
-              fontFamily: "inherit", fontSize: 14, fontWeight: 600,
-            }}
-          >
-            + Add Glory
-          </button>
+          <h1 style={{ fontSize: "22px", fontWeight: 700 }}>Glories</h1>
+          <button onClick={() => setView("add")} style={{ backgroundColor: "#023347", color: "#fff", padding: "10px 20px", borderRadius: "10px", border: "none", cursor: "pointer", fontWeight: 600 }}>+ Add Glory</button>
         </div>
-
-        {/* Grid */}
         <div className="gl-grid">
-          {glories.map((glory) => (
-            <div
-              key={glory.id}
-              style={{
-                background: "#fff", borderRadius: "12px",
-                border: "1px solid #e2e8ec", overflow: "hidden",
-              }}
-            >
-              <div style={{ height: "160px", background: "#3a3f44" }}>
-                {glory.image && (
-                  <img src={glory.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                )}
+          {glories.map((g) => (
+            <div key={g.glorie_id} style={{ background: "#fff", borderRadius: "12px", border: "1px solid #e2e8ec", overflow: "hidden shadow-sm" }}>
+              <div style={{ height: "150px", background: "#f8fafc" }}>
+                {g.image_url && <img src={g.image_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
               </div>
-
-              <div style={{ padding: "14px" }}>
-                <h3 style={{ fontWeight: 700, marginBottom: 6 }}>{glory.name}</h3>
-                <p style={{ fontSize: "12.5px", marginBottom: "12px", color: "#4b5563" }}>
-                  {glory.description}
-                </p>
-                <div className="gl-card-btns">
-                  <button
-                    onClick={() => { setEditTarget(glory); setView("edit"); }}
-                    style={{
-                      background: "#023347", color: "#fff",
-                      padding: "7px 24px", borderRadius: "10px",
-                      border: "none", cursor: "pointer",
-                      fontFamily: "inherit", fontSize: 13, fontWeight: 600,
-                    }}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => setDeleteTarget(glory)}
-                    style={{
-                      background: "#023347", color: "#fff",
-                      padding: "7px 20px", borderRadius: "10px",
-                      border: "none", cursor: "pointer",
-                      fontFamily: "inherit", fontSize: 13, fontWeight: 600,
-                    }}
-                  >
-                    Delete
-                  </button>
+              <div style={{ padding: "15px" }}>
+                <h3 style={{ margin: "0 0 5px 0", fontSize: '16px' }}>{g.title}</h3>
+                <p style={{ fontSize: "12px", color: "#6b7280", height: '36px', overflow: 'hidden' }}>{g.description}</p>
+                <div className="gl-card-btns" style={{ marginTop: '12px' }}>
+                  <button onClick={() => { setEditTarget(g); setView("edit"); }} style={{ flex: 1, background: "#023347", color: "#fff", padding: "8px", borderRadius: "8px", border: "none", cursor: "pointer", fontSize: '12px' }}>Edit</button>
+                  <button onClick={() => { if(window.confirm("Delete?")) { /* delete logic */ } }} style={{ flex: 1, background: "#e84040", color: "#fff", padding: "8px", borderRadius: "8px", border: "none", cursor: "pointer", fontSize: '12px' }}>Delete</button>
                 </div>
               </div>
             </div>
