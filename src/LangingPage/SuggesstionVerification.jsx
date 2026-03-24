@@ -71,6 +71,21 @@ export default function SuggesstionVerification() {
     }
   };
 
+  // ✅ CHANGE 1: Handle backspace to clear current field and move focus back
+  const handleOtpKeyDown = (e, index) => {
+    if (e.key === "Backspace") {
+      e.preventDefault();
+      if (inputs.current[index].value !== "") {
+        // If current field has a value, just clear it
+        inputs.current[index].value = "";
+      } else if (index > 0) {
+        // If current field is already empty, move to previous and clear it
+        inputs.current[index - 1].focus();
+        inputs.current[index - 1].value = "";
+      }
+    }
+  };
+
   const handleSubmitOTP = async () => {
     const otpValue = inputs.current.map(input => input.value).join("");
     if (otpValue.length < 6) return alert("Enter full OTP");
@@ -130,6 +145,14 @@ export default function SuggesstionVerification() {
     }
   };
 
+  // ✅ CHANGE 2: Cancel handler to close OTP modal and clear OTP inputs
+  const handleCancelOTP = () => {
+    inputs.current.forEach(input => {
+      if (input) input.value = "";
+    });
+    setShowOTP(false);
+  };
+
   return (
     <div className="min-h-screen bg-[#F5F9FA] flex items-center justify-center px-6 py-12 relative">
       <div className="w-full max-w-5xl bg-white rounded-2xl shadow-sm p-10 border border-gray-100">
@@ -140,7 +163,7 @@ export default function SuggesstionVerification() {
               <label className="block text-sm text-gray-600 mb-2">Name</label>
               <input 
                 name="name" 
-                value={formData.name} // Added value prop
+                value={formData.name}
                 required 
                 onChange={handleChange} 
                 className="w-full border border-[#CFE8EC] rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-[#388E9C]" 
@@ -150,7 +173,7 @@ export default function SuggesstionVerification() {
               <label className="block text-sm text-gray-600 mb-2">Email</label>
               <input 
                 name="email" 
-                value={formData.email} // Added value prop
+                value={formData.email}
                 type="email" 
                 required 
                 onChange={handleChange} 
@@ -161,7 +184,7 @@ export default function SuggesstionVerification() {
               <label className="block text-sm text-gray-600 mb-2">Mobile no.</label>
               <input 
                 name="phone_number" 
-                value={formData.phone_number} // Added value prop
+                value={formData.phone_number}
                 required 
                 onChange={handleChange} 
                 className="w-full border border-[#CFE8EC] rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-[#388E9C]" 
@@ -171,7 +194,7 @@ export default function SuggesstionVerification() {
               <label className="block text-sm text-gray-600 mb-2">Year</label>
               <input 
                 name="year" 
-                value={formData.year} // Added value prop
+                value={formData.year}
                 required 
                 onChange={handleChange} 
                 className="w-full border border-[#CFE8EC] rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-[#388E9C]" 
@@ -181,7 +204,7 @@ export default function SuggesstionVerification() {
               <label className="block text-sm text-gray-600 mb-2">Section</label>
               <input 
                 name="section" 
-                value={formData.section} // Added value prop
+                value={formData.section}
                 required 
                 onChange={handleChange} 
                 className="w-full border border-[#CFE8EC] rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-[#388E9C]" 
@@ -201,25 +224,35 @@ export default function SuggesstionVerification() {
       {showOTP && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
-          <div className="relative w-[500px] h-[360px] bg-white rounded-2xl border border-[#CDE4EC] shadow-xl flex flex-col items-center justify-center px-10">
+          <div className="relative w-[500px] bg-white rounded-2xl border border-[#CDE4EC] shadow-xl flex flex-col items-center justify-center px-10 py-10">
             <h2 className="text-xl font-semibold text-[#1C2B33] mb-8">Enter OTP</h2>
-            <div className="flex gap-4 mb-10">
+            <div className="flex gap-4 mb-6">
               {[...Array(6)].map((_, index) => (
                 <input 
                   key={index} 
                   maxLength="1" 
                   ref={(el) => (inputs.current[index] = el)} 
-                  onChange={(e) => handleOtpChange(e, index)} 
+                  onChange={(e) => handleOtpChange(e, index)}
+                  onKeyDown={(e) => handleOtpKeyDown(e, index)}
                   className="w-[50px] h-[50px] border border-[#3A9FBF] rounded-[10px] text-center text-xl outline-none focus:ring-2 focus:ring-[#3A9FBF]" 
                 />
               ))}
             </div>
+            {/* ✅ Submit Button */}
             <button 
               disabled={loading} 
               onClick={handleSubmitOTP} 
-              className="w-full h-[50px] bg-[#0B1C3D] text-white rounded-lg text-sm hover:bg-[#142d63] transition-all"
+              className="w-full h-[50px] bg-[#0B1C3D] text-white rounded-lg text-sm hover:bg-[#142d63] transition-all mb-3"
             >
               {loading ? "Submitting..." : "Submit"}
+            </button>
+            {/* ✅ CHANGE 2: Cancel Button */}
+            <button 
+              disabled={loading}
+              onClick={handleCancelOTP} 
+              className="w-full h-[50px] bg-white text-[#0B1C3D] border border-[#0B1C3D] rounded-lg text-sm hover:bg-gray-100 transition-all"
+            >
+              Cancel
             </button>
           </div>
         </div>

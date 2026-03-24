@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function Verification() {
   const [showOTP, setShowOTP] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -20,6 +21,7 @@ export default function Verification() {
 
   const handleVerifyRequest = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const response = await fetch("http://localhost:3000/api/send-otp", {
         method: "POST",
@@ -33,12 +35,25 @@ export default function Verification() {
       }
     } catch (error) {
       console.error("Error:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleOtpChange = (e, index) => {
     if (e.target.value.length === 1 && index < 5) {
       inputs.current[index + 1].focus();
+    }
+  };
+
+  const handleOtpKeyDown = (e, index) => {
+    if (e.key === "Backspace") {
+      if (inputs.current[index].value !== "") {
+        inputs.current[index].value = "";
+      } else if (index > 0) {
+        inputs.current[index - 1].value = "";
+        inputs.current[index - 1].focus();
+      }
     }
   };
 
@@ -61,6 +76,11 @@ export default function Verification() {
     } catch (error) {
       console.error("Verification error:", error);
     }
+  };
+
+  const handleCancel = () => {
+    inputs.current.forEach(input => { if (input) input.value = ""; });
+    setShowOTP(false);
   };
 
   return (
@@ -115,8 +135,29 @@ export default function Verification() {
               <input name="section" required onChange={handleChange} className="w-full border border-[#CFE8EC] rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-[#388E9C]" />
             </div>
           </div>
-          <button type="submit" className="mt-10 w-full bg-[#023347] text-white py-3 rounded-lg font-semibold hover:bg-[#388E9C] transition-all shadow-md">
-            Verify
+
+          {/* Verify button with loading spinner */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="mt-10 w-full bg-[#023347] text-white py-3 rounded-lg font-semibold hover:bg-[#388E9C] transition-all shadow-md flex items-center justify-center gap-3 disabled:opacity-80 disabled:cursor-not-allowed"
+          >
+            {loading ? (
+              <>
+                <svg
+                  className="animate-spin h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                </svg>
+                Sending OTP...
+              </>
+            ) : (
+              "Verify"
+            )}
           </button>
         </form>
       </div>
@@ -124,14 +165,22 @@ export default function Verification() {
       {showOTP && (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="absolute inset-0 bg-white/60 backdrop-blur-sm"></div>
-          <div className="relative w-[500px] h-[360px] bg-white rounded-2xl border border-[#CDE4EC] shadow-xl flex flex-col items-center justify-center px-10">
+          <div className="relative w-[500px] bg-white rounded-2xl border border-[#CDE4EC] shadow-xl flex flex-col items-center justify-center px-10 py-10">
             <h2 className="text-xl font-semibold text-[#1C2B33] mb-8">Enter OTP</h2>
-            <div className="flex gap-4 mb-10">
+            <div className="flex gap-4 mb-6">
               {[...Array(6)].map((_, index) => (
-                <input key={index} maxLength="1" ref={(el) => (inputs.current[index] = el)} onChange={(e) => handleOtpChange(e, index)} className="w-[50px] h-[50px] border border-[#3A9FBF] rounded-[10px] text-center text-xl outline-none focus:ring-2 focus:ring-[#3A9FBF]" />
+                <input
+                  key={index}
+                  maxLength="1"
+                  ref={(el) => (inputs.current[index] = el)}
+                  onChange={(e) => handleOtpChange(e, index)}
+                  onKeyDown={(e) => handleOtpKeyDown(e, index)}
+                  className="w-[50px] h-[50px] border border-[#3A9FBF] rounded-[10px] text-center text-xl outline-none focus:ring-2 focus:ring-[#3A9FBF]"
+                />
               ))}
             </div>
-            <button onClick={handleSubmitOTP} className="w-full h-[50px] bg-[#0B1C3D] text-white rounded-lg text-sm hover:bg-[#142d63] transition-all">Submit</button>
+            <button onClick={handleSubmitOTP} className="w-full h-[50px] bg-[#0B1C3D] text-white rounded-lg text-sm hover:bg-[#142d63] transition-all mb-3">Submit</button>
+            <button onClick={handleCancel} className="w-full h-[50px] bg-white text-[#0B1C3D] border border-[#CFE8EC] rounded-lg text-sm hover:bg-gray-50 transition-all">Cancel</button>
           </div>
         </div>
       )}
