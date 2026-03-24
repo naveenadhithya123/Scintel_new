@@ -4,10 +4,10 @@ import AdminSidebar from "./AdminSidebar";
 
 export default function AdminMembers() {
   const navigate = useNavigate();
-  
+
   // ── State for API Data ──
   const [batches, setBatches] = useState([]); // List for tabs
-  const [selectedBatchYear, setSelectedBatchYear] = useState(""); 
+  const [selectedBatchYear, setSelectedBatchYear] = useState("");
   const [batchDetails, setBatchDetails] = useState(null); // Info + Members list
   const [loading, setLoading] = useState(true);
 
@@ -17,7 +17,7 @@ export default function AdminMembers() {
       const res = await fetch("http://localhost:3000/api/association-batches");
       const data = await res.json();
       setBatches(data);
-      if (data.length > 0) {
+      if (data.length > 0 && !selectedBatchYear) {
         // Default to the first batch in the list
         setSelectedBatchYear(data[0].batch_year);
       }
@@ -37,6 +37,28 @@ export default function AdminMembers() {
       console.error("Error fetching batch details:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 3. Handle Batch Deletion
+  const handleRemoveBatch = async () => {
+    if (!batchDetails?.batch_info?.batch_id) return;
+    
+    if (!window.confirm(`Are you sure you want to delete the entire ${selectedBatchYear} batch?`)) return;
+    
+    try {
+      const res = await fetch(`http://localhost:3000/api/admin/association-batch/${batchDetails.batch_info.batch_id}`, {
+        method: "DELETE"
+      });
+      if (res.ok) {
+        alert("Batch deleted successfully");
+        window.location.reload(); // Refresh to update tabs and clear deleted data
+      } else {
+        alert("Failed to delete batch");
+      }
+    } catch (err) {
+      console.error("Error deleting batch:", err);
+      alert("Error deleting batch");
     }
   };
 
@@ -87,16 +109,27 @@ export default function AdminMembers() {
           <h1>Association Members</h1>
           <div className="am-header-btns">
             <button 
-  onClick={() => navigate("/admin/edit-batch", { state: { batch: batchDetails } })} 
-  style={btnStyle}
->
-  Edit
-</button>
-            <button onClick={() => navigate("/add-batch")} style={btnStyle}>Add Batch</button>
+              onClick={handleRemoveBatch} 
+              style={{ ...btnStyle, background: "#dc2626" }}
+            >
+              Remove Batch
+            </button>
+            <button 
+              onClick={() => navigate("/admin/edit-batch", { state: { batch: batchDetails } })} 
+              style={btnStyle}
+            >
+              Edit
+            </button>
+            <button 
+              onClick={() => navigate("/add-batch")} 
+              style={btnStyle}
+            >
+              Add Batch
+            </button>
           </div>
         </div>
 
-        {/* Dynamic Tabs from /api/association-batches */}
+        {/* Dynamic Tabs */}
         <div className="am-tabs">
           {batches.map((b) => (
             <span
@@ -113,7 +146,6 @@ export default function AdminMembers() {
           <p>Loading details...</p>
         ) : batchDetails ? (
           <>
-            {/* Dynamic Batch Info from /api/association-batch/${year} */}
             <div className="am-batch-info">
               <img 
                 src={batchDetails.batch_info.image_url || "https://via.placeholder.com/384x216"} 
@@ -126,7 +158,6 @@ export default function AdminMembers() {
               </div>
             </div>
 
-            {/* Members Table */}
             <div className="am-table-wrap">
               <table className="am-table">
                 <thead>
@@ -138,7 +169,7 @@ export default function AdminMembers() {
                   </tr>
                 </thead>
                 <tbody>
-                  {batchDetails.members.length > 0 ? (
+                  {batchDetails.members && batchDetails.members.length > 0 ? (
                     batchDetails.members.map((member) => (
                       <tr key={member.register_number}>
                         <td>{member.name}</td>
@@ -148,18 +179,27 @@ export default function AdminMembers() {
                       </tr>
                     ))
                   ) : (
-                    <tr><td colSpan="4" style={{ textAlign: 'center', padding: '20px' }}>No members found.</td></tr>
+                    <tr>
+                      <td colSpan="4" style={{ textAlign: 'center', padding: '20px' }}>
+                        No members found.
+                      </td>
+                    </tr>
                   )}
                 </tbody>
               </table>
 
               {/* Mobile View */}
               <div className="am-cards">
-                {batchDetails.members.map((member) => (
+                {batchDetails.members && batchDetails.members.map((member) => (
                   <div key={member.register_number} className="am-card">
                     <div className="am-card-name">{member.name}</div>
-                    <div className="am-card-row"><span>Reg: {member.register_number}</span><span>Yr: {member.year}</span></div>
-                    <div className="am-card-row" style={{ color: '#083A4B', fontWeight: 500 }}>{member.role}</div>
+                    <div className="am-card-row">
+                      <span>Reg: {member.register_number}</span>
+                      <span>Yr: {member.year}</span>
+                    </div>
+                    <div className="am-card-row" style={{ color: '#083A4B', fontWeight: 500 }}>
+                      {member.role}
+                    </div>
                   </div>
                 ))}
               </div>
