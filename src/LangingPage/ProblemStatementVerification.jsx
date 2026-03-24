@@ -91,7 +91,7 @@ export default function Verification() {
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-2xl font-semibold text-[#023347]">Verification</h2>
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/problems")}
             className="flex items-center gap-2 bg-[#023347] text-white px-6 py-2 rounded-xl text-xs font-bold shadow-sm
               transition-all duration-300 ease-out
               hover:bg-[#388E9C] hover:shadow-lg hover:scale-105 active:scale-95"
