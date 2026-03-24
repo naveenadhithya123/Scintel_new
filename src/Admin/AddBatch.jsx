@@ -6,220 +6,214 @@ export default function AddBatch() {
   const navigate = useNavigate();
   const fileRef = useRef();
 
-  // ── Batch form state ──
-  const [image, setImage] = useState(null);
+  // ── State for API Data ──
+  const [batchYear, setBatchYear] = useState(""); // Needed for the backend 'batch_year' primary/foreign key
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-
-  // ── Members table state ──
+  const [imageFile, setImageFile] = useState(null); // Actual file for upload
+  const [previewUrl, setPreviewUrl] = useState(null); // For UI preview
   const [members, setMembers] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // ── Add member modal ──
+  // ── Member Modal State ──
   const [showAddModal, setShowAddModal] = useState(false);
   const [memberForm, setMemberForm] = useState({ name: "", reg: "", role: "", year: "" });
-
-  // ── Remove confirm modal ──
   const [removeIndex, setRemoveIndex] = useState(null);
 
-  /* ── Image upload ── */
+  /* ── Image handling ── */
   const handleImage = (file) => {
     if (!file) return;
+    setImageFile(file);
     const reader = new FileReader();
-    reader.onload = (e) => setImage(e.target.result);
+    reader.onload = (e) => setPreviewUrl(e.target.result);
     reader.readAsDataURL(file);
   };
 
-  /* ── Add member ── */
+  /* ── Add member to local list ── */
   const handleAddMember = () => {
-    if (!memberForm.name.trim()) return;
+    if (!memberForm.name.trim() || !memberForm.reg.trim()) {
+      alert("Name and Register Number are required.");
+      return;
+    }
     setMembers((prev) => [...prev, memberForm]);
     setMemberForm({ name: "", reg: "", role: "", year: "" });
     setShowAddModal(false);
   };
 
-  /* ── Remove member ── */
+  /* ── Remove member from local list ── */
   const handleRemove = () => {
     setMembers((prev) => prev.filter((_, i) => i !== removeIndex));
     setRemoveIndex(null);
   };
 
-  /* ── Save batch ── */
-  const handleSave = () => {
-    if (!title.trim()) {
-      alert("Please enter a batch title.");
+  /* ── Save Batch and Members to Backend ── */
+  const handleSave = async () => {
+    if (!batchYear.trim() || !title.trim() || !description.trim()) {
+      alert("Please fill in Batch Year, Title, and Description.");
       return;
     }
-    const existing = JSON.parse(localStorage.getItem("batches")) || [];
-    const newBatch = { title, description, image, members };
-    localStorage.setItem("batches", JSON.stringify([...existing, newBatch]));
 
-    // Also persist members to shared members key used by EditBatch
-    const allMembers = JSON.parse(localStorage.getItem("members")) || [];
-    localStorage.setItem("members", JSON.stringify([...allMembers, ...members]));
+    setLoading(true);
+    try {
+      // 1. Create FormData for the Batch (handles the image file)
+      const formData = new FormData();
+      formData.append("batch_year", batchYear);
+      formData.append("title", title);
+      formData.append("description", description);
+      if (imageFile) {
+        formData.append("image", imageFile);
+      }
 
-    navigate(-1);
+      // 2. Call Add Batch API
+      const batchResponse = await fetch("http://localhost:3000/api/admin/association-batch", {
+        method: "POST",
+        body: formData, // Browser automatically sets Content-Type for FormData
+      });
+
+      if (!batchResponse.ok) {
+        const errorData = await batchResponse.json();
+        throw new Error(errorData.message || "Failed to add batch");
+      }
+
+      // 3. Call Add Members API for each member in the list
+      const memberPromises = members.map((m) =>
+        fetch("http://localhost:3000/api/admin/association-members", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            register_number: m.reg,
+            name: m.name,
+            role: m.role,
+            year: m.year,
+            batch_year: batchYear, // Links member to the created batch
+          }),
+        })
+      );
+
+      const results = await Promise.all(memberPromises);
+      
+      // Check if any member uploads failed
+      const failed = results.filter(r => !r.ok);
+      if (failed.length > 0) {
+        alert(`${failed.length} members failed to upload, but batch was created.`);
+      } else {
+        alert("Batch and members added successfully!");
+      }
+
+      navigate(-1);
+    } catch (err) {
+      console.error("Save Error:", err);
+      alert(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // ── Styles ──
   const inputStyle = {
     width: "100%", border: "1px solid #d1d5db", borderRadius: 8,
     padding: "12px", fontSize: 14, outline: "none",
     fontFamily: "inherit", boxSizing: "border-box", color: "#111827",
   };
-
   const labelStyle = { display: "block", marginBottom: 4, color: "#4b5563", fontSize: 14 };
-
   const btnPrimary = {
     background: "#083A4B", color: "#fff", padding: "9px 24px",
     borderRadius: 8, border: "none", fontWeight: 600,
     fontSize: 14, cursor: "pointer", fontFamily: "inherit",
+    opacity: loading ? 0.7 : 1
   };
 
   return (
     <AdminSidebar>
       <style>{`
-        .ab-top-form {
-          display: flex;
-          gap: 40px;
-          margin-bottom: 32px;
-          align-items: flex-start;
+        .ab-top-form { display: flex; gap: 40px; margin-bottom: 32px; align-items: flex-start; }
+        .ab-upload-box { 
+          width: 420px; min-width: 420px; height: 220px; border: 2px dashed #d1d5db; 
+          border-radius: 12px; display: flex; align-items: center; justify-content: center; 
+          color: #6b7280; font-size: 14px; flex-shrink: 0; cursor: pointer; overflow: hidden; position: relative; 
         }
-        .ab-upload-box {
-          width: 420px;
-          min-width: 420px;
-          height: 220px;
-          border: 2px dashed #d1d5db;
-          border-radius: 12px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: #6b7280;
-          font-size: 14px;
-          flex-shrink: 0;
-          cursor: pointer;
-          overflow: hidden;
-          position: relative;
-        }
-        .ab-upload-box img {
-          width: 100%; height: 100%; object-fit: cover;
-          position: absolute; inset: 0;
-        }
-        .ab-fields {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-        }
-        .ab-table-wrap {
-          background: #fff;
-          border-radius: 12px;
-          border: 1px solid #e5e7eb;
-          overflow: hidden;
-        }
+        .ab-upload-box img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+        .ab-fields { flex: 1; display: flex; flex-direction: column; gap: 16px; }
+        .ab-table-wrap { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; }
         .ab-table { width: 100%; border-collapse: collapse; }
         .ab-table thead { background: #3DA6B6; color: #fff; }
         .ab-table th, .ab-table td { padding: 16px; text-align: left; font-size: 14px; }
         .ab-table td { color: #6b7280; border-top: 1px solid #f3f4f6; }
-        .ab-table tbody tr:hover { background: #f9fafb; }
-        .ab-cards { display: none; }
-        .ab-btn-row {
-          display: flex;
-          justify-content: flex-end;
-          gap: 16px;
-          margin-top: 32px;
-        }
-
-        /* Modal */
-        .ab-modal-backdrop {
-          position: fixed; inset: 0; background: rgba(0,0,0,0.4);
-          display: flex; align-items: center; justify-content: center;
-          z-index: 50; padding: 0 16px;
-        }
-        .ab-modal {
-          background: #fff; border-radius: 14px; padding: 32px;
-          width: 100%; max-width: 480px; box-sizing: border-box;
-        }
+        .ab-btn-row { display: flex; justify-content: flex-end; gap: 16px; margin-top: 32px; }
+        .ab-modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 0 16px; }
+        .ab-modal { background: #fff; border-radius: 14px; padding: 32px; width: 100%; max-width: 480px; box-sizing: border-box; }
         .ab-modal h3 { font-size: 17px; font-weight: 700; color: #111827; margin-bottom: 20px; }
-        .ab-modal-grid {
-          display: grid; grid-template-columns: 1fr 1fr;
-          gap: 16px; margin-bottom: 20px;
-        }
+        .ab-modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
         .ab-modal-btns { display: flex; justify-content: flex-end; gap: 12px; }
-
-        /* ── MOBILE ── */
         @media (max-width: 768px) {
-          .ab-top-form   { flex-direction: column; gap: 20px; }
+          .ab-top-form { flex-direction: column; gap: 20px; }
           .ab-upload-box { width: 100%; min-width: unset; height: 180px; }
-          .ab-table      { display: none; }
-          .ab-cards      { display: flex; flex-direction: column; }
-          .ab-card       { padding: 14px 16px; border-top: 1px solid #f3f4f6; }
-          .ab-card:first-child { border-top: none; }
-          .ab-card-name  { font-weight: 600; font-size: 14px; color: #111827; margin-bottom: 6px; }
-          .ab-card-row   { display: flex; justify-content: space-between; font-size: 13px; color: #6b7280; margin-bottom: 3px; }
-          .ab-card-label { font-weight: 500; color: #374151; }
-          .ab-card-actions { display: flex; gap: 10px; margin-top: 10px; }
-          .ab-card-actions button { flex: 1; }
+          .ab-table { display: none; }
           .ab-modal-grid { grid-template-columns: 1fr !important; }
-        }
-
-        @media (max-width: 480px) {
-          .ab-btn-row        { flex-direction: column; }
-          .ab-btn-row button { width: 100%; }
-          .ab-main-pad       { padding: 20px 16px !important; }
-          .ab-modal-btns     { flex-direction: column; }
-          .ab-modal-btns button { width: 100%; }
         }
       `}</style>
 
       <div className="ab-main-pad" style={{ flex: 1, padding: "40px", overflowY: "auto" }}>
-
         <h1 style={{ fontSize: 22, fontWeight: 600, color: "#111827", marginBottom: 24 }}>
-          Add Batch
+          Add New Batch
         </h1>
 
-        {/* TOP FORM */}
         <div className="ab-top-form">
-
-          {/* Upload box */}
+          {/* Upload Box */}
           <div
             className="ab-upload-box"
             onClick={() => fileRef.current.click()}
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={(e) => { e.preventDefault(); handleImage(e.dataTransfer.files[0]); }}
           >
-            {image
-              ? <img src={image} alt="batch" />
-              : <>Drag and Drop or&nbsp;<span style={{ color: "#2563eb", cursor: "pointer" }}>choose file</span></>
-            }
-            <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => handleImage(e.target.files[0])} />
+            {previewUrl ? (
+              <img src={previewUrl} alt="Preview" />
+            ) : (
+              <span>Click to upload batch image</span>
+            )}
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={(e) => handleImage(e.target.files[0])}
+            />
           </div>
 
-          {/* Fields */}
+          {/* Batch Fields */}
           <div className="ab-fields">
             <div>
-              <label style={labelStyle}>Title</label>
+              <label style={labelStyle}>Batch Year (e.g. 2023)</label>
+              <input
+                type="text"
+                style={inputStyle}
+                value={batchYear}
+                onChange={(e) => setBatchYear(e.target.value)}
+                placeholder="2023"
+              />
+            </div>
+            <div>
+              <label style={labelStyle}>Batch Title</label>
               <input
                 type="text"
                 style={inputStyle}
                 value={title}
-                placeholder="e.g. 2025-26"
                 onChange={(e) => setTitle(e.target.value)}
+                placeholder="Scintel 2023"
               />
             </div>
             <div>
               <label style={labelStyle}>Description</label>
               <textarea
-                rows="4"
-                style={{ ...inputStyle, resize: "vertical" }}
+                rows="3"
+                style={{ ...inputStyle, resize: "none" }}
                 value={description}
-                placeholder="Describe this batch..."
                 onChange={(e) => setDescription(e.target.value)}
+                placeholder="Brief description of this batch..."
               />
             </div>
           </div>
-
         </div>
 
-        {/* Members header row */}
+        {/* Member Section Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
           <span style={{ fontSize: 15, fontWeight: 600, color: "#111827" }}>Members</span>
           <button
@@ -230,10 +224,8 @@ export default function AddBatch() {
           </button>
         </div>
 
-        {/* TABLE */}
+        {/* Members Table */}
         <div className="ab-table-wrap">
-
-          {/* Desktop table */}
           <table className="ab-table">
             <thead>
               <tr>
@@ -247,8 +239,8 @@ export default function AddBatch() {
             <tbody>
               {members.length === 0 ? (
                 <tr>
-                  <td colSpan="5" style={{ textAlign: "center", padding: "64px 16px", color: "#9ca3af" }}>
-                    Members are not added yet
+                  <td colSpan="5" style={{ textAlign: "center", padding: "40px", color: "#9ca3af" }}>
+                    No members added to this batch yet.
                   </td>
                 </tr>
               ) : (
@@ -261,7 +253,7 @@ export default function AddBatch() {
                     <td>
                       <button
                         onClick={() => setRemoveIndex(i)}
-                        style={{ ...btnPrimary, padding: "6px 16px", fontSize: 13 }}
+                        style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}
                       >
                         Remove
                       </button>
@@ -271,41 +263,25 @@ export default function AddBatch() {
               )}
             </tbody>
           </table>
-
-          {/* Mobile cards */}
-          <div className="ab-cards">
-            {members.length === 0 ? (
-              <div style={{ textAlign: "center", padding: "40px 16px", color: "#9ca3af", fontSize: 14 }}>
-                Members are not added yet
-              </div>
-            ) : (
-              members.map((m, i) => (
-                <div key={i} className="ab-card">
-                  <div className="ab-card-name">{m.name}</div>
-                  <div className="ab-card-row"><span className="ab-card-label">Reg no.</span><span>{m.reg}</span></div>
-                  <div className="ab-card-row"><span className="ab-card-label">Role</span><span>{m.role}</span></div>
-                  <div className="ab-card-row"><span className="ab-card-label">Year</span><span>{m.year}</span></div>
-                  <div className="ab-card-actions">
-                    <button
-                      onClick={() => setRemoveIndex(i)}
-                      style={{ ...btnPrimary, padding: "8px 0", fontSize: 13 }}
-                    >
-                      Remove
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-
         </div>
 
-        {/* BUTTONS */}
+        {/* Footer Buttons */}
         <div className="ab-btn-row">
-          <button style={btnPrimary} onClick={() => navigate(-1)}>Cancel</button>
-          <button style={btnPrimary} onClick={handleSave}>Save</button>
+          <button 
+            style={{ ...btnPrimary, background: "#fff", color: "#374151", border: "1px solid #d1d5db" }} 
+            onClick={() => navigate(-1)}
+            disabled={loading}
+          >
+            Cancel
+          </button>
+          <button 
+            style={btnPrimary} 
+            onClick={handleSave}
+            disabled={loading}
+          >
+            {loading ? "Saving..." : "Save Batch"}
+          </button>
         </div>
-
       </div>
 
       {/* ── Add Member Modal ── */}
@@ -315,10 +291,10 @@ export default function AddBatch() {
             <h3>Add Member</h3>
             <div className="ab-modal-grid">
               {[
-                { label: "Name",            key: "name",  placeholder: "Full name" },
-                { label: "Register Number", key: "reg",   placeholder: "e.g. 611224104121" },
-                { label: "Role",            key: "role",  placeholder: "e.g. Developer" },
-                { label: "Year",            key: "year",  placeholder: "e.g. II" },
+                { label: "Name", key: "name", placeholder: "Full name" },
+                { label: "Register Number", key: "reg", placeholder: "611..." },
+                { label: "Role", key: "role", placeholder: "Secretary" },
+                { label: "Year", key: "year", placeholder: "4" },
               ].map(({ label, key, placeholder }) => (
                 <div key={key}>
                   <label style={labelStyle}>{label}</label>
@@ -333,17 +309,8 @@ export default function AddBatch() {
               ))}
             </div>
             <div className="ab-modal-btns">
-              <button
-                onClick={() => setShowAddModal(false)}
-                style={{
-                  background: "#f1f5f9", color: "#374151", padding: "9px 22px",
-                  borderRadius: 8, border: "1px solid #d1d5db", fontWeight: 500,
-                  fontSize: 14, cursor: "pointer", fontFamily: "inherit",
-                }}
-              >
-                Cancel
-              </button>
-              <button style={btnPrimary} onClick={handleAddMember}>Add</button>
+              <button onClick={() => setShowAddModal(false)} style={{ ...btnPrimary, background: "#f1f5f9", color: "#374151" }}>Cancel</button>
+              <button style={btnPrimary} onClick={handleAddMember}>Add to List</button>
             </div>
           </div>
         </div>
@@ -353,41 +320,18 @@ export default function AddBatch() {
       {removeIndex !== null && (
         <div className="ab-modal-backdrop" onClick={() => setRemoveIndex(null)}>
           <div className="ab-modal" style={{ maxWidth: 380, textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
-            <div style={{
-              width: 52, height: 52, borderRadius: "50%", background: "#fef2f2",
-              display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px",
-            }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="3 6 5 6 21 6"/>
-                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-                <path d="M10 11v6M14 11v6"/>
-                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
-              </svg>
-            </div>
-            <h3 style={{ fontSize: 17, fontWeight: 700, color: "#111827", marginBottom: 8 }}>Remove Member?</h3>
-            <p style={{ color: "#6b7280", fontSize: 13, marginBottom: 24, lineHeight: 1.5 }}>
-              This member will be removed from the batch.
-            </p>
+            <h3>Remove Member?</h3>
+            <p style={{ color: "#6b7280", fontSize: 13, marginBottom: 24 }}>This will remove them from the list below.</p>
             <button
               onClick={handleRemove}
-              style={{ ...btnPrimary, background: "#ef4444", width: "100%", padding: "11px 0", marginBottom: 10 }}
+              style={{ ...btnPrimary, background: "#ef4444", width: "100%", marginBottom: 10 }}
             >
               Remove
             </button>
-            <button
-              onClick={() => setRemoveIndex(null)}
-              style={{
-                width: "100%", padding: "10px 0", borderRadius: 8, background: "#fff",
-                border: "1.5px solid #e2e8f0", color: "#374151", fontWeight: 500,
-                fontSize: 14, cursor: "pointer", fontFamily: "inherit",
-              }}
-            >
-              Cancel
-            </button>
+            <button onClick={() => setRemoveIndex(null)} style={{ ...btnPrimary, background: "#fff", color: "#374151", border: "1px solid #d1d5db", width: "100%" }}>Cancel</button>
           </div>
         </div>
       )}
-
     </AdminSidebar>
   );
 }

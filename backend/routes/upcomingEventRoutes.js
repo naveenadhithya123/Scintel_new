@@ -6,5 +6,3 @@ const router = express.Router();
 router.get("/upcoming-events", getUpcomingEvents);
 
 export default router;
-
-

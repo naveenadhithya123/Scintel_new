@@ -1,321 +1,213 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import AdminSidebar from "./AdminSidebar";
 
 export default function EditBatch() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const fileInputRef = useRef(null);
+
+  // ── State for Batch Info ──
+  const [originalYear, setOriginalYear] = useState(""); 
+  const [batchYear, setBatchYear] = useState("");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [existingImageUrl, setExistingImageUrl] = useState("");
+  const [newImageFile, setNewImageFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState("");
+
+  // ── State for Members ──
   const [members, setMembers] = useState([]);
-  const [showModal, setShowModal] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  // ✅ LOAD FROM LOCAL STORAGE
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("members"));
-    if (saved && saved.length > 0) {
-      setMembers(saved);
-    } else {
-      const defaultData = [
-        { name: "Muhammed Shuaib", reg: "611224104121", role: "Technical Support", year: "II" },
-        { name: "Rahul",           reg: "611224104122", role: "Developer",          year: "II" },
-        { name: "Santhosh",        reg: "611224104123", role: "Developer",          year: "II" },
-        { name: "Kathir",          reg: "611224104124", role: "Designer",           year: "II" },
-      ];
-      setMembers(defaultData);
-      localStorage.setItem("members", JSON.stringify(defaultData));
-    }
-  }, []);
+    // 1. Capture the data passed via navigate state
+    const data = location.state?.batch;
 
-  // ✅ DELETE FUNCTION
-  const handleDelete = () => {
-    const updated = members.filter((_, i) => i !== selectedIndex);
-    setMembers(updated);
-    localStorage.setItem("members", JSON.stringify(updated));
-    setShowModal(false);
+    // 2. LOGIC FIX: Check if we have the data. 
+    // If you sent 'batchDetails' from AdminMembers, 'data.batch_info' will exist.
+    if (data && data.batch_info) {
+      const info = data.batch_info;
+      
+      setOriginalYear(info.batch_year); 
+      setBatchYear(info.batch_year);
+      setTitle(info.title || "");
+      setDescription(info.description || "");
+      setExistingImageUrl(info.image_url || "");
+      setPreviewUrl(info.image_url || "");
+      setMembers(data.members || []); 
+    } else {
+      // If data is missing (e.g. page refresh), redirect back to Admin Members
+      console.warn("No batch data found in state. Redirecting...");
+      navigate("/admin-members"); 
+    }
+  }, [location, navigate]);
+
+  const handleSaveAll = async () => {
+    if (!batchYear || !title) {
+      alert("Batch Year and Title are required.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // A. Update Batch Details (Multipart/FormData)
+      const formData = new FormData();
+      formData.append("batch_year", batchYear);
+      formData.append("title", title);
+      formData.append("description", description);
+      formData.append("existing_image_url", existingImageUrl);
+      if (newImageFile) formData.append("image", newImageFile);
+
+      const batchRes = await fetch(`http://localhost:3000/api/admin/association-batch/${originalYear}`, {
+        method: "PUT",
+        body: formData,
+      });
+
+      if (!batchRes.ok) throw new Error("Failed to update batch info");
+
+      // B. Update Members (Sequential PUT requests)
+      const memberPromises = members.map(m => 
+        fetch(`http://localhost:3000/api/admin/association-members/${m.register_number}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            name: m.name, 
+            role: m.role, 
+            year: m.year, 
+            batch_year: batchYear // Link to updated batch year
+          })
+        })
+      );
+
+      await Promise.all(memberPromises);
+
+      alert("Batch and members updated successfully!");
+      navigate("/admin-members");
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const inputStyle = { width: "100%", padding: "10px", margin: "8px 0 18px", borderRadius: "6px", border: "1px solid #ccc" };
 
   return (
     <AdminSidebar>
-      <style>{`
-        /* ── Header ── */
-        .eb-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 24px;
-          gap: 12px;
-          flex-wrap: wrap;
-        }
-        .eb-header h1 {
-          font-size: 22px;
-          font-weight: 600;
-          color: #1f2937;
-          margin: 0;
-        }
+      <div style={{ padding: "40px", flex: 1, overflowY: "auto" }}>
+        <h2 style={{ marginBottom: "25px", color: "#083A4B" }}>Edit Batch: {originalYear}</h2>
+        
+        <div style={{ display: "flex", gap: "40px", marginBottom: "40px", flexWrap: "wrap" }}>
+          {/* Left: Image Upload */}
+          <div style={{ width: "320px" }}>
+            <div style={{ width: "100%", height: "180px", background: "#f0f0f0", borderRadius: "10px", overflow: "hidden", border: "1px solid #ddd" }}>
+              <img 
+                src={previewUrl || "https://placehold.jp/320x180.png"} 
+                alt="Preview" 
+                style={{ width: "100%", height: "100%", objectFit: "cover" }} 
+              />
+            </div>
+            <input type="file" ref={fileInputRef} hidden onChange={(e) => {
+              const file = e.target.files[0];
+              if(file) {
+                setNewImageFile(file);
+                setPreviewUrl(URL.createObjectURL(file));
+              }
+            }} />
+            <button 
+              onClick={() => fileInputRef.current.click()}
+              style={{ marginTop: "12px", width: "100%", padding: "8px", cursor: "pointer", background: "#f8f9fa", border: "1px solid #ccc", borderRadius: "5px" }}
+            >
+              Change Batch Image
+            </button>
+          </div>
 
-        /* ── Batch info ── */
-        .eb-batch-info {
-          display: flex;
-          gap: 24px;
-          margin-bottom: 32px;
-          align-items: flex-start;
-        }
-        .eb-batch-img {
-          width: 256px;
-          min-width: 256px;
-          height: 160px;
-          background: #083A4B;
-          border-radius: 10px;
-          flex-shrink: 0;
-        }
-        .eb-batch-text h3 {
-          font-size: 17px;
-          font-weight: 600;
-          margin-bottom: 8px;
-          color: #111827;
-        }
-        .eb-batch-text p {
-          color: #6b7280;
-          max-width: 420px;
-          line-height: 1.6;
-          font-size: 14px;
-        }
+          {/* Right: Form Fields */}
+          <div style={{ flex: 1, minWidth: "300px" }}>
+            <label style={{ fontWeight: "600", fontSize: "14px" }}>Batch Year</label>
+            <input style={inputStyle} value={batchYear} onChange={e => setBatchYear(e.target.value)} />
+            
+            <label style={{ fontWeight: "600", fontSize: "14px" }}>Batch Title</label>
+            <input style={inputStyle} value={title} onChange={e => setTitle(e.target.value)} />
+            
+            <label style={{ fontWeight: "600", fontSize: "14px" }}>Description</label>
+            <textarea 
+              style={{ ...inputStyle, height: "80px", resize: "none" }} 
+              value={description} 
+              onChange={e => setDescription(e.target.value)} 
+            />
+          </div>
+        </div>
 
-        /* ── Table wrap ── */
-        .eb-table-wrap {
-          background: #fff;
-          border-radius: 16px;
-          border: 1px solid rgba(42,142,158,0.4);
-          overflow: hidden;
-          margin-top: 24px;
-        }
+        <h3 style={{ marginBottom: "15px" }}>Batch Members</h3>
+        <table style={{ width: "100%", borderCollapse: "collapse", background: "#fff", borderRadius: "8px", overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+          <thead style={{ background: "#3DA6B6", color: "#fff" }}>
+            <tr>
+              <th style={{ padding: "12px", textAlign: "left" }}>Reg No</th>
+              <th style={{ padding: "12px", textAlign: "left" }}>Name</th>
+              <th style={{ padding: "12px", textAlign: "left" }}>Role</th>
+              <th style={{ padding: "12px", textAlign: "left" }}>Year</th>
+            </tr>
+          </thead>
+          <tbody>
+            {members.map((m, index) => (
+              <tr key={index} style={{ borderBottom: "1px solid #eee" }}>
+                <td style={{ padding: "12px", color: "#666" }}>{m.register_number}</td>
+                <td style={{ padding: "12px" }}>
+                  <input 
+                    style={{ padding: "6px", width: "90%" }}
+                    value={m.name} 
+                    onChange={e => {
+                      const updated = [...members];
+                      updated[index].name = e.target.value;
+                      setMembers(updated);
+                    }} 
+                  />
+                </td>
+                <td style={{ padding: "12px" }}>
+                  <input 
+                    style={{ padding: "6px", width: "90%" }}
+                    value={m.role} 
+                    onChange={e => {
+                      const updated = [...members];
+                      updated[index].role = e.target.value;
+                      setMembers(updated);
+                    }} 
+                  />
+                </td>
+                <td style={{ padding: "12px" }}>
+                  <input 
+                    style={{ padding: "6px", width: "90%" }}
+                    value={m.year} 
+                    onChange={e => {
+                      const updated = [...members];
+                      updated[index].year = e.target.value;
+                      setMembers(updated);
+                    }} 
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
-        /* ── Desktop table (default) ── */
-        .eb-table { width: 100%; border-collapse: collapse; }
-        .eb-table thead { background: #2F8C95; color: #fff; }
-        .eb-table th, .eb-table td { padding: 18px 20px; text-align: left; font-size: 14px; }
-        .eb-table th:last-child, .eb-table td:last-child { text-align: right; padding-right: 40px; }
-        .eb-table td { border-top: 1px solid #f3f4f6; color: #374151; }
-        .eb-table tbody tr:hover { background: #f9fafb; }
-        .eb-action-btns { display: flex; justify-content: flex-end; gap: 12px; }
-
-        /* Mobile cards hidden on desktop */
-        .eb-cards { display: none; }
-
-        /* ── MOBILE ── */
-        @media (max-width: 768px) {
-          .eb-header h1        { font-size: 18px; }
-          .eb-batch-info       { flex-direction: column; gap: 14px; }
-          .eb-batch-img        { width: 100%; min-width: unset; height: 180px; }
-          .eb-table            { display: none; }
-          .eb-cards            { display: flex; flex-direction: column; gap: 0; }
-
-          .eb-card {
-            padding: 14px 16px;
-            border-top: 1px solid #f3f4f6;
-          }
-          .eb-card:first-child { border-top: none; }
-          .eb-card-name {
-            font-size: 15px;
-            font-weight: 600;
-            color: #111827;
-            margin-bottom: 6px;
-          }
-          .eb-card-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 13px;
-            color: #6b7280;
-            margin-bottom: 4px;
-          }
-          .eb-card-label { font-weight: 500; color: #374151; }
-          .eb-card-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-          }
-          .eb-card-actions button { flex: 1; }
-        }
-
-        @media (max-width: 480px) {
-          .eb-header button { width: 100%; }
-        }
-      `}</style>
-
-      {/* Scrollable main */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "40px" }} className="eb-main-pad">
-        <style>{`
-          @media (max-width: 600px) { .eb-main-pad { padding: 20px 16px !important; } }
-        `}</style>
-
-        {/* Header */}
-        <div className="eb-header">
-          <h1>Edit Batch</h1>
-          <button
-            onClick={() => navigate("/add-member")}
-            style={{
-              background: "#083A4B", color: "#fff",
-              padding: "9px 18px", borderRadius: 8,
-              border: "none", fontWeight: 600, fontSize: 14, cursor: "pointer",
-            }}
+        <div style={{ marginTop: "30px", display: "flex", justifyContent: "flex-end", gap: "15px" }}>
+          <button 
+            onClick={() => navigate(-1)} 
+            style={{ padding: "10px 25px", borderRadius: "6px", border: "1px solid #ccc", background: "#fff", cursor: "pointer" }}
           >
-            + Add Member
+            Cancel
+          </button>
+          <button 
+            onClick={handleSaveAll} 
+            disabled={loading}
+            style={{ padding: "10px 30px", borderRadius: "6px", border: "none", background: "#083A4B", color: "#fff", cursor: "pointer", fontWeight: "600" }}
+          >
+            {loading ? "Saving..." : "Update Everything"}
           </button>
         </div>
-
-        {/* Batch Info */}
-        <div className="eb-batch-info">
-          <div className="eb-batch-img" />
-          <div className="eb-batch-text">
-            <h3>Batch 2022 - 23</h3>
-            <p>
-              The mountain peak touches the golden sunrise. Cold wind brushes
-              against your face. Clouds drift lazily below your feet.
-              Nature feels powerful and peaceful at once.
-            </p>
-          </div>
-        </div>
-
-        {/* Table + Cards */}
-        <div className="eb-table-wrap">
-
-          {/* ── Desktop table ── */}
-          <table className="eb-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Register no.</th>
-                <th>Role</th>
-                <th>Year</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {members.map((member, index) => (
-                <tr key={index}>
-                  <td>{member.name}</td>
-                  <td>{member.reg}</td>
-                  <td>{member.role}</td>
-                  <td>{member.year}</td>
-                  <td>
-                    <div className="eb-action-btns">
-                      <button
-                        onClick={() => navigate("/edit-member", { state: { index } })}
-                        style={{
-                          background: "#083A4B", color: "#fff",
-                          padding: "8px 20px", borderRadius: 8,
-                          border: "none", fontWeight: 600, fontSize: 13, cursor: "pointer",
-                        }}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => { setSelectedIndex(index); setShowModal(true); }}
-                        style={{
-                          background: "#083A4B", color: "#fff",
-                          padding: "8px 20px", borderRadius: 8,
-                          border: "none", fontWeight: 600, fontSize: 13, cursor: "pointer",
-                        }}
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          {/* ── Mobile cards ── */}
-          <div className="eb-cards">
-            {members.map((member, index) => (
-              <div key={index} className="eb-card">
-                <div className="eb-card-name">{member.name}</div>
-                <div className="eb-card-row">
-                  <span className="eb-card-label">Reg no.</span>
-                  <span>{member.reg}</span>
-                </div>
-                <div className="eb-card-row">
-                  <span className="eb-card-label">Role</span>
-                  <span>{member.role}</span>
-                </div>
-                <div className="eb-card-row">
-                  <span className="eb-card-label">Year</span>
-                  <span>{member.year}</span>
-                </div>
-                <div className="eb-card-actions">
-                  <button
-                    onClick={() => navigate("/edit-member", { state: { index } })}
-                    style={{
-                      background: "#083A4B", color: "#fff",
-                      padding: "8px 0", borderRadius: 8,
-                      border: "none", fontWeight: 600, fontSize: 13, cursor: "pointer",
-                    }}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => { setSelectedIndex(index); setShowModal(true); }}
-                    style={{
-                      background: "#083A4B", color: "#fff",
-                      padding: "8px 0", borderRadius: 8,
-                      border: "none", fontWeight: 600, fontSize: 13, cursor: "pointer",
-                    }}
-                  >
-                    Remove
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-
-        </div>
       </div>
-
-      {/* Delete Modal */}
-      {showModal && (
-        <div style={{
-          position: "fixed", inset: 0,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          background: "rgba(0,0,0,0.4)", zIndex: 50,
-          padding: "0 16px",
-        }}>
-          <div style={{
-            background: "#fff", borderRadius: 12,
-            padding: "32px", width: "100%", maxWidth: 420,
-            textAlign: "center", boxSizing: "border-box",
-          }}>
-            <h2 style={{ fontSize: 19, fontWeight: 600, marginBottom: 8, color: "#111827" }}>
-              Are you sure?
-            </h2>
-            <p style={{ color: "#6b7280", marginBottom: 24, fontSize: 14 }}>
-              This member will be permanently removed.
-            </p>
-            <div style={{ display: "flex", justifyContent: "center", gap: 24 }}>
-              <button
-                onClick={() => setShowModal(false)}
-                style={{
-                  background: "none", border: "none",
-                  color: "#374151", fontWeight: 500,
-                  fontSize: 14, cursor: "pointer",
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDelete}
-                style={{
-                  background: "#ef4444", color: "#fff",
-                  padding: "9px 24px", borderRadius: 8,
-                  border: "none", fontWeight: 600,
-                  fontSize: 14, cursor: "pointer",
-                }}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </AdminSidebar>
   );
 }

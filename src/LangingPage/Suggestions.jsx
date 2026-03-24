@@ -43,30 +43,22 @@ function Suggestions() {
   };
 
   const handleSubmit = async () => {
-    const newErrors = validate();
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      setIsShaking(true);
-      setTimeout(() => setIsShaking(false), 500);
-      return;
-    }
+  const newErrors = validate();
+  if (Object.keys(newErrors).length > 0) {
+    setErrors(newErrors);
+    setIsShaking(true);
+    setTimeout(() => setIsShaking(false), 500);
+    return;
+  }
 
-    let base64File = ""; // Default to empty string because DB doesn't allow NULL
-    if (proofFile) {
-      base64File = await new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.readAsDataURL(proofFile);
-      });
-    }
-
-    // Pass data to verification page via state
-    navigate("/SuggesstionVerification", { 
-      state: { 
-        suggestionData: { ...form, proof_url: base64File } 
-      } 
-    });
-  };
+  // Pass raw data and the actual file object to verification page
+  navigate("/SuggesstionVerification", { 
+    state: { 
+      suggestionData: { ...form },
+      proofFile: proofFile // Pass the actual File object
+    } 
+  });
+};
 
   return (
     <>

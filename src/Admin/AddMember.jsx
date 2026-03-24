@@ -1,21 +1,60 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import AdminSidebar from "./AdminSidebar";
 
 export default function AddMember() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Retrieve batch_year from navigation state (passed from AddBatch)
+  const batchYear = location.state?.batch_year;
 
   const [form, setForm] = useState({ name: "", reg: "", role: "", year: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleAdd = () => {
-    const existing = JSON.parse(localStorage.getItem("members")) || [];
-    const updated = [...existing, form];
-    localStorage.setItem("members", JSON.stringify(updated));
-    navigate("/edit-batch");
+  const handleAdd = async () => {
+    // Basic validation
+    if (!form.name || !form.reg) {
+      alert("Name and Register Number are required.");
+      return;
+    }
+
+    if (!batchYear) {
+      alert("Batch Year context is missing. Please return to the Batch page.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch("http://localhost:3000/api/admin/association-members", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          register_number: form.reg,
+          name: form.name,
+          role: form.role,
+          year: form.year,
+          batch_year: batchYear, // Associating member with the batch
+        }),
+      });
+
+      if (res.ok) {
+        alert("Member added successfully!");
+        navigate(-1); // Go back to the previous screen (likely AdminMembers or EditBatch)
+      } else {
+        const errorData = await res.json();
+        alert(`Failed to add member: ${errorData.message || "Unknown error"}`);
+      }
+    } catch (error) {
+      console.error("Connection error:", error);
+      alert("Could not connect to the server.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const inputStyle = {
@@ -37,10 +76,22 @@ export default function AddMember() {
     fontSize: 14,
   };
 
+  const btnStyle = {
+    background: "#083A4B",
+    color: "#fff",
+    padding: "9px 24px",
+    borderRadius: 8,
+    border: "none",
+    fontWeight: 600,
+    fontSize: 14,
+    cursor: "pointer",
+    fontFamily: "inherit",
+    opacity: isSubmitting ? 0.7 : 1,
+  };
+
   return (
     <AdminSidebar>
       <style>{`
-        /* Form grid: 2 cols on desktop, 1 col on mobile */
         .am-form-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
@@ -48,7 +99,6 @@ export default function AddMember() {
           max-width: 900px;
         }
 
-        /* Button row */
         .am-btn-row {
           margin-top: auto;
           display: flex;
@@ -79,17 +129,22 @@ export default function AddMember() {
         className="am-main-pad"
         style={{ flex: 1, padding: "40px", display: "flex", flexDirection: "column", overflowY: "auto" }}
       >
-        <h1 style={{ fontSize: 22, fontWeight: 600, color: "#1f2937", marginBottom: 48 }}>
-          Add Member
-        </h1>
+        <div style={{ marginBottom: 48 }}>
+          <h1 style={{ fontSize: 22, fontWeight: 600, color: "#1f2937", marginBottom: 8 }}>
+            Add Member
+          </h1>
+          <p style={{ fontSize: 14, color: "#6b7280" }}>
+            Adding member to Batch: <strong>{batchYear || "Unknown"}</strong>
+          </p>
+        </div>
 
-        {/* FORM */}
         <div className="am-form-grid">
-
           <div>
             <label style={labelStyle}>Name</label>
             <input
               name="name"
+              placeholder="Enter full name"
+              value={form.name}
               onChange={handleChange}
               style={inputStyle}
             />
@@ -99,6 +154,8 @@ export default function AddMember() {
             <label style={labelStyle}>Register Number</label>
             <input
               name="reg"
+              placeholder="e.g. 611221104000"
+              value={form.reg}
               onChange={handleChange}
               style={inputStyle}
             />
@@ -108,6 +165,8 @@ export default function AddMember() {
             <label style={labelStyle}>Role</label>
             <input
               name="role"
+              placeholder="e.g. President, Member"
+              value={form.role}
               onChange={handleChange}
               style={inputStyle}
             />
@@ -117,41 +176,31 @@ export default function AddMember() {
             <label style={labelStyle}>Year</label>
             <input
               name="year"
+              placeholder="e.g. III, IV"
+              value={form.year}
               onChange={handleChange}
               style={inputStyle}
             />
           </div>
-
         </div>
 
-        {/* BUTTONS */}
         <div className="am-btn-row">
           <button
+            type="button"
             onClick={() => navigate(-1)}
-            style={{
-              background: "#083A4B", color: "#fff",
-              padding: "9px 24px", borderRadius: 8,
-              border: "none", fontWeight: 600,
-              fontSize: 14, cursor: "pointer",
-              fontFamily: "inherit",
-            }}
+            style={{ ...btnStyle, background: "#f3f4f6", color: "#374151", border: "1px solid #d1d5db" }}
           >
             Cancel
           </button>
           <button
+            type="button"
+            disabled={isSubmitting}
             onClick={handleAdd}
-            style={{
-              background: "#083A4B", color: "#fff",
-              padding: "9px 24px", borderRadius: 8,
-              border: "none", fontWeight: 600,
-              fontSize: 14, cursor: "pointer",
-              fontFamily: "inherit",
-            }}
+            style={btnStyle}
           >
-            Add
+            {isSubmitting ? "Adding..." : "Add Member"}
           </button>
         </div>
-
       </div>
     </AdminSidebar>
   );

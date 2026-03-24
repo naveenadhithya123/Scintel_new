@@ -1,8 +1,8 @@
-import express from "express";
-import { sendOtp } from "../controllers/otpsendController.js";
+    import express from "express";
+    import { sendOtp } from "../controllers/otpsendController.js";
 
-const router = express.Router();
+    const router = express.Router();
 
-router.post("/send-otp", sendOtp);
+    router.post("/send-otp", sendOtp);
 
-export default router;
+    export default router;
