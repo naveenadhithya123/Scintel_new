@@ -6,7 +6,6 @@ const ProblemAdmin = () => {
   const [selectedProblem, setSelectedProblem] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Data States
   const [problemData, setProblemData] = useState([]);
   const [requestData, setRequestData] = useState([]);
   const [lockRequestData, setLockRequestData] = useState([]);
@@ -92,7 +91,6 @@ const ProblemAdmin = () => {
                  selectedProblem.problem_solver_request_id;
 
       return (
-        /* Added h-full and overflow-y-auto to the detail view as well */
         <div className="flex flex-col h-full overflow-y-auto p-4 md:p-6 no-scrollbar">
           <header className="mb-6 flex-shrink-0">
             <h2 className="text-xl md:text-2xl font-bold text-[#023347]">
@@ -104,7 +102,7 @@ const ProblemAdmin = () => {
             <div className="flex justify-between items-start mb-6">
               <h3 className="text-xl md:text-2xl font-bold text-[#023347]">{selectedProblem.title}</h3>
               {selectedProblem.status && (
-                 <span className={`px-4 py-1.5 rounded-full text-xs font-bold ${selectedProblem.status === 'In Progress' ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'}`}>
+                <span className={`px-4 py-1.5 rounded-full text-xs font-bold ${selectedProblem.status === 'In Progress' ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'}`}>
                   {selectedProblem.status}
                 </span>
               )}
@@ -139,21 +137,62 @@ const ProblemAdmin = () => {
             </div>
           </div>
           
+          {/* ── ONLY THESE BUTTONS CHANGED ── */}
           <div className="flex flex-wrap justify-end gap-4 pb-10 flex-shrink-0">
-            <button onClick={() => setSelectedProblem(null)} className="bg-gray-500 text-white px-6 py-2 rounded-lg font-medium hover:bg-gray-600 transition-all">Back</button>
+
+            {/* Back — Edit style: hover teal */}
+            <button
+              onClick={() => setSelectedProblem(null)}
+              className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5"
+            >
+              Back
+            </button>
+
             {type === 'problem' && (
-              <button onClick={() => handleAction(`current-problems/${id}`, 'DELETE', 'Problem removed.')} className="bg-red-600 text-white px-8 py-2.5 rounded-lg font-medium hover:bg-red-700 transition-all">Remove Problem</button>
+              /* Remove Problem — Delete style: hover red */
+              <button
+                onClick={() => handleAction(`current-problems/${id}`, 'DELETE', 'Problem removed.')}
+                className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5"
+              >
+                Remove Problem
+              </button>
             )}
+
             {type === 'request' && (
               <>
-                <button onClick={() => handleAction(`problem-requests/${id}`, 'DELETE', 'Denied.')} className="bg-red-500 text-white px-8 py-2.5 rounded-lg font-medium hover:bg-red-600">Deny</button>
-                <button onClick={() => handleAction(`problem-requests/accept/${id}`, 'POST', 'Added to list.')} className="bg-green-600 text-white px-8 py-2.5 rounded-lg font-medium hover:bg-green-700">Add to List</button>
+                {/* Deny — Delete style */}
+                <button
+                  onClick={() => handleAction(`problem-requests/${id}`, 'DELETE', 'Denied.')}
+                  className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5"
+                >
+                  Deny
+                </button>
+                {/* Add to List — Edit style */}
+                <button
+                  onClick={() => handleAction(`problem-requests/accept/${id}`, 'POST', 'Added to list.')}
+                  className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5"
+                >
+                  Add to List
+                </button>
               </>
             )}
+
             {type === 'lock' && (
               <>
-                <button onClick={() => handleAction(`problem-solver-requests/deny/${id}`, 'DELETE', 'Solver declined.')} className="bg-red-500 text-white px-8 py-2.5 rounded-lg font-medium hover:bg-red-600">Deny Solver</button>
-                <button onClick={() => handleAction(`problem-solver-requests/accept/${id}`, 'POST', 'Solver approved.')} className="bg-[#2A8E9E] text-white px-8 py-2.5 rounded-lg font-medium hover:bg-[#217380]">Approve Solver</button>
+                {/* Deny Solver — Delete style */}
+                <button
+                  onClick={() => handleAction(`problem-solver-requests/deny/${id}`, 'DELETE', 'Solver declined.')}
+                  className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5"
+                >
+                  Deny Solver
+                </button>
+                {/* Approve Solver — Edit style */}
+                <button
+                  onClick={() => handleAction(`problem-solver-requests/accept/${id}`, 'POST', 'Solver approved.')}
+                  className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5"
+                >
+                  Approve Solver
+                </button>
               </>
             )}
           </div>
@@ -162,7 +201,6 @@ const ProblemAdmin = () => {
     }
 
     return (
-      /* h-screen + flex-col ensures the container fills the screen exactly */
       <div className="flex flex-col h-screen p-4 md:p-6">
         <header className="mb-6 flex-shrink-0">
           <h2 className="text-xl md:text-2xl font-bold text-[#023347] mb-4">Admin Dashboard</h2>
@@ -180,7 +218,6 @@ const ProblemAdmin = () => {
           </div>
         </header>
 
-        {/* This div is the key fix: overflow-y-auto makes the table area scrollable while header stays fixed */}
         <div className="bg-white rounded-2xl shadow-sm border border-[#2A8E9E]/20 flex-1 overflow-hidden flex flex-col mb-6">
           <div className="overflow-auto flex-1 no-scrollbar">
             <table className="w-full text-left border-collapse min-w-[700px]">
@@ -240,7 +277,6 @@ const ProblemAdmin = () => {
   };
 
   return (
-    /* We make the sidebar wrapper take full screen height */
     <div className="h-screen overflow-hidden">
       <AdminSidebar>
         {renderContent()}
@@ -249,4 +285,4 @@ const ProblemAdmin = () => {
   );
 };
 
-export default ProblemAdmin;
+export default ProblemAdmin; 

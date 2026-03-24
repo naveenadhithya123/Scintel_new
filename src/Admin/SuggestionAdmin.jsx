@@ -7,7 +7,6 @@ export default function SuggestionAdmin() {
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // 1. Fetch all suggestions on load
   useEffect(() => {
     fetchSuggestions();
   }, []);
@@ -25,7 +24,6 @@ export default function SuggestionAdmin() {
     }
   };
 
-  // 2. Fetch specific detail
   const handleViewDetail = async (id) => {
     try {
       setLoading(true);
@@ -39,20 +37,16 @@ export default function SuggestionAdmin() {
     }
   };
 
-  // 3. Remove Suggestion (Calls your DeleteSpecificSuggestion Controller)
   const handleRemove = async (id) => {
     if (!window.confirm("Are you sure? This will delete the record and the image from Cloudinary.")) return;
-    
     try {
       setLoading(true);
       const response = await fetch(`http://localhost:3000/api/admin/suggestions/${id}`, {
         method: "DELETE",
       });
-      
       const result = await response.json();
-      
       if (response.ok) {
-        alert(result.message); // "Suggestion deleted successfully"
+        alert(result.message);
         setSelectedItem(null);
         fetchSuggestions(); 
       } else {
@@ -65,7 +59,6 @@ export default function SuggestionAdmin() {
     }
   };
 
-  // 4. Accept Suggestion (Calls your Admin_AcceptSuggestionMail Controller)
   const handleAccept = async (email) => {
     try {
       setLoading(true);
@@ -74,9 +67,7 @@ export default function SuggestionAdmin() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
-      
       const result = await response.json();
-
       if (response.ok) {
         alert("Success: " + result.message);
       } else {
@@ -99,9 +90,8 @@ export default function SuggestionAdmin() {
       <style>{`
         .sg-main::-webkit-scrollbar { width: 6px; }
         .sg-main::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .sg-header-row, .sg-data-row { display: grid; grid-template-columns: 2fr 1.2fr 1.5fr 0.8fr 1.2fr; padding: 14px 24px; }
-        .sg-data-row { align-items: center; border-bottom: 1px solid #f1f5f9; transition: background 0.2s; }
-        .sg-data-row:hover { background-color: #f8fafc; }
+        .sg-table-scroll::-webkit-scrollbar { width: 6px; }
+        .sg-table-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
       `}</style>
 
       <AdminSidebar />
@@ -111,46 +101,77 @@ export default function SuggestionAdmin() {
           <>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h1 style={{ color: "#023347", fontSize: "24px", fontWeight: 800 }}>Suggestions Dashboard</h1>
-              <input 
-                type="text" 
-                placeholder="Search title or user..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{ padding: '10px 16px', borderRadius: '10px', border: '1px solid #e2e8ec', width: '300px', outline: 'none' }}
-              />
+              <div style={{ position: 'relative', width: '300px' }}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', width: '16px', height: '16px', color: '#9ca3af', pointerEvents: 'none' }}
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Search title or user..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '10px 16px 10px 40px',
+                    borderRadius: '12px',
+                    border: '1.5px solid #e2e8ec',
+                    outline: 'none',
+                    fontSize: '14px',
+                    color: '#023347',
+                    backgroundColor: '#F5F9FA',
+                    boxSizing: 'border-box',
+                    transition: 'border-color 0.2s, box-shadow 0.2s',
+                  }}
+                  onFocus={e => { e.target.style.borderColor = '#2A8E9E'; e.target.style.boxShadow = '0 0 0 3px rgba(42,142,158,0.1)'; e.target.style.backgroundColor = '#fff'; }}
+                  onBlur={e => { e.target.style.borderColor = '#e2e8ec'; e.target.style.boxShadow = 'none'; e.target.style.backgroundColor = '#F5F9FA'; }}
+                />
+              </div>
             </div>
 
-            <div style={{ backgroundColor: "#FFFFFF", borderRadius: "16px", border: "1px solid #e2e8ec", overflow: 'hidden' }}>
-              <div className="sg-header-row" style={{ backgroundColor: "#F8FAFC", color: "#64748b", fontWeight: 700, fontSize: '12px' }}>
-                <div>TITLE</div>
-                <div style={{ textAlign: "center" }}>CATEGORY</div>
-                <div style={{ textAlign: "center" }}>SUBMITTED BY</div>
-                <div style={{ textAlign: "center" }}>YEAR</div>
-                <div style={{ textAlign: "center" }}>ACTION</div>
+            {/* TABLE — ProblemAdmin style with inner scroll */}
+            <div className="bg-white rounded-2xl shadow-sm border border-[#2A8E9E]/20 overflow-hidden flex flex-col" style={{ maxHeight: 'calc(100vh - 180px)' }}>
+              <div className="overflow-y-auto sg-table-scroll">
+                <table className="w-full text-left border-collapse" style={{ minWidth: '700px' }}>
+                  <thead className="bg-[#2A8E9E] sticky top-0 z-10">
+                    <tr className="text-white">
+                      <th className="px-6 py-4 font-semibold text-center text-sm">Title</th>
+                      <th className="px-6 py-4 font-semibold text-center text-sm">Category</th>
+                      <th className="px-6 py-4 font-semibold text-center text-sm">Submitted By</th>
+                      <th className="px-6 py-4 font-semibold text-center text-sm">Year</th>
+                      <th className="px-6 py-4 font-semibold text-center text-sm">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {loading && (
+                      <tr><td colSpan="5" className="py-20 text-center text-gray-400">Processing...</td></tr>
+                    )}
+                    {!loading && filteredList.map((item) => (
+                      <tr key={item.suggestion_id} className="hover:bg-gray-50">
+                        <td className="px-6 py-5 text-[#023347] font-bold text-center">{item.title}</td>
+                        <td className="px-6 py-5 text-center text-gray-600 text-sm">{item.category}</td>
+                        <td className="px-6 py-5 text-center text-gray-600 text-sm">{item.name}</td>
+                        <td className="px-6 py-5 text-center text-gray-600 text-sm">{item.year}</td>
+                        <td className="px-6 py-5 text-center">
+                          <button
+                            onClick={() => handleViewDetail(item.suggestion_id)}
+                            className="bg-[#023347] text-white px-6 py-2 rounded-md text-sm font-semibold hover:bg-[#2A8E9E] transition-colors"
+                          >
+                            View
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-
-              {loading && <div style={{padding: '20px', textAlign: 'center'}}>Processing...</div>}
-              
-              {!loading && filteredList.map((item) => (
-                <div key={item.suggestion_id} className="sg-data-row">
-                  <div style={{ color: "#0f172a", fontWeight: 600 }}>{item.title}</div>
-                  <div style={{ textAlign: "center" }}>{item.category}</div>
-                  <div style={{ textAlign: "center" }}>{item.name}</div>
-                  <div style={{ textAlign: "center" }}>{item.year}</div>
-                  <div style={{ display: "flex", justifyContent: "center" }}>
-                    <button 
-                      onClick={() => handleViewDetail(item.suggestion_id)}
-                      style={{ backgroundColor: "#023347", color: "#fff", padding: "8px 18px", borderRadius: "8px", border: "none", cursor: "pointer", fontWeight: 600 }}
-                    >
-                      View
-                    </button>
-                  </div>
-                </div>
-              ))}
             </div>
           </>
         ) : (
-          /* ── DETAIL VIEW ── */
+          /* ── DETAIL VIEW — unchanged ── */
           <div style={{ maxWidth: '900px', margin: '0 auto' }}>
             <button onClick={() => setSelectedItem(null)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', marginBottom: '20px', fontWeight: 600 }}>
                ← Back to List
@@ -171,7 +192,6 @@ export default function SuggestionAdmin() {
                 <p style={{ margin: 0, color: "#1e293b", lineHeight: "1.6", whiteSpace: 'pre-wrap' }}>{selectedItem.description}</p>
               </div>
 
-              {/* IMAGE SECTION */}
               <div style={{ marginBottom: '35px' }}>
                 <h4 style={{ fontSize: '13px', color: '#64748b', textTransform: 'uppercase', marginBottom: '15px' }}>Attachment</h4>
                 {selectedItem.proof_url ? (

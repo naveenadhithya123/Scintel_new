@@ -90,7 +90,7 @@ function Suggestions() {
                 isVisible ? "translate-y-0 opacity-100 blur-0" : "translate-y-20 opacity-0 blur-sm"
               }`}
             >
-              Suggestions / Complaints
+              Feedback
             </h1>
 
             <button

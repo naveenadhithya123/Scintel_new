@@ -42,6 +42,8 @@ export default function AddMember() {
         }),
       });
 
+      console.log(form);
+
       if (res.ok) {
         alert("Member added successfully!");
         navigate(-1); // Go back to the previous screen (likely AdminMembers or EditBatch)
