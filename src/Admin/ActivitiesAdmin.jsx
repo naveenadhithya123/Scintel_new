@@ -7,22 +7,17 @@ export default function ActivitiesAdmin() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 1. Fetch data from backend
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch('http://localhost:3000/api/activities');
       const data = await response.json();
-      
-      // Assuming backend returns { data: [...] } or just [...]
       const result = data.data || data; 
-      
       const mappedData = result.map((item, index) => ({
         id: item.id || index,
-        year: item.batch || item.year, // Handles both naming conventions
+        year: item.batch || item.year,
         count: item.activity_count || 0
       }));
-      
       setRows(mappedData);
     } catch (error) {
       console.error("Fetch error:", error);
@@ -35,17 +30,13 @@ export default function ActivitiesAdmin() {
     fetchData();
   }, [fetchData]);
 
-  // 2. Delete functionality
   const handleDelete = async (year) => {
     if (!window.confirm(`Are you sure you want to delete all activities for ${year}?`)) return;
-
     try {
       const response = await fetch(`http://localhost:3000/api/activities/${year}`, {
         method: "DELETE",
       });
-
       if (response.ok) {
-        // Refresh the list after successful deletion
         fetchData();
       } else {
         alert("Failed to delete the record.");
@@ -93,7 +84,7 @@ export default function ActivitiesAdmin() {
                     <tr>
                       <td colSpan="3" className="p-20 text-center text-gray-400 italic">
                         <div className="flex flex-col items-center gap-2">
-                           <span className="animate-pulse">Loading records...</span>
+                          <span className="animate-pulse">Loading records...</span>
                         </div>
                       </td>
                     </tr>
@@ -119,13 +110,13 @@ export default function ActivitiesAdmin() {
                           <div className="flex justify-center gap-4">
                             <button
                               onClick={() => navigate(`/admin/activities/${row.year}`)}
-                              className="bg-[#023347] text-white px-7 py-2 rounded-lg font-medium text-sm hover:bg-[#012535] transition-all shadow-md"
+                              className="flex-1 h-11 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5"
                             >
                               Edit
                             </button>
                             <button
-                              className="bg-red-600 text-white px-7 py-2 rounded-lg font-medium text-sm hover:bg-red-700 transition-all shadow-md"
                               onClick={() => handleDelete(row.year)}
+                              className="flex-1 h-11 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5"
                             >
                               Delete
                             </button>

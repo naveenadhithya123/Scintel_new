@@ -94,14 +94,10 @@ export default function EventsGrid() {
       setLoading(true);
       const response = await fetch(`http://localhost:3000/api/admin/activities/${year}`);
       const result = await response.json();
-      
-      // result.data contains the array from your API screenshot
       if (result.success && Array.isArray(result.data)) {
         const formattedEvents = result.data.map(item => {
-          // Handle the comma-separated image string
           const imageList = item.image ? item.image.split(',') : [];
           const firstImage = imageList.length > 0 ? imageList[0].trim() : '';
-
           return {
             id: item.activity_id,
             title: item.title,
@@ -186,7 +182,6 @@ export default function EventsGrid() {
                   display: 'flex', flexDirection: 'column'
                 }}
               >
-                {/* Thumbnail using the first image from the list */}
                 <div style={{
                   width: '100%', height: 180, 
                   backgroundColor: '#e2e8f0', 
@@ -204,21 +199,20 @@ export default function EventsGrid() {
                     {event.description}
                   </p>
                   
-                  <div style={{ display: 'flex', gap: 10 }}>
+                  {/* ── ONLY THESE BUTTONS CHANGED ── */}
+                  <div className="flex gap-4 mt-2">
                     <button
-                      onClick={() => navigate(`/admin/activities/${year}/edit-event/${event.id}`)}                  
-                      style={{
-                        flex: 1, padding: '10px 0', borderRadius: 8, border: '1px solid #e2e8f0',
-                        backgroundColor: '#fff', color: '#0d2233', fontWeight: 600, fontSize: 13, cursor: 'pointer',
-                      }}
-                    >Edit</button>
+                      onClick={() => navigate(`/admin/activities/${year}/edit-event/${event.id}`)}
+                      className="flex-1 h-11 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5"
+                    >
+                      Edit
+                    </button>
                     <button
                       onClick={() => setDeleteId(event.id)}
-                      style={{
-                        flex: 1, padding: '10px 0', borderRadius: 8, border: 'none',
-                        backgroundColor: '#ef4444', color: '#fff', fontWeight: 600, fontSize: 13, cursor: 'pointer',
-                      }}
-                    >Delete</button>
+                      className="flex-1 h-11 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5"
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
               </div>

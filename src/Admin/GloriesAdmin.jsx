@@ -10,7 +10,6 @@ const STYLES = `
   .gl-form-btns { display: flex; justify-content: flex-end; gap: 12px; }
   .gl-card-btns { display: flex; gap: 10px; }
   
-  /* UI Enhancement: Image Hover Effect */
   .img-upload-container {
     position: relative;
     border: 2px dashed #2A8E9E;
@@ -69,7 +68,6 @@ function GloryForm({ heading, initialTitle, initialDescription, initialImage, on
   };
 
   const handleSubmit = () => {
-    // Only proceed if required fields are filled
     if(!title.trim() || !description.trim()) {
       alert("Please fill in both Title and Description");
       return;
@@ -83,7 +81,6 @@ function GloryForm({ heading, initialTitle, initialDescription, initialImage, on
 
       <label style={{ marginBottom: "10px", display: "block", fontWeight: 600 }}>Thumbnail Picture</label>
       
-      {/* Clickable Image Area acts as the "Change Image" button */}
       <div className="img-upload-container" onClick={() => fileInputRef.current.click()}>
         {preview ? (
           <>
@@ -98,7 +95,6 @@ function GloryForm({ heading, initialTitle, initialDescription, initialImage, on
         )}
       </div>
 
-      {/* Hidden File Input */}
       <input 
         ref={fileInputRef} 
         type="file" 
@@ -125,8 +121,18 @@ function GloryForm({ heading, initialTitle, initialDescription, initialImage, on
       />
 
       <div className="gl-form-btns">
-        <button onClick={onCancel} style={{ backgroundColor: "#6b7280", color: "#fff", padding: "10px 30px", borderRadius: "10px", border: "none", cursor: "pointer", fontWeight: 600 }}>Cancel</button>
-        <button onClick={handleSubmit} style={{ backgroundColor: "#023347", color: "#fff", padding: "10px 40px", borderRadius: "10px", border: "none", cursor: "pointer", fontWeight: 600 }}>{saveLabel}</button>
+        <button
+          onClick={onCancel}
+          className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handleSubmit}
+          className="h-11 px-10 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5"
+        >
+          {saveLabel}
+        </button>
       </div>
     </main>
   );
@@ -163,7 +169,6 @@ export default function GloriesAdmin() {
     formData.append("title", title);
     formData.append("description", description);
     
-    // MANDATORY: Keeping the existing URL for your friend's backend
     if (editTarget?.image_url) {
         formData.append("existing_image_url", editTarget.image_url);
     }
@@ -173,9 +178,6 @@ export default function GloriesAdmin() {
     const res = await fetch(`${API_BASE_URL}/${editTarget.glorie_id}`, { method: "PUT", body: formData });
     if (res.ok) { setEditTarget(null); setView("list"); loadData(); }
   };
-
-  // Rest of the List view and Sidebar logic remains the same as your UI...
-  // (Included below for completeness)
 
   if (view === "add") return (
     <AdminSidebar><style>{STYLES}</style><GloryForm heading="Add Glory" onCancel={() => setView("list")} onSave={handleSaveAdd} saveLabel="Add" /></AdminSidebar>
@@ -202,10 +204,23 @@ export default function GloriesAdmin() {
               <div style={{ padding: "15px" }}>
                 <h3 style={{ margin: "0 0 5px 0", fontSize: '16px' }}>{g.title}</h3>
                 <p style={{ fontSize: "12px", color: "#6b7280", height: '36px', overflow: 'hidden' }}>{g.description}</p>
+
+                {/* ── ONLY THESE BUTTONS CHANGED ── */}
                 <div className="gl-card-btns" style={{ marginTop: '12px' }}>
-                  <button onClick={() => { setEditTarget(g); setView("edit"); }} style={{ flex: 1, background: "#023347", color: "#fff", padding: "8px", borderRadius: "8px", border: "none", cursor: "pointer", fontSize: '12px' }}>Edit</button>
-                  <button onClick={() => { if(window.confirm("Delete?")) { /* delete logic */ } }} style={{ flex: 1, background: "#e84040", color: "#fff", padding: "8px", borderRadius: "8px", border: "none", cursor: "pointer", fontSize: '12px' }}>Delete</button>
+                  <button
+                    onClick={() => { setEditTarget(g); setView("edit"); }}
+                    className="flex-1 h-11 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => { if(window.confirm("Delete?")) { /* delete logic */ } }}
+                    className="flex-1 h-11 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5"
+                  >
+                    Delete
+                  </button>
                 </div>
+
               </div>
             </div>
           ))}
