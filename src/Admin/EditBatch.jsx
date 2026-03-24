@@ -7,9 +7,7 @@ export default function EditBatch() {
   const location = useLocation();
   const fileInputRef = useRef(null);
 
-  // ── State for Batch Info ──
-  const [batchId, setBatchId] = useState("");
-  const [originalYear, setOriginalYear] = useState("");
+  const [originalYear, setOriginalYear] = useState(""); 
   const [batchYear, setBatchYear] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");

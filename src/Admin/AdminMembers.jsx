@@ -15,7 +15,8 @@ export default function AdminMembers() {
       const res = await fetch("http://localhost:3000/api/association-batches");
       const data = await res.json();
       setBatches(data);
-      if (data.length > 0) {
+      if (data.length > 0 && !selectedBatchYear) {
+        // Default to the first batch in the list
         setSelectedBatchYear(data[0].batch_year);
       }
     } catch (err) {
