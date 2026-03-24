@@ -35,7 +35,7 @@ function Navbar() {
     { label: "Activities", path: "/activities" },
     { label: "Members", path: "/members" },
     { label: "Problems", path: "/problems" },
-    { label: "Feedback", path: "/suggestions" },
+    { label: "Suggestions", path: "/suggestions" },
   ];
 
   return (
