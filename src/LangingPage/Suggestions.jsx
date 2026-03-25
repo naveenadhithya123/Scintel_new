@@ -67,6 +67,8 @@ function Suggestions() {
   return (
     <>
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+        * { font-family: 'Poppins', sans-serif !important; }
         .gray-scrollbar::-webkit-scrollbar { width: 6px; }
         .gray-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
         .gray-scrollbar::-webkit-scrollbar-thumb { background: #9ca3af !important; border-radius: 10px; }
@@ -88,7 +90,7 @@ function Suggestions() {
         style={{
           minHeight: "100vh",
           backgroundColor: "#EEF4F4",
-          fontFamily: "'Segoe UI', sans-serif",
+          fontFamily: "'Poppins', sans-serif",
           padding: "40px 48px 80px",
           boxSizing: "border-box",
           transition: "opacity 1000ms cubic-bezier(0.22,1,0.36,1), transform 1000ms cubic-bezier(0.22,1,0.36,1)",
@@ -96,14 +98,14 @@ function Suggestions() {
           transform: isVisible ? "translateY(0)" : "translateY(48px)",
         }}
       >
-        {/* Heading — "Suggestions" only, left aligned */}
+        {/* Heading */}
         <h2
           style={{
             color: "#023347",
             fontSize: "36px",
             fontWeight: 800,
             marginBottom: "32px",
-            marginLeft:175,
+            marginLeft: 175,
             letterSpacing: "-0.02em",
             lineHeight: 1.1,
           }}
@@ -111,7 +113,7 @@ function Suggestions() {
           Suggestions
         </h2>
 
-        {/* White card — centered */}
+        {/* White card */}
         <div
           style={{
             backgroundColor: "#ffffff",
@@ -156,7 +158,7 @@ function Suggestions() {
               outline: "none",
               marginBottom: errors.title ? "4px" : "28px",
               boxSizing: "border-box",
-              fontFamily: "'Segoe UI', sans-serif",
+              fontFamily: "'Poppins', sans-serif",
               transition: "border-color 0.2s, background-color 0.2s",
             }}
           />
@@ -198,7 +200,7 @@ function Suggestions() {
               resize: "none",
               marginBottom: errors.description ? "4px" : "28px",
               boxSizing: "border-box",
-              fontFamily: "'Segoe UI', sans-serif",
+              fontFamily: "'Poppins', sans-serif",
               lineHeight: "1.7",
               transition: "border-color 0.2s, background-color 0.2s",
             }}
@@ -250,8 +252,8 @@ function Suggestions() {
               </span>
             </div>
             <p style={{ color: "#5a4a1a", fontSize: "13px", lineHeight: "1.7", margin: 0, textAlign: "center" }}>
-              Suggestions are applicable only to Scintel Association activities
-              and events organized by the Scintel Association.
+              Suggestions are applicable only to Career Development activities
+              and Guidances.
             </p>
           </div>
 

@@ -72,9 +72,6 @@ function Navbar() {
                       ${isActive ? "w-full" : "w-0 group-hover:w-full"}`}
                     />
                   </button>
-                  {isActive && (
-                    <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 bg-[#388E9C] rounded-full" />
-                  )}
                 </li>
               );
             })}
@@ -115,7 +112,6 @@ function Navbar() {
                   `}
                 >
                   {item.label}
-                  {isActive && <span className="w-1.5 h-1.5 rounded-full bg-[#388E9C]" />}
                 </button>
               </li>
             );
@@ -125,7 +121,6 @@ function Navbar() {
     </>
   );
 }
-
 
 function MainPage() {
 return (
