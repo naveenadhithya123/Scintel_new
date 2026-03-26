@@ -302,8 +302,6 @@ export default function SuggestionAdmin() {
   // ── DETAIL CARD ──
   const renderDetailCard = () => (
     <div>
-      {/* Page-level header row — "Suggestion Description" title on left, Back button on right
-          Mirrors the exact same pattern as "Suggestions Dashboard" and "Suggestion Records" headers */}
       <div
         style={{
           display: "flex",
@@ -368,7 +366,6 @@ export default function SuggestionAdmin() {
           <div><strong>Phone:</strong> {selectedItem.phone_number}</div>
         </div>
 
-        {/* Buttons vary by context */}
         <div style={{ display: "flex", justifyContent: "flex-end", gap: "15px" }}>
           {prevView === "overall" && (
             <>
@@ -406,7 +403,6 @@ export default function SuggestionAdmin() {
             </button>
           )}
 
-          {/* History tabs — read-only, no action buttons */}
           {prevView === "history" && null}
         </div>
       </div>
@@ -461,7 +457,7 @@ export default function SuggestionAdmin() {
             backgroundColor: "#F8FAFC",
             resize: "vertical",
             boxSizing: "border-box",
-            fontFamily: "inherit",
+            fontFamily: "'Poppins', sans-serif",
             lineHeight: "1.6",
             transition: "border-color 0.2s, box-shadow 0.2s",
           }}
@@ -510,10 +506,12 @@ export default function SuggestionAdmin() {
         display: "flex",
         height: "100vh",
         backgroundColor: "#F5F9FA",
-        fontFamily: "'Inter', sans-serif",
+        fontFamily: "'Poppins', sans-serif",
       }}
     >
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+        * { font-family: 'Poppins', sans-serif !important; }
         .sg-main::-webkit-scrollbar { width: 6px; }
         .sg-main::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .sg-table-scroll::-webkit-scrollbar { width: 6px; }
@@ -587,6 +585,7 @@ export default function SuggestionAdmin() {
                       color: "#023347",
                       backgroundColor: "#F5F9FA",
                       boxSizing: "border-box",
+                      fontFamily: "'Poppins', sans-serif",
                       transition: "border-color 0.2s, box-shadow 0.2s",
                     }}
                     onFocus={(e) => {
@@ -635,6 +634,7 @@ export default function SuggestionAdmin() {
                     cursor: "pointer",
                     transition: "color 0.2s",
                     whiteSpace: "nowrap",
+                    fontFamily: "'Poppins', sans-serif",
                   }}
                 >
                   {tab.label}
@@ -796,6 +796,7 @@ export default function SuggestionAdmin() {
                     cursor: "pointer",
                     transition: "color 0.2s",
                     whiteSpace: "nowrap",
+                    fontFamily: "'Poppins', sans-serif",
                   }}
                 >
                   {tab.label}
@@ -803,7 +804,7 @@ export default function SuggestionAdmin() {
               ))}
             </div>
 
-            {/* History Table — no Category column */}
+            {/* History Table */}
             <div
               className="bg-white rounded-2xl shadow-sm border border-[#2A8E9E]/20 overflow-hidden flex flex-col"
               style={{ maxHeight: "calc(100vh - 220px)" }}
