@@ -25,16 +25,17 @@ const UpcomingEvent = sequelize.define("UpcomingEvent", {
   },
 
   brochure_url: {
-    type: DataTypes.STRING
+    type: DataTypes.STRING,
+    allowNull: true
   },
 
   start_date: {
-    type: DataTypes.DATE,
+    type: DataTypes.DATEONLY,   // better for DATE
     allowNull: false
   },
 
   end_date: {
-    type: DataTypes.DATE,
+    type: DataTypes.DATEONLY,
     allowNull: false
   },
 
@@ -56,6 +57,17 @@ const UpcomingEvent = sequelize.define("UpcomingEvent", {
   event_link: {
     type: DataTypes.STRING,
     allowNull: false
+  },
+
+  // ✅ ADD THESE TWO
+  registration_start_date: {
+    type: DataTypes.DATEONLY,
+    allowNull: true
+  },
+
+  registration_end_date: {
+    type: DataTypes.DATEONLY,
+    allowNull: true
   }
 
 }, {

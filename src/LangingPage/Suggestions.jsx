@@ -1,37 +1,18 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 
 function Suggestions() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    type: 'General Feedback',
     title: '',
-    category: '',
-    description: '',
-    priority: ''
+    description: ''
   });
-  const [proofFile, setProofFile] = useState(null);
   const [errors, setErrors] = useState({});
   const [isShaking, setIsShaking] = useState(false);
-
-  const sectionRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    document.body.style.backgroundColor = "#EEF4F4";
-    document.body.style.margin = "0";
-    return () => {
-      document.body.style.backgroundColor = "";
-    };
-  }, []);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsVisible(entry.isIntersecting),
-      { threshold: 0.1 }
-    );
-    if (sectionRef.current) observer.observe(sectionRef.current);
-    return () => { if (sectionRef.current) observer.unobserve(sectionRef.current); };
+    setIsVisible(true);
   }, []);
 
   const handleChange = (e) => {
@@ -41,10 +22,8 @@ function Suggestions() {
 
   const validate = () => {
     const newErrors = {};
-    if (!form.title.trim()) newErrors.title = 'Title is required';
-    if (!form.category.trim()) newErrors.category = 'Category is required';
-    if (!form.description.trim()) newErrors.description = 'Description is required';
-    if (!form.priority.trim()) newErrors.priority = 'Priority is required';
+    if (!form.title.trim()) newErrors.title = 'Title required';
+    if (!form.description.trim()) newErrors.description = 'Narrative required';
     return newErrors;
   };
 
@@ -57,229 +36,119 @@ function Suggestions() {
       return;
     }
     navigate("/SuggesstionVerification", {
-      state: {
-        suggestionData: { ...form },
-        proofFile: proofFile
-      }
+      state: { suggestionData: { ...form } }
     });
   };
 
   return (
-    <>
+    <div className="relative min-h-screen bg-[#FDFCFB] text-[#023347] font-sans selection:bg-[#D4AF37]/20 overflow-x-hidden">
+      
+      {/* --- AMBIENT LIGHTING (God Ray) --- */}
+      <div className="absolute top-0 left-0 w-full h-[300px] md:h-[400px] bg-gradient-to-b from-[#D4AF37]/5 via-transparent to-transparent pointer-events-none" />
+
+      <main className="max-w-[1500px] mx-auto px-5 md:px-12 py-10 md:py-16 relative z-10">
+        
+        {/* --- HEADER ZONE --- */}
+        <header className="mb-10 md:mb-16 border-b border-[#023347]/5 pb-8 md:pb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 md:gap-8">
+          <div className="flex flex-col items-start text-left">
+            <span className={`text-[9px] md:text-[10px] font-bold tracking-[0.4em] md:tracking-[0.5em] uppercase text-[#D4AF37] mb-3 md:mb-4 block transition-all duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+              Community Voice
+            </span>
+            <h1 className={`text-3xl md:text-5xl font-semibold leading-tight transition-all duration-[1200ms] ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 md:translate-y-12 opacity-0'}`}>
+              Submit <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] via-[#B8860B] to-[#D4AF37]">Suggestions</span>
+            </h1>
+          </div>
+          
+          <button
+            onClick={() => navigate(-1)}
+            className="group flex items-center gap-3 bg-white border border-[#023347]/10 text-[#023347] px-6 md:px-8 py-3 md:py-3.5 rounded-xl md:rounded-2xl text-[9px] md:text-[10px] font-bold tracking-[0.2em] uppercase transition-all hover:bg-gray-50 active:scale-95 shadow-sm"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 md:w-4 h-4 transition-transform group-hover:-translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              <path d="M19 12H5M5 12l7 7M5 12l7-7" />
+            </svg>
+            Discard
+          </button>
+        </header>
+
+        {/* --- FORM MODULE (Corporate Glass) --- */}
+        <div className={`relative bg-white/[0.02] backdrop-blur-[4px] border border-black/5 rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-16 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+          
+          {/* Prestige Pillar Anchor (Hidden on very small screens to save space) */}
+          <div className="absolute left-0 top-12 w-1 md:w-1.5 h-16 md:h-24 bg-[#023347] rounded-r-full hidden xs:block" />
+
+          <div className="space-y-8 md:space-y-12">
+            <div className="flex flex-col gap-y-8 md:gap-y-12 text-left">
+              
+              {/* Title Field */}
+              <div>
+                <label className="text-[9px] md:text-[10px] font-bold tracking-widest uppercase text-[#023347]/50 mb-2 md:mb-3 block">Suggestion Title</label>
+                <input 
+                  type="text" 
+                  name="title" 
+                  value={form.title} 
+                  onChange={handleChange} 
+                  placeholder="Summarize your thought..."
+                  className={`w-full bg-transparent border-b py-3 md:py-4 font-sans text-lg md:text-xl outline-none transition-colors placeholder:text-[#023347]/20 ${errors.title ? 'border-red-400' : 'border-[#023347]/10 focus:border-[#D4AF37]'}`} 
+                />
+                {errors.title && <p className="text-[9px] md:text-[10px] text-red-500 font-bold mt-2 uppercase tracking-tighter">{errors.title}</p>}
+              </div>
+
+              {/* Description Field */}
+              <div>
+                <label className="text-[9px] md:text-[10px] font-bold tracking-widest uppercase text-[#023347]/50 mb-2 md:mb-3 block">Comprehensive Narrative</label>
+                <textarea 
+                  name="description" 
+                  value={form.description} 
+                  onChange={handleChange} 
+                  placeholder="Explain the impact and reasoning behind this suggestion..."
+                  className={`w-full bg-transparent border rounded-xl md:rounded-2xl p-4 md:p-6 font-sans text-base md:text-lg outline-none transition-colors min-h-[200px] md:min-h-[250px] resize-none placeholder:text-[#023347]/20 ${errors.description ? 'border-red-400' : 'border-[#023347]/10 focus:border-[#D4AF37]'}`} 
+                />
+                {errors.description && <p className="text-[9px] md:text-[10px] text-red-500 font-bold mt-2 uppercase tracking-tighter">{errors.description}</p>}
+              </div>
+            </div>
+
+            {/* Disclaimer Module */}
+            <div className="bg-[#D4AF37]/5 border border-[#D4AF37]/20 rounded-xl md:rounded-2xl p-5 md:p-6 flex flex-col items-center text-center">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-4 h-4 rounded-full bg-[#D4AF37] text-white text-[9px] md:text-[10px] flex items-center justify-center font-bold">!</div>
+                <span className="text-[9px] md:text-[10px] font-bold tracking-widest uppercase text-[#B8860B]">Disclaimer</span>
+              </div>
+              <p className="text-[12px] md:text-[13px] text-[#023347]/70 leading-relaxed max-w-xl">
+                Submissions are strictly monitored. Suggestions must pertain exclusively to <strong>Career Development</strong> and <strong>Guidance activities</strong>.
+              </p>
+            </div>
+
+            {/* Submission Logic */}
+            <div className="flex justify-center md:justify-end pt-4 md:pt-6">
+              <button 
+                onClick={handleSubmit} 
+                className={`w-full md:w-auto bg-[#023347] text-white px-12 md:px-20 py-4 md:py-5 rounded-xl md:rounded-2xl text-[10px] md:text-[11px] font-bold tracking-[0.2em] uppercase transition-all duration-500 hover:bg-[#D4AF37] hover:shadow-2xl hover:shadow-[#D4AF37]/20 active:scale-95 ${isShaking ? 'animate-shake bg-red-500' : ''}`}
+              >
+                Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
-        * { font-family: 'Poppins', sans-serif !important; }
-        .gray-scrollbar::-webkit-scrollbar { width: 6px; }
-        .gray-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-        .gray-scrollbar::-webkit-scrollbar-thumb { background: #9ca3af !important; border-radius: 10px; }
-        .gray-scrollbar::-webkit-scrollbar-thumb:hover { background: #6b7280 !important; }
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;600;700&display=swap');
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .font-sans { font-family: 'Inter', sans-serif; }
+        
         @keyframes shake {
           0%, 100% { transform: translateX(0); }
-          25% { transform: translateX(-5px); }
-          75% { transform: translateX(5px); }
+          25% { transform: translateX(-8px); }
+          75% { transform: translateX(8px); }
         }
         .animate-shake { animation: shake 0.4s ease-in-out; }
-        .sugg-input:focus { border-color: #1a7a8a !important; background-color: #fff !important; }
-        .submit-btn:hover { background-color: #388E9C !important; }
-        html, body, #root { background-color: #EEF4F4 !important; margin: 0; padding: 0; }
+
+        /* Custom extra-small breakpoint for very narrow phones */
+        @media (min-width: 380px) {
+          .xs\:block { display: block; }
+        }
       `}</style>
-
-      <div
-        ref={sectionRef}
-        id="suggestions"
-        style={{
-          minHeight: "100vh",
-          backgroundColor: "#EEF4F4",
-          fontFamily: "'Poppins', sans-serif",
-          padding: "40px 48px 80px",
-          boxSizing: "border-box",
-          transition: "opacity 1000ms cubic-bezier(0.22,1,0.36,1), transform 1000ms cubic-bezier(0.22,1,0.36,1)",
-          opacity: isVisible ? 1 : 0,
-          transform: isVisible ? "translateY(0)" : "translateY(48px)",
-        }}
-      >
-        {/* Heading */}
-        <h2
-          style={{
-            color: "#023347",
-            fontSize: "36px",
-            fontWeight: 800,
-            marginBottom: "32px",
-            marginLeft: 175,
-            letterSpacing: "-0.02em",
-            lineHeight: 1.1,
-          }}
-        >
-          Suggestions
-        </h2>
-
-        {/* White card */}
-        <div
-          style={{
-            backgroundColor: "#ffffff",
-            borderRadius: "16px",
-            padding: "44px 52px 48px",
-            width: "100%",
-            maxWidth: "860px",
-            marginLeft: "auto",
-            marginRight: "auto",
-            boxSizing: "border-box",
-            boxShadow: "0 4px 24px rgba(0,0,0,0.09)",
-          }}
-        >
-          {/* Title */}
-          <label
-            style={{
-              display: "block",
-              color: "#023347",
-              fontSize: "14px",
-              fontWeight: 600,
-              marginBottom: "8px",
-              letterSpacing: "0.01em",
-            }}
-          >
-            Title
-          </label>
-          <input
-            type="text"
-            name="title"
-            value={form.title}
-            onChange={handleChange}
-            placeholder="Enter a brief title"
-            className="sugg-input"
-            style={{
-              width: "100%",
-              padding: "12px 16px",
-              borderRadius: "8px",
-              border: errors.title ? "1.5px solid #f87171" : "1.5px solid #2A8E9E",
-              backgroundColor: "#F7F8FA",
-              fontSize: "14px",
-              color: "#111",
-              outline: "none",
-              marginBottom: errors.title ? "4px" : "28px",
-              boxSizing: "border-box",
-              fontFamily: "'Poppins', sans-serif",
-              transition: "border-color 0.2s, background-color 0.2s",
-            }}
-          />
-          {errors.title && (
-            <p style={{ color: "#ef4444", fontSize: "12px", marginBottom: "20px", marginLeft: "2px" }}>
-              {errors.title}
-            </p>
-          )}
-
-          {/* Description */}
-          <label
-            style={{
-              display: "block",
-              color: "#023347",
-              fontSize: "14px",
-              fontWeight: 600,
-              marginBottom: "8px",
-              letterSpacing: "0.01em",
-            }}
-          >
-            Description
-          </label>
-          <textarea
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            rows={8}
-            placeholder="Describe your suggestion or complaint in detail..."
-            className="sugg-input gray-scrollbar"
-            style={{
-              width: "100%",
-              padding: "12px 16px",
-              borderRadius: "8px",
-              border: errors.description ? "1.5px solid #f87171" : "1.5px solid #2A8E9E",
-              backgroundColor: "#F7F8FA",
-              fontSize: "14px",
-              color: "#111",
-              outline: "none",
-              resize: "none",
-              marginBottom: errors.description ? "4px" : "28px",
-              boxSizing: "border-box",
-              fontFamily: "'Poppins', sans-serif",
-              lineHeight: "1.7",
-              transition: "border-color 0.2s, background-color 0.2s",
-            }}
-          />
-          {errors.description && (
-            <p style={{ color: "#ef4444", fontSize: "12px", marginBottom: "20px", marginLeft: "2px" }}>
-              {errors.description}
-            </p>
-          )}
-
-          {/* Disclaimer */}
-          <div
-            style={{
-              backgroundColor: "#fdf6e3",
-              border: "1.5px solid #e8c96a",
-              borderRadius: "10px",
-              padding: "14px 20px 16px",
-              marginBottom: "32px",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "7px",
-                marginBottom: "8px",
-              }}
-            >
-              <span
-                style={{
-                  backgroundColor: "#e8a020",
-                  color: "#ffffff",
-                  borderRadius: "50%",
-                  width: "19px",
-                  height: "19px",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "11px",
-                  fontWeight: 700,
-                  flexShrink: 0,
-                }}
-              >
-                i
-              </span>
-              <span style={{ color: "#b07d10", fontSize: "13.5px", fontWeight: 700 }}>
-                Disclaimer
-              </span>
-            </div>
-            <p style={{ color: "#5a4a1a", fontSize: "13px", lineHeight: "1.7", margin: 0, textAlign: "center" }}>
-              Suggestions are applicable only to Career Development activities
-              and Guidances.
-            </p>
-          </div>
-
-          {/* Submit */}
-          <button
-            onClick={handleSubmit}
-            className={`submit-btn${isShaking ? " animate-shake" : ""}`}
-            style={{
-              width: "100%",
-              backgroundColor: isShaking ? "#ef4444" : "#023347",
-              color: "#ffffff",
-              fontSize: "15px",
-              fontWeight: 700,
-              padding: "15px",
-              borderRadius: "10px",
-              border: "none",
-              cursor: "pointer",
-              letterSpacing: "0.03em",
-              transition: "background 0.2s",
-            }}
-          >
-            Submit
-          </button>
-        </div>
-      </div>
-    </>
+    </div>
   );
 }
 

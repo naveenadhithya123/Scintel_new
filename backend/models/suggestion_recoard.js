@@ -1,17 +1,18 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/database.js";
 
-const Suggestion = sequelize.define("Suggestion", {
-  suggestion_id: {
+const SuggestionRecoard = sequelize.define("SuggestionRecoard", {
+  record_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
   },
   title: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: true,
+    defaultValue: "No Title"
   },
-  description: {
+  suggestion: {
     type: DataTypes.TEXT,
     allowNull: false
   },
@@ -36,8 +37,8 @@ const Suggestion = sequelize.define("Suggestion", {
     allowNull: false
   }
 }, {
-  tableName: "suggestions",
+  tableName: "suggestion_records",
   timestamps: false
 });
 
-export default Suggestion;
+export default SuggestionRecoard;

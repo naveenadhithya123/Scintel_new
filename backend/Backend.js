@@ -29,8 +29,10 @@ import AdminAddActivityRoutes from "./routes/Admin_AddActivityRoutes.js";
 import AdminEditActivityRoutes from "./routes/Admin_editActivityRoutes.js";
 import AdminUpdateEditActivityRoutes from "./routes/Admin_UpdateEditActivityRoutes.js";
 import AdminDeleteActivityRoutes from "./routes/Admin_DeleteSpecificSuggestionRoutes.js";
-import AdminFetchAllSuggestionsRoutes from "./routes/Admin_FetchAllSuggestionsRoutes.js";
-import AdminFetchSpecificSuggestionsRoutes from "./routes/Admin_FetchSpecificIdSuggestionsRoutes.js";
+import AdminDeleteSuggestionAndSendMailRoutes from "./routes/Admin_deleteSuggestionAndSendMailRoutes.js";
+import AdminFetchAllSuggestionWithAcknowledgedRoutes from "./routes/Admin_fetchAllSuggestionWithAcknowledgedRoutes.js";
+import AdminFetchAllSuggestionWithUnacknowledgedRoutes from "./routes/Admin_fetchAllSuggestionWithUnacknowledgedRoutes.js";
+import AdminFetchSpecificSuggestionWithIdRoutes from "./routes/Admin_fetchSpecificSuggestionWithIdRoutes.js";
 import AdminDeleteSpecificSuggestionRoutes from "./routes/Admin_DeleteSpecificSuggestionRoutes.js";
 import AdminAddGloryRoutes from "./routes/Admin_AddGloryRoutes.js";
 import AdminFetchAllGloriesRoutes from "./routes/Admin_FetchAllGloriesRoutes.js";
@@ -38,6 +40,11 @@ import AdminDeleteSpecificGloryRoutes from "./routes/Admin_DeleteSpecificGloryRo
 import AdminFetchSpecificGloryRoutes from "./routes/Admin_FetchSpecificGloryRoutes.js";
 import AdminUpdateEditGloryRoutes from "./routes/Admin_UpdateEditGloryRoutes.js";
 import AdminAcceptSuggestionMailRoutes from "./routes/Admin_AcceptSuggestionMailRoutes.js";
+import AdminAcknowledgeSuggestionRoutes from "./routes/Admin_AcknowledgeSuggestionRoutes.js";
+import AdminFetchAllresolvedSuggestionFromSuggestionRecoardRoutes from "./routes/Admin_fetchAllresolvedSuggestionFromSuggestionRecoardRoutes.js";
+import AdminFetchSpecficSuggestionFromsuggestioRecoardRoutes from "./routes/Admin_fetchSpecficSuggestionFromsuggestioRecoardRoutes.js";
+import AdminFetchAllUnresolvedSuggestionFromSuggestionRecoardRoutes from "./routes/Admin_fetchAllUnresolvedSuggestionFromSuggestionRecoardRoutes.js";
+import AdminResolveSuggestionRoutes from "./routes/Admin_ResolveSuggestionRoutes.js";
 import AdminAddAssociationBatchRoutes from "./routes/Admin_AddAssociationBatchRoutes.js";
 import AdminAddMemberAssociationRoutes from "./routes/Admin_AddMemberAssociationRoutes.js";
 import AdminFetchSpecificMemberAssociationRoutes from "./routes/Admin_FetchSpecificMemberAssociationRoutes.js";
@@ -60,7 +67,8 @@ import AdminDenyProblemSolverRequestRoutes from "./routes/Admin_DenyProblemSolve
 import AdminDeleteSpecificBatchActivityRoutes from "./routes/Admin_DeleteSpecificBatchActivityRoutes.js";
 import AdminDeleteSpecificActivityRoutes from "./routes/Admin_DeleteSpecificActivityRoutes.js";
 
-const port = Number(process.env.PORT) || 3000;
+
+
 
 const app = express();
 
@@ -104,8 +112,10 @@ app.use("/api", AdminAddActivityRoutes);
 app.use("/api", AdminEditActivityRoutes);
 app.use("/api", AdminUpdateEditActivityRoutes);
 app.use("/api", AdminDeleteActivityRoutes);
-app.use("/api", AdminFetchAllSuggestionsRoutes);
-app.use("/api", AdminFetchSpecificSuggestionsRoutes);
+app.use("/api", AdminDeleteSuggestionAndSendMailRoutes);
+app.use("/api", AdminFetchAllSuggestionWithAcknowledgedRoutes);
+app.use("/api", AdminFetchAllSuggestionWithUnacknowledgedRoutes);
+app.use("/api", AdminFetchSpecificSuggestionWithIdRoutes);
 app.use("/api", AdminDeleteSpecificSuggestionRoutes); 
 app.use("/api", AdminAddGloryRoutes);
 app.use("/api", AdminFetchAllGloriesRoutes);
@@ -113,6 +123,11 @@ app.use("/api", AdminDeleteSpecificGloryRoutes);
 app.use("/api", AdminFetchSpecificGloryRoutes);
 app.use("/api", AdminUpdateEditGloryRoutes);
 app.use("/api", AdminAcceptSuggestionMailRoutes);
+app.use("/api", AdminAcknowledgeSuggestionRoutes);
+app.use("/api", AdminFetchAllresolvedSuggestionFromSuggestionRecoardRoutes);
+app.use("/api", AdminFetchAllUnresolvedSuggestionFromSuggestionRecoardRoutes);
+app.use("/api", AdminFetchSpecficSuggestionFromsuggestioRecoardRoutes);
+app.use("/api", AdminResolveSuggestionRoutes);
 app.use("/api", AdminAddAssociationBatchRoutes);
 app.use("/api", AdminAddMemberAssociationRoutes);
 app.use("/api", AdminFetchSpecificMemberAssociationRoutes);
@@ -135,6 +150,6 @@ app.use("/api", AdminDenyProblemSolverRequestRoutes);
 app.use("/api", AdminDeleteSpecificBatchActivityRoutes);
 app.use("/api", AdminDeleteSpecificActivityRoutes);
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+app.listen(3000,  () => {
+  console.log("Server running on port 3000");
 });

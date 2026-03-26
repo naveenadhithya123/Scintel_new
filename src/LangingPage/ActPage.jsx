@@ -25,7 +25,7 @@ function Activities() {
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => { setIsVisible(entry.isIntersecting); },
+      ([entry]) => { if (entry.isIntersecting) setIsVisible(true); },
       { threshold: 0.1 }
     );
     if (sectionRef.current) observer.observe(sectionRef.current);
@@ -37,81 +37,122 @@ function Activities() {
   };
 
   return (
-    <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
-        .activities-container, .activities-container * {
-          font-family: 'Poppins', sans-serif !important;
-        }
-        .gray-scrollbar::-webkit-scrollbar { width: 6px; }
-        .gray-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-        .gray-scrollbar::-webkit-scrollbar-thumb { background: #9ca3af !important; border-radius: 10px; }
-        .gray-scrollbar::-webkit-scrollbar-thumb:hover { background: #6b7280 !important; }
-      `}</style>
+    <div 
+      ref={sectionRef} 
+      className="relative min-h-screen bg-[#FDFCFB] overflow-x-hidden font-poppins selection:bg-[#D4AF37]/20"
+    >
+      {/* --- AMBIENT LIGHTING (God Ray) --- */}
+      <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-[#D4AF37]/5 via-transparent to-transparent pointer-events-none" />
 
-      <div ref={sectionRef} id="activities" className="activities-container h-screen bg-[#F5F9FA] flex flex-col py-12 perspective-[1000px] select-none">
-        <div className="px-6 md:px-12 pb-6 max-w-7xl mx-auto w-full flex-none overflow-hidden">
-          <div className="flex items-center justify-between">
-            <h2 className={`text-[40px] font-extrabold text-[#023347] mb-3 w-fit tracking-tight transform transition-all duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)] ${isVisible ? "translate-y-0 opacity-100 blur-0" : "translate-y-20 opacity-0 blur-sm"}`}>
-              Activities
-            </h2>
-            <button
-              onClick={() => navigate("/")}
-              className={`flex items-center gap-2 bg-[#023347] text-white px-6 py-2 rounded-xl text-xs font-bold shadow-sm transition-all duration-300 ease-out hover:bg-[#388E9C] hover:shadow-lg hover:scale-105 active:scale-95 transform ${isVisible ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0"}`}
-              style={{ transitionDuration: "1000ms", transitionTimingFunction: "cubic-bezier(0.22,1,0.36,1)" }}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 12H5M5 12l7 7M5 12l7-7" />
-              </svg>
-              Back
-            </button>
+      <main className="max-w-[1500px] mx-auto px-6 md:px-12 py-12 relative z-10">
+        
+        {/* --- 1. UNIFIED HEADER SECTION --- */}
+        <header className="mb-20 border-b border-[#023347]/5 pb-12 flex flex-col md:flex-row justify-between items-end gap-8">
+          <div className="overflow-visible">
+            <span className={`text-[10px] font-bold tracking-[0.5em] uppercase text-[#D4AF37] mb-5 block transition-all duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+              Institutional Archives
+            </span>
+            <h1 className={`font-serif text-4xl md:text-6xl font-semibold text-[#023347] transition-all duration-[1200ms] delay-200 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
+              Academic <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-[#B8860B]">Activities</span>
+            </h1>
           </div>
-        </div>
 
-        <div className="px-6 md:px-12 max-w-7xl mx-auto w-full flex-1 min-h-0">
-          <div className={`bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-full transform-gpu transition-all duration-1000 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${isVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-12 scale-[0.98]"}`}>
-            <div className="hidden md:grid grid-cols-12 gap-4 bg-[#388E9C] px-6 py-4 border-b border-[#2c7582] flex-none z-10 relative">
-              <div className="col-span-4 text-center text-[10px] font-bold text-white uppercase tracking-wider">Year</div>
-              <div className="col-span-4 text-center text-[10px] font-bold text-white uppercase tracking-wider">Activities Count</div>
-              <div className="col-span-4 text-center text-[10px] font-bold text-white uppercase tracking-wider">Action</div>
-            </div>
-            <div className="flex-1 overflow-y-auto gray-scrollbar p-2 overscroll-auto touch-pan-y">
-              {activitiesData.length > 0 ? (
-                activitiesData.map((item, index) => (
-                  <div
-                    key={item.id || index}
-                    className={`group/row relative grid grid-cols-1 md:grid-cols-12 gap-4 px-6 py-4 border-b border-gray-50 items-center rounded-xl transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] hover:bg-[#F5F9FA] hover:shadow-md hover:-translate-y-1 hover:scale-[1.005] hover:border-gray-200 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
-                    style={{ transitionDelay: `${index * 50}ms` }}
-                  >
-                    <div className="md:col-span-4 flex flex-col md:items-center">
-                      <span className="md:hidden text-[10px] font-bold text-[#388E9C] uppercase mb-1 tracking-wider">Year</span>
-                      <span className="text-sm font-semibold text-[#3C3E40] group-hover/row:text-[#023347] transition-colors">{item.batch}</span>
-                    </div>
-                    <div className="md:col-span-4 flex flex-col md:items-center">
-                      <span className="md:hidden text-[10px] font-bold text-[#388E9C] uppercase mb-1 tracking-wider">Activities</span>
-                      <span className="text-sm font-medium text-[#3C3E40] bg-gray-50 px-3 py-1 rounded-full group-hover/row:bg-white group-hover/row:shadow-sm transition-all">{item.activity_count}</span>
-                    </div>
-                    <div className="md:col-span-4 flex flex-col md:items-center">
-                      <span className="md:hidden text-[10px] font-bold text-[#388E9C] uppercase mb-1 tracking-wider">Action</span>
-                      <button
-                        onClick={() => handleViewDetail(item.batch)}
-                        className="bg-[#023347] text-white px-6 py-2 rounded-xl text-xs font-bold shadow-sm transition-all duration-300 ease-out hover:bg-[#388E9C] hover:shadow-lg hover:scale-105 active:scale-95"
-                      >
-                        View Detail
-                      </button>
+          <button
+            onClick={() => navigate("/")}
+            className={`group flex items-center gap-3 bg-[#023347] text-white px-10 py-4 rounded-2xl text-[11px] font-bold tracking-[0.2em] uppercase transition-all duration-500 hover:bg-[#D4AF37] hover:shadow-2xl hover:shadow-[#D4AF37]/20 active:scale-95 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 transition-transform group-hover:-translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              <path d="M19 12H5M5 12l7 7M5 12l7-7" />
+            </svg>
+            Return Home
+          </button>
+        </header>
+
+        {/* --- 2. STAGGERED DECK TABLE LAYOUT --- */}
+        <div className="grid grid-cols-1 gap-8">
+          {activitiesData.length > 0 ? (
+            activitiesData.map((item, index) => (
+              <div
+                key={item.id || index}
+                className={`group relative flex flex-col md:flex-row bg-white/[0.02] backdrop-blur-[6px] border border-black/5 rounded-[2rem] overflow-hidden transition-all duration-700 hover:border-[#D4AF37]/40 hover:bg-white hover:shadow-[0_30px_60px_-15px_rgba(2,51,71,0.08)] hover:-translate-y-3 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}
+                style={{ 
+                  transitionDelay: `${index * 100}ms`,
+                  animation: isVisible ? `gentle-float ${5 + index}s ease-in-out infinite alternate` : 'none'
+                }}
+              >
+                {/* Prestige Pillar */}
+                <div className="w-full md:w-3 h-3 md:h-auto bg-[#023347] group-hover:bg-[#D4AF37] transition-colors duration-500" />
+
+                <div className="flex-1 grid grid-cols-1 md:grid-cols-12 items-center p-8 md:p-10 gap-6">
+                  {/* Year Display */}
+                  <div className="md:col-span-4">
+                    <p className="text-[10px] font-bold text-[#D4AF37] tracking-[0.3em] uppercase mb-2">Batch Period</p>
+                    <h3 className="text-3xl font-extrabold text-[#023347] group-hover:text-[#B8860B] transition-colors duration-500">
+                      {item.batch}
+                    </h3>
+                  </div>
+
+                  {/* Count Display */}
+                  <div className="md:col-span-4 flex flex-col md:items-center">
+                    <div className="bg-[#023347]/5 px-6 py-3 rounded-2xl group-hover:bg-[#023347]/10 transition-colors">
+                        <p className="text-[9px] font-bold text-[#023347]/40 tracking-widest uppercase mb-1">Activity Volume</p>
+                        <p className="text-lg font-bold text-[#023347]">
+                            {item.activity_count} <span className="text-xs font-medium text-[#023347]/50 ml-1 italic">Published Records</span>
+                        </p>
                     </div>
                   </div>
-                ))
-              ) : (
-                <div className="flex items-center justify-center h-full text-gray-400 italic">
-                  {loaded ? "No activities found." : "Loading activities..."}
+
+                  {/* Action Zone - SYNCHRONIZED BUTTON STYLE */}
+                  <div className="md:col-span-4 flex justify-end">
+                    <button
+                      onClick={() => handleViewDetail(item.batch)}
+                      className="group flex items-center justify-center gap-3 bg-[#023347] text-white w-full md:w-auto px-10 py-4 rounded-2xl text-[11px] font-bold tracking-[0.2em] uppercase transition-all duration-500 hover:bg-[#D4AF37] hover:shadow-2xl hover:shadow-[#D4AF37]/20 active:scale-95"
+                    >
+                      Explore Records
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 transition-transform group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
-              )}
+
+                {/* Floating Aesthetic Marker */}
+                <div className="absolute top-6 right-8 w-1 h-1 rounded-full bg-[#D4AF37]/30 group-hover:scale-[3] group-hover:bg-[#D4AF37] transition-all duration-700" />
+              </div>
+            ))
+          ) : (
+            <div className="h-80 flex flex-col items-center justify-center border-2 border-dashed border-[#023347]/5 rounded-[3rem] bg-white/40">
+              <div className="w-12 h-12 border-4 border-[#D4AF37]/20 border-t-[#D4AF37] rounded-full animate-spin mb-4" />
+              <p className="text-sm font-bold text-[#023347]/40 uppercase tracking-[0.4em]">
+                {loaded ? "No Archives Located" : "Synchronizing Database"}
+              </p>
             </div>
-          </div>
+          )}
         </div>
-      </div>
-    </>
+      </main>
+
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;500;600;700;800&display=swap');
+        
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .font-poppins { font-family: 'Poppins', sans-serif; }
+
+        @keyframes gentle-float {
+          0% { transform: translateY(0px); }
+          100% { transform: translateY(-12px); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #FDFCFB; }
+        ::-webkit-scrollbar-thumb { 
+          background: #02334715; 
+          border-radius: 20px; 
+          border: 3px solid #FDFCFB; 
+        }
+        ::-webkit-scrollbar-thumb:hover { background: #D4AF37; }
+      `}</style>
+    </div>
   );
 }
 

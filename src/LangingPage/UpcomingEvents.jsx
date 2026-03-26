@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-// NOTE: If this line shows an error, run: npm install lucide-react
-import { ChevronLeft, ChevronRight } from "lucide-react"; 
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function UpcomingEvents() {
   const navigate = useNavigate();
@@ -27,7 +26,7 @@ export default function UpcomingEvents() {
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => setIsVisible(entry.isIntersecting), 
+      ([entry]) => { if (entry.isIntersecting) setIsVisible(true); },
       { threshold: 0.1 }
     );
     if (sectionRef.current) observer.observe(sectionRef.current);
@@ -43,91 +42,140 @@ export default function UpcomingEvents() {
   const scrollToPage = (pageIndex) => {
     if (!scrollRef.current) return;
     const containerWidth = scrollRef.current.offsetWidth;
-    scrollRef.current.scrollTo({ 
-      left: containerWidth * pageIndex, 
-      behavior: "smooth" 
+    scrollRef.current.scrollTo({
+      left: containerWidth * pageIndex,
+      behavior: "smooth"
     });
     setActiveIndex(pageIndex);
   };
 
   return (
-    <div ref={sectionRef} id="events" className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans overflow-hidden py-16 relative">
-      
-      <div className="px-6 md:px-12 pb-10 max-w-7xl mx-auto w-full">
-        <h2 className={`text-[40px] font-extrabold text-[#023347] transition-all duration-1000 ${isVisible ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0"}`}>
-          Upcoming Events
-        </h2>
-      </div>
+    <div 
+      ref={sectionRef} 
+      id="events" 
+      className="relative bg-[#FDFCFB] min-h-screen text-[#023347] selection:bg-[#D4AF37]/20 overflow-hidden py-24 flex flex-col justify-center"
+    >
+      {/* --- 4. AMBIENT LIGHTING (God Ray) --- */}
+      <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-[#D4AF37]/5 via-transparent to-transparent pointer-events-none" />
 
-      <div className="relative max-w-7xl mx-auto w-full flex-1 group">
+      <section className="max-w-[1500px] mx-auto px-6 md:px-12 w-full relative z-10">
         
-        {/* Navigation Arrows */}
-        {activeIndex > 0 && (
-          <button 
-            type="button"
-            onClick={() => scrollToPage(activeIndex - 1)}
-            className="absolute -left-12 top-1/2 -translate-y-1/2 z-20 bg-white p-3.5 rounded-full shadow-xl hover:bg-gray-50 transition-all border border-gray-100 hidden xl:block"
-          >
-            <ChevronLeft size={28} className="text-[#023347]" />
-          </button>
-        )}
+        {/* --- 1. UNIFIED HEADER SECTION --- */}
+        <header className="mb-16 border-b border-[#023347]/5 pb-10 flex flex-col md:flex-row items-start md:items-end justify-between gap-6">
+          <div className="overflow-visible">
+            <div className="flex items-center gap-4 mb-4">
+              <span className={`text-[10px] font-bold tracking-[0.5em] uppercase text-[#D4AF37] transition-all duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+                Calendar of Excellence
+              </span>
+              <div className={`h-[1px] bg-[#D4AF37]/30 transition-all duration-[1.5s] ${isVisible ? 'w-24' : 'w-0'}`} />
+            </div>
+            <h2 className={`text-5xl md:text-6xl font-semibold font-serif text-[#023347] tracking-tight transition-all duration-[1200ms] delay-200 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
+              Upcoming <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] via-[#B8860B] to-[#D4AF37]">Prestige</span>
+            </h2>
+          </div>
 
-        {activeIndex < pages.length - 1 && (
-          <button 
-            type="button"
-            onClick={() => scrollToPage(activeIndex + 1)}
-            className="absolute -right-12 top-1/2 -translate-y-1/2 z-20 bg-white p-3.5 rounded-full shadow-xl hover:bg-gray-50 transition-all border border-gray-100 hidden xl:block"
-          >
-            <ChevronRight size={28} className="text-[#023347]" />
-          </button>
-        )}
+          {/* Navigation Controls */}
+          <div className={`flex gap-4 transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+            <button 
+              onClick={() => activeIndex > 0 && scrollToPage(activeIndex - 1)} 
+              disabled={activeIndex === 0}
+              className={`p-4 rounded-full border border-[#023347]/10 text-[#023347] transition-all duration-300 ${activeIndex === 0 ? 'opacity-20 cursor-not-allowed' : 'hover:border-[#D4AF37] hover:bg-white'}`}
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <button 
+              onClick={() => activeIndex < pages.length - 1 && scrollToPage(activeIndex + 1)} 
+              disabled={activeIndex === pages.length - 1}
+              className={`p-4 rounded-full bg-[#023347] text-white shadow-xl shadow-[#023347]/20 transition-all duration-300 ${activeIndex === pages.length - 1 ? 'opacity-20 cursor-not-allowed' : 'hover:bg-[#D4AF37] hover:scale-105 active:scale-95'}`}
+            >
+              <ChevronRight size={20} />
+            </button>
+          </div>
+        </header>
 
-        <div ref={scrollRef} className="flex overflow-x-hidden snap-x snap-mandatory scroll-smooth no-scrollbar">
-          <style>{`.no-scrollbar::-webkit-scrollbar { display: none; }`}</style>
-          
+        {/* --- 2. THE FLOATING GRID --- */}
+        <div 
+          ref={scrollRef} 
+          className="flex overflow-x-hidden snap-x snap-mandatory scroll-smooth no-scrollbar"
+        >
           {pages.map((pageCards, pageIndex) => (
-            <div key={pageIndex} className="flex-none w-full snap-center px-4 md:px-12">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                {pageCards.map((event) => (
-                  <div 
+            <div key={pageIndex} className="flex-none w-full snap-center">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 px-2 pb-12">
+                {pageCards.map((event, idx) => (
+                  <article 
                     key={event.event_id} 
-                    className={`flex flex-col sm:flex-row bg-white rounded-3xl shadow-sm overflow-hidden border border-gray-100 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 h-auto sm:h-[270px] ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-24"}`}
+                    className={`group relative transition-all duration-[1s] ease-out ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}
+                    style={{ 
+                      transitionDelay: `${idx * 150}ms`,
+                      // 3. MOTION PHYSICS (Idle Float)
+                      animation: isVisible ? `gentle-float ${4 + (idx % 2)}s ease-in-out infinite alternate` : 'none',
+                    }}
                   >
-                    
-                    {/* The Fixed Image Box */}
-                    <div className="w-full sm:w-[210px] h-[220px] sm:h-full bg-[#023347] relative flex-shrink-0 overflow-hidden">
-                      <img 
-                        src={event.brochure_url} 
-                        alt={event.event_title} 
-                        className="w-full h-full object-cover block" 
-                      />
-                    </div>
-
-                    <div className="p-7 flex flex-col justify-between flex-1 min-w-0">
-                      <div>
-                        <h3 className="text-2xl font-bold text-[#023347] mb-3 line-clamp-1">{event.event_title}</h3>
-                        <p className="text-[15px] text-[#3C3E40] line-clamp-3 leading-relaxed">
-                          {event.event_short_description}
-                        </p>
+                    {/* --- CORPORATE GLASS MODULE --- */}
+                    <div className="relative flex flex-col sm:flex-row bg-white/[0.02] backdrop-blur-[4px] rounded-[2rem] border border-black/5 transition-all duration-700 hover:border-[#D4AF37]/40 hover:shadow-2xl hover:shadow-[#D4AF37]/10 hover:-translate-y-3 overflow-hidden h-full">
+                      
+                      {/* Image Frame */}
+                      <div className="w-full sm:w-[220px] h-[240px] sm:h-auto overflow-hidden relative">
+                        <img 
+                          src={event.brochure_url} 
+                          alt={event.event_title} 
+                          className="w-full h-full object-cover transition-all duration-[2s] ease-out group-hover:scale-105 opacity-90 group-hover:opacity-100" 
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-r from-[#023347]/20 via-transparent to-transparent" />
                       </div>
 
-                      <div className="mt-4">
-                        <button 
-                          type="button"
-                          onClick={() => navigate(`/event-register/${event.event_id}`)}
-                          className="w-full h-[48px] bg-[#023347] text-white rounded-xl text-sm font-semibold hover:bg-[#388E9C] transition-all shadow-md active:scale-95"
-                        >
-                          View Details
-                        </button>
+                      {/* Content Area (Standard Sans Font) */}
+                      <div className="p-8 flex flex-col justify-between flex-1 font-sans">
+                        <div>
+                          <div className="flex items-center gap-3 mb-4">
+                            <span className="text-[9px] font-bold text-[#D4AF37] tracking-[0.4em] uppercase">Bulletin Entry</span>
+                            <div className="flex-1 h-[1px] bg-[#D4AF37]/20" />
+                          </div>
+                          
+                          <h3 className="text-xl font-bold text-[#023347] mb-3 tracking-tight group-hover:text-[#B8860B] transition-colors duration-500 line-clamp-1">
+                            {event.event_title}
+                          </h3>
+                          <p className="text-[13px] text-[#023347]/60 leading-relaxed font-medium line-clamp-3">
+                            {event.event_short_description}
+                          </p>
+                        </div>
+
+                        <div className="mt-8">
+                          <button 
+                            type="button"
+                            onClick={() => navigate(`/event-register/${event.event_id}`)}
+                            className="group/btn w-full h-[52px] bg-[#023347] text-white rounded-[1rem] text-[11px] font-bold tracking-[0.2em] uppercase transition-all duration-500 hover:bg-[#D4AF37] shadow-lg active:scale-95"
+                          >
+                            View Details
+                          </button>
+                        </div>
                       </div>
+
+                      {/* Aesthetic Corner Marker */}
+                      <div className="absolute top-6 right-6 w-1.5 h-1.5 rounded-full bg-[#D4AF37]/10 group-hover:bg-[#D4AF37] transition-all duration-500" />
                     </div>
-                  </div>
+                  </article>
                 ))}
               </div>
             </div>
           ))}
         </div>
-      </div>
+      </section>
+
+      <style jsx>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&display=swap');
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        
+        .font-serif {
+          font-family: 'Playfair Display', serif;
+        }
+
+        @keyframes gentle-float {
+          0% { transform: translateY(0px); }
+          100% { transform: translateY(-12px); }
+        }
+      `}</style>
     </div>
   );
 }

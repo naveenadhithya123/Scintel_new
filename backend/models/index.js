@@ -13,13 +13,7 @@ import CurrentProblem from "./CurrentProblem.js";
 
 // Relationships
 
-User.hasMany(Suggestion, {
-  foreignKey: "user_id"
-});
 
-Suggestion.belongsTo(User, {
-  foreignKey: "user_id"
-});
 
 
 User.hasMany(CurrentProblem, {
