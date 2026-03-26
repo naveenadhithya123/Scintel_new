@@ -28,61 +28,116 @@ export default function ProblemDetails() {
   }, [id]);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(([entry]) => setIsVisible(entry.isIntersecting), { threshold: 0.1 });
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) setIsVisible(true);
+    }, { threshold: 0.1 });
     if (sectionRef.current) observer.observe(sectionRef.current);
     return () => { if (sectionRef.current) observer.unobserve(sectionRef.current); };
   }, [loading]);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center text-gray-400">Loading details...</div>;
-  if (!problem) return <div className="min-h-screen flex items-center justify-center">Problem not found.</div>;
+  if (loading) return (
+    <div className="min-h-screen bg-[#FDFCFB] py-16 px-6 flex flex-col items-center">
+      <div className="w-full max-w-[1500px] animate-pulse">
+        <div className="h-10 w-1/3 bg-[#023347]/10 rounded-xl mb-12" />
+        <div className="relative h-[600px] bg-white/[0.03] border border-black/5 rounded-[2rem] overflow-hidden">
+           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+        </div>
+      </div>
+    </div>
+  );
+
+  if (!problem) return (
+    <div className="min-h-screen bg-[#FDFCFB] flex items-center justify-center font-serif text-2xl text-[#023347]">
+      Statement not located in archives.
+    </div>
+  );
 
   return (
-    <div ref={sectionRef} className="min-h-screen bg-[#F5F9FA] py-16 px-6 flex justify-center select-none font-sans">
-      <div className="w-full max-w-6xl">
-        <div className="flex items-start justify-between mb-10">
-          <div className="flex flex-col">
-            <h1 className="text-3xl font-bold text-[#023347]">{problem.title}</h1>
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Category: {problem.category}</span>
+    <div 
+      ref={sectionRef} 
+      className="relative min-h-screen bg-[#FDFCFB] text-[#023347] font-sans selection:bg-[#D4AF37]/20 overflow-x-hidden"
+    >
+      {/* --- AMBIENT LIGHTING --- */}
+      <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-[#D4AF37]/5 via-transparent to-transparent pointer-events-none" />
+
+      <main className="max-w-[1500px] mx-auto px-6 md:px-12 py-16 relative z-10">
+        
+        {/* --- HEADER --- */}
+        <header className="mb-16 border-b border-[#023347]/5 pb-10 flex flex-col md:flex-row justify-between items-end gap-8">
+          <div className="overflow-visible">
+            <span className={`text-[10px] font-bold tracking-[0.5em] uppercase text-[#D4AF37] mb-4 block transition-all duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+              Case Analysis #{id}
+            </span>
+            <h1 className={`font-serif text-4xl md:text-5xl font-semibold leading-tight transition-all duration-[1200ms] ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
+              {problem.title.split(' ').slice(0, -1).join(' ')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] via-[#B8860B] to-[#D4AF37]">
+                {problem.title.split(' ').pop()}
+              </span>
+            </h1>
+            <p className="text-[10px] font-bold text-[#023347]/40 uppercase tracking-[0.2em] mt-4 italic">
+              Sector: {problem.category}
+            </p>
           </div>
 
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 bg-[#023347] text-white px-6 py-2 rounded-xl text-xs font-bold shadow-sm
-              transition-all duration-300 ease-out
-              hover:bg-[#388E9C] hover:shadow-lg hover:scale-105 active:scale-95"
+            className="group flex items-center gap-3 bg-white border border-[#023347]/10 text-[#023347] px-8 py-3.5 rounded-2xl text-[10px] font-bold tracking-[0.2em] uppercase transition-all hover:bg-gray-50 active:scale-95 shadow-sm"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-3.5 h-3.5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 transition-transform group-hover:-translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
               <path d="M19 12H5M5 12l7 7M5 12l7-7" />
             </svg>
-            Back to List
+            Back to archives
           </button>
+        </header>
+
+        {/* --- DESCRIPTION BOX --- */}
+        <div className={`group relative bg-white/[0.02] backdrop-blur-[4px] border border-black/5 rounded-[2rem] p-8 md:p-16 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+          <div className="absolute left-0 top-12 w-1.5 h-24 bg-[#023347] rounded-r-full group-hover:bg-[#D4AF37] transition-all duration-500" />
+
+          <div className="max-w-5xl">
+            <header className="mb-10 flex items-center gap-4">
+                <div className="w-10 h-10 border border-[#023347]/10 flex items-center justify-center rounded-2xl text-lg font-serif italic bg-white/5 text-[#D4AF37]">¶</div>
+                <h2 className="text-[11px] font-black text-[#D4AF37] tracking-[0.3em] uppercase">
+                    Detailed Narrative
+                </h2>
+            </header>
+            
+            <div className="font-sans text-[#023347]/80 text-lg leading-[1.8] space-y-6">
+              <p className="whitespace-pre-line ">
+                {problem.detailed_description}
+              </p>
+            </div>
+          </div>
         </div>
 
-        <div className={`bg-white rounded-3xl shadow-sm border border-gray-100 p-8 md:p-12 transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
-          <h2 className="text-xl font-semibold text-[#023347] mb-8 border-b pb-4">Detailed Description</h2>
-          <div className="text-[#3C3E40] text-[16px] leading-relaxed">
-            <p className="whitespace-pre-line">{problem.detailed_description}</p>
-          </div>
-
-          <div className="flex justify-end mt-12">
-            <button
+        {/* --- STANDALONE LOCK BUTTON --- */}
+        <div className={`mt-10 flex justify-end transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+           <button
               onClick={() => navigate("/verification-mentor", { state: { problem_id: id } })} 
-              className="bg-[#0B1C3D] text-white px-10 py-3 rounded-xl font-semibold shadow-md hover:bg-[#142d63] transition duration-300"
+              className="bg-[#023347] text-white px-12 py-4 rounded-2xl text-[11px] font-bold tracking-[0.2em] uppercase transition-all duration-500 hover:bg-[#D4AF37] hover:shadow-2xl hover:shadow-[#D4AF37]/20 active:scale-95"
             >
-              Lock Statement
+              Lock Statement for Mentorship
             </button>
-          </div>
         </div>
-      </div>
+      </main>
+
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;600;700&display=swap');
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .font-sans { font-family: 'Inter', sans-serif; }
+
+        @keyframes shimmer {
+          100% { transform: translateX(100%); }
+        }
+
+        .animate-pulse {
+          animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: .5; }
+        }
+      `}</style>
     </div>
   );
 }

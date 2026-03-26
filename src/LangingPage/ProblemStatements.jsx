@@ -13,27 +13,18 @@ function ProblemStatements() {
   // Intersection Observer for Animations
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsVisible(entry.isIntersecting);
-      },
+      ([entry]) => { if (entry.isIntersecting) setIsVisible(true); },
       { threshold: 0.1 }
     );
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
-    return () => {
-      if (sectionRef.current) observer.unobserve(sectionRef.current);
-    };
+    if (sectionRef.current) observer.observe(sectionRef.current);
+    return () => { if (sectionRef.current) observer.unobserve(sectionRef.current); };
   }, []);
 
-  // Fetch Problems from API
+  // Fetch Problems
   useEffect(() => {
     const fetchProblems = async () => {
       try {
         const response = await fetch("http://localhost:3000/api/current-problems");
-        if (!response.ok) throw new Error("Network response was not ok");
         const data = await response.json();
         setProblems(data);
       } catch (error) {
@@ -45,121 +36,134 @@ function ProblemStatements() {
     fetchProblems();
   }, []);
 
-  // Dynamic Redirect Logic
-  const handleViewRedirect = (id) => {
-    navigate(`/problem-details/${id}`);
-  };
-
   return (
-    <>
-      <style>{`
-        .gray-scrollbar::-webkit-scrollbar { width: 6px; }
-        .gray-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-        .gray-scrollbar::-webkit-scrollbar-thumb { background: #9ca3af !important; border-radius: 10px; }
-        .gray-scrollbar::-webkit-scrollbar-thumb:hover { background: #6b7280 !important; }
-      `}</style>
+    <div 
+      ref={sectionRef}
+      className="relative min-h-screen bg-[#FDFCFB] text-[#023347] font-sans selection:bg-[#D4AF37]/20 overflow-x-hidden"
+    >
+      {/* --- AMBIENT LIGHTING (God Ray) --- */}
+      <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-[#D4AF37]/5 via-transparent to-transparent pointer-events-none" />
 
-      <div 
-        ref={sectionRef}
-        id='problems' 
-        className="min-h-screen bg-[#F5F9FA] flex flex-col font-sans py-12  select-none"
-      >
-        {/* Header Section */}
-        <div className="px-6 md:px-12 pb-6 max-w-7xl mx-auto w-full flex justify-between items-end">
-          <h2 className={`text-[40px] font-extrabold text-[#023347] transition-all duration-1000 ${isVisible ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0"}`}>
-            Problem Statements
-          </h2>
+      <main className="max-w-[1500px] mx-auto px-6 md:px-12 py-16 relative z-10">
+        
+        {/* --- HEADER --- */}
+        <header className="mb-16 border-b border-[#023347]/5 pb-10 flex flex-col md:flex-row justify-between items-end gap-8">
+          <div>
+            <span className={`text-[10px] font-bold tracking-[0.5em] uppercase text-[#D4AF37] mb-4 block transition-all duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+              Innovation Lab
+            </span>
+            <h1 className={`font-serif text-5xl font-semibold leading-tight transition-all duration-[1200ms] ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
+              Problem <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-[#B8860B]">Statements</span>
+            </h1>
+          </div>
 
-          <div className="flex flex-col items-end gap-3">
+          <div className="flex gap-4">
             <button
-              onClick={() => navigate('/')}
-              className={`flex items-center gap-2 bg-[#023347] text-white px-6 py-2 rounded-xl text-xs font-bold shadow-sm 
-                transition-all duration-300 ease-out hover:bg-[#388E9C] hover:shadow-lg hover:scale-105 active:scale-95
-                ${isVisible ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0"}`}
-              style={{ transitionDuration: "1000ms" }}
+              onClick={() => navigate(-1)}
+              className="group flex items-center gap-3 bg-white border border-[#023347]/10 text-[#023347] px-6 py-3.5 rounded-2xl text-[10px] font-bold tracking-[0.2em] uppercase transition-all hover:bg-gray-50 active:scale-95"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 12H5M5 12l7 7M5 12l7-7" />
-              </svg>
               Back
             </button>
-
             <button
               onClick={() => navigate("/ProblemStatementVerification")}
-              className={`bg-[#023347] text-white px-8 py-3 rounded-lg font-semibold shadow-md hover:bg-[#388E9C] transition-all duration-300
-                ${isVisible ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0"}`}
-              style={{ transitionDuration: "1200ms" }}
+              className="bg-[#023347] text-white px-8 py-3.5 rounded-2xl text-[10px] font-bold tracking-[0.2em] uppercase transition-all duration-500 hover:bg-[#D4AF37] hover:shadow-2xl hover:shadow-[#D4AF37]/20 active:scale-95"
             >
-              Add Problem Statement
+              + Submit Statement
             </button>
           </div>
-        </div>
+        </header>
 
-        {/* Table Container */}
-        <div className="px-6 md:px-12 max-w-7xl mx-auto w-full">
-          <div 
-            className={`bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-[75vh] transform-gpu transition-all duration-1000 delay-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${
-              isVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-12 scale-[0.98]"
-            }`}
-          >
-            {/* Table Header (Sticky) */}
-            <div className="hidden md:grid grid-cols-12 gap-4 bg-[#388E9C] px-6 py-4 border-b border-[#2c7582] flex-none sticky top-0 z-10">
-              <div className="col-span-4 text-center text-[10px] font-bold text-white uppercase tracking-wider">Title</div>
-              <div className="col-span-6 text-center text-[10px] font-bold text-white uppercase tracking-wider">Description</div>
-              <div className="col-span-2 text-center text-[10px] font-bold text-white uppercase tracking-wider">Action</div>
-            </div>
-
-            {/* Scrollable List Area */}
-            <div className="flex-1 overflow-y-auto gray-scrollbar p-2 overscroll-auto touch-pan-y">
-              {loading ? (
-                <div className="flex items-center justify-center h-full text-gray-400">Loading problems...</div>
-              ) : problems.length > 0 ? (
-                problems.map((item, idx) => (
-                  <div 
-                    key={item.problem_id || idx} 
-                    className={`group/row relative grid grid-cols-1 md:grid-cols-12 gap-4 px-6 py-4 border-b border-gray-50 items-center rounded-xl 
-                      transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]
-                      hover:bg-[#F5F9FA] hover:shadow-md hover:-translate-y-1 hover:scale-[1.005]
-                      ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
-                    style={{ transitionDelay: `${idx * 50}ms` }}
-                  >
-                    {/* Title */}
-                    <div className="md:col-span-4 flex flex-col items-center">
-                      <span className="md:hidden text-[10px] font-bold text-[#388E9C] uppercase mb-1">Title</span>
-                      <span className="text-sm font-semibold text-[#023347] text-center w-full group-hover/row:text-[#388E9C] transition-colors">
-                        {item.title}
-                      </span>
+        {/* --- STAGGERED GLASS DECK --- */}
+        <div className="space-y-4">
+          {loading ? (
+            /* --- 🏛️ PRESTIGE GHOST SHIMMER LOADING STATE --- */
+            <div className="space-y-8">
+              {[...Array(4)].map((_, i) => (
+                <div 
+                  key={i} 
+                  className="relative flex flex-col md:flex-row bg-white/[0.03] border border-black/5 rounded-[2rem] overflow-hidden animate-pulse"
+                >
+                  {/* Ghost Pillar */}
+                  <div className="hidden md:block w-1.5 h-24 bg-[#023347]/10" />
+                  
+                  <div className="flex-1 grid grid-cols-1 md:grid-cols-12 items-center p-8 md:p-10 gap-8">
+                    {/* Ghost Title Zone */}
+                    <div className="md:col-span-4 space-y-3">
+                      <div className="h-2 w-16 bg-[#D4AF37]/20 rounded-full" />
+                      <div className="h-8 w-48 bg-[#023347]/10 rounded-xl" />
                     </div>
 
-                    {/* Description */}
-                    <div className="md:col-span-6 flex flex-col items-center overflow-hidden">
-                      <span className="md:hidden text-[10px] font-bold text-[#388E9C] uppercase mb-1">Description</span>
-                      <span className="text-sm text-[#3C3E40] leading-relaxed block w-full text-center">
-                        {item.short_description || item.shortDescription}
-                      </span>
+                    {/* Ghost Detail Zone */}
+                    <div className="md:col-span-5 space-y-2 border-l border-[#023347]/5 pl-8">
+                      <div className="h-3 w-full bg-[#023347]/5 rounded-full" />
+                      <div className="h-3 w-5/6 bg-[#023347]/5 rounded-full" />
                     </div>
 
-                    {/* Action */}
-                    <div className="md:col-span-2 flex flex-col items-center">
-                      <span className="md:hidden text-[10px] font-bold text-[#388E9C] uppercase mb-1">Action</span>
-                      <button
-                        onClick={() => handleViewRedirect(item.problem_id)}
-                        className="bg-[#023347] text-white font-bold px-6 py-2 rounded-xl text-xs shadow-sm 
-                          transition-all duration-300 ease-out hover:bg-[#388E9C] hover:shadow-lg hover:scale-105 active:scale-95"
-                      >
-                        View Detail
-                      </button>
+                    {/* Ghost Action Zone */}
+                    <div className="md:col-span-3 flex justify-end">
+                      <div className="h-12 w-40 bg-[#023347]/10 rounded-2xl" />
                     </div>
                   </div>
-                ))
-              ) : (
-                <div className="flex items-center justify-center h-full text-gray-400">No problems found.</div>
-              )}
+
+                  {/* The Shimmer Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+                </div>
+              ))}
             </div>
-          </div>
+          ) : problems.length > 0 ? (
+            problems.map((item, idx) => (
+              <div 
+                key={item.problem_id || idx}
+                className={`group relative flex flex-col md:flex-row items-center gap-6 bg-white/[0.02] backdrop-blur-[4px] border border-black/5 rounded-[2rem] p-6 md:p-8 transition-all duration-700 hover:border-[#D4AF37]/40 hover:shadow-2xl hover:-translate-y-1.5 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}
+                style={{ transitionDelay: `${idx * 100}ms` }}
+              >
+                <div className="hidden md:block w-1.5 h-16 bg-[#023347] rounded-full group-hover:bg-[#D4AF37] transition-all duration-500" />
+                <div className="flex-1 md:max-w-[30%]">
+                  <span className="text-[9px] font-bold text-[#D4AF37] uppercase tracking-[0.2em] mb-1 block">Case #{idx + 1}</span>
+                  <h3 className="text-lg font-bold text-[#023347] leading-snug group-hover:text-[#B8860B] transition-colors">
+                    {item.title}
+                  </h3>
+                </div>
+                <div className="flex-[2] border-l border-[#023347]/5 pl-0 md:pl-8">
+                  <p className="text-sm text-[#023347]/70 leading-relaxed line-clamp-2 md:line-clamp-3 italic">
+                    {item.short_description || item.shortDescription}
+                  </p>
+                </div>
+                <div className="w-full md:w-auto">
+                  <button
+                    onClick={() => navigate(`/problem-details/${item.problem_id}`)}
+                    className="w-full md:w-auto bg-[#023347] text-white px-8 py-3.5 rounded-2xl text-[10px] font-bold tracking-[0.2em] uppercase transition-all duration-500 hover:bg-[#D4AF37] hover:shadow-2xl hover:shadow-[#D4AF37]/20 active:scale-95"
+                  >
+                    Analyze Details
+                  </button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="py-20 text-center text-[#023347]/40">No records currently available.</div>
+          )}
         </div>
-      </div>
-    </>
+      </main>
+
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;600;700&display=swap');
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .font-sans { font-family: 'Inter', sans-serif; }
+
+        @keyframes shimmer {
+          100% { transform: translateX(100%); }
+        }
+
+        .animate-pulse {
+          animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: .5; }
+        }
+      `}</style>
+    </div>
   );
 }
 

@@ -5,9 +5,9 @@ export default function AssociationMembers() {
   const navigate = useNavigate();
 
   // --- STATE FOR BACKEND DATA ---
-  const [batches, setBatches] = useState([]); // List of years/titles for tabs
-  const [activeTab, setActiveTab] = useState(""); // Currently selected year
-  const [batchDetails, setBatchDetails] = useState(null); // Contains { batch_info, members }
+  const [batches, setBatches] = useState([]);
+  const [activeTab, setActiveTab] = useState("");
+  const [batchDetails, setBatchDetails] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // --- UI STATES ---
@@ -15,17 +15,14 @@ export default function AssociationMembers() {
   const sectionRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
 
-  // 1. FETCH ALL BATCHES (To generate Tabs)
+  // 1. FETCH ALL BATCHES
   useEffect(() => {
     const fetchBatches = async () => {
       try {
         const response = await fetch("http://localhost:3000/api/association-batches");
         const data = await response.json();
         setBatches(data);
-        if (data.length > 0) {
-          // Auto-select the most recent batch
-          setActiveTab(data[0].batch_year);
-        }
+        if (data.length > 0) setActiveTab(data[0].batch_year);
       } catch (error) {
         console.error("Error fetching batches:", error);
       }
@@ -33,7 +30,7 @@ export default function AssociationMembers() {
     fetchBatches();
   }, []);
 
-  // 2. FETCH SPECIFIC BATCH DETAILS (When user clicks a Tab)
+  // 2. FETCH SPECIFIC BATCH DETAILS
   useEffect(() => {
     const fetchMembers = async () => {
       if (!activeTab) return;
@@ -48,7 +45,6 @@ export default function AssociationMembers() {
         setLoading(false);
       }
     };
-
     fetchMembers();
   }, [activeTab]);
 
@@ -63,136 +59,154 @@ export default function AssociationMembers() {
   }, []);
 
   return (
-    <>
-      <style>{`
-        .gray-scrollbar::-webkit-scrollbar { width: 6px; }
-        .gray-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-        .gray-scrollbar::-webkit-scrollbar-thumb { background: #9ca3af !important; border-radius: 10px; }
-      `}</style>
+    <div 
+      ref={sectionRef} 
+      className="relative min-h-screen bg-[#FDFCFB] text-[#023347] font-sans selection:bg-[#D4AF37]/20 overflow-x-hidden"
+    >
+      {/* --- AMBIENT DEPTH LAYER (God Ray) --- */}
+      <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-[#D4AF37]/5 via-transparent to-transparent pointer-events-none" />
 
       {/* --- IMAGE LIGHTBOX --- */}
       {selectedImage && (
         <div 
-          className="fixed inset-0 z-[5000] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 cursor-zoom-out animate-in fade-in duration-300"
+          className="fixed inset-0 z-[5000] bg-[#023347]/95 backdrop-blur-xl flex items-center justify-center p-4 cursor-zoom-out"
           onClick={() => setSelectedImage(null)}
         >
-          <img 
-            src={selectedImage} 
-            alt="Full View" 
-            className="max-w-full max-h-[95vh] rounded-md shadow-2xl object-contain" 
-          />
+          <img src={selectedImage} alt="Full View" className="max-w-5xl w-full rounded-2xl shadow-2xl object-contain animate-in zoom-in-95 duration-300" />
         </div>
       )}
 
-      <div 
-        ref={sectionRef} 
-        id="associationMembers" 
-        className="min-h-screen bg-[#F5F9FA] flex flex-col font-sans py-12  select-none"
-      >
-        <div className="px-6 md:px-12 max-w-7xl mx-auto w-full flex flex-col">
-          
-          {/* Header */}
-          <div className="pb-6 overflow-hidden flex items-center justify-between">
-            <h1 
-              className={`text-[40px] font-extrabold text-[#023347] mb-3 w-fit tracking-tight transform transition-all duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                isVisible ? "translate-y-0 opacity-100 blur-0" : "translate-y-20 opacity-0 blur-sm"
-              }`}
-            >
-              Association Members
+      <main className="max-w-[1500px] mx-auto px-6 md:px-12 py-16 relative z-10">
+        
+        {/* --- PROFESSIONAL HEADER --- */}
+        <header className="mb-16 flex flex-col md:flex-row items-start md:items-end justify-between gap-8 border-b border-[#023347]/5 pb-10">
+          <div className="max-w-2xl">
+            <div className="flex items-center gap-4 mb-4">
+              <span className={`text-[10px] font-bold tracking-[0.5em] uppercase text-[#D4AF37] transition-all duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+                Institutional Leadership
+              </span>
+              <div className={`h-[1px] bg-[#D4AF37]/30 transition-all duration-[1.5s] ${isVisible ? 'w-12' : 'w-0'}`} />
+            </div>
+            
+            <h1 className={`text-4xl md:text-6xl font-semibold font-serif text-[#023347] tracking-tight transition-all duration-[1200ms] ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}>
+              Association <span className="bg-gradient-to-r from-[#D4AF37] via-[#B8860B] to-[#D4AF37] bg-clip-text text-transparent">Roll</span>
             </h1>
-
-            <button
-              onClick={() => navigate('/')}
-              className={`flex items-center gap-2 bg-[#023347] text-white px-6 py-2 rounded-xl text-xs font-bold shadow-sm 
-                transition-all duration-300 ease-out hover:bg-[#388E9C] hover:shadow-lg hover:scale-105 active:scale-95
-                transform ${isVisible ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0"}
-              `}
-              style={{ transitionDuration: "1000ms" }}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 12H5M5 12l7 7M5 12l7-7" />
-              </svg>
-              Back
-            </button>
           </div>
 
-          {/* --- TOP INFO SECTION (Group Photo + Description) --- */}
-          {batchDetails?.batch_info && (
-            <div className={`flex flex-col md:flex-row gap-8 mb-6 items-start transition-all duration-1000 delay-100 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}>
-              <div className="relative group w-full md:w-72 aspect-video rounded-2xl overflow-hidden shadow-md cursor-zoom-in shrink-0 bg-gray-200">
-                <img
-                  src={batchDetails.batch_info.image_url || "https://via.placeholder.com/400x220"}
-                  alt="batch"
-                  onClick={() => setSelectedImage(batchDetails.batch_info.image_url)}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
+          <button
+            onClick={() => navigate(-1)}
+            className="group flex items-center gap-3 bg-[#023347] text-white px-8 py-3.5 rounded-2xl text-[10px] font-bold tracking-[0.2em] uppercase transition-all duration-500 hover:bg-[#D4AF37] hover:shadow-xl active:scale-95"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            Return Home
+          </button>
+        </header>
+
+        {/* --- BATCH OVERVIEW --- */}
+        {batchDetails?.batch_info && (
+          <section className={`mb-12 flex flex-col md:flex-row gap-10 items-start transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}>
+            <div className="w-full md:w-80 relative group aspect-video rounded-[2rem] overflow-hidden border border-black/5 shadow-sm cursor-zoom-in shrink-0">
+              <img
+                src={batchDetails.batch_info.image_url || "https://via.placeholder.com/600x400"}
+                alt="Batch"
+                onClick={() => setSelectedImage(batchDetails.batch_info.image_url)}
+                className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
+              />
+            </div>
+            <div className="pt-2">
+              <h2 className="text-2xl font-bold mb-3">{batchDetails.batch_info.title}</h2>
+              <p className="text-[#023347]/70 leading-relaxed text-sm max-w-3xl">
+                {batchDetails.batch_info.description}
+              </p>
+            </div>
+          </section>
+        )}
+
+        {/* --- YEAR TABS --- */}
+        <nav className="flex gap-10 mb-8 border-b border-[#023347]/5 overflow-x-auto no-scrollbar">
+          {batches.map((tab) => (
+            <button
+              key={tab.batch_year}
+              onClick={() => setActiveTab(tab.batch_year)}
+              className={`pb-4 text-xs font-bold tracking-widest uppercase transition-all relative whitespace-nowrap ${activeTab === tab.batch_year ? "text-[#D4AF37]" : "text-[#023347]/40 hover:text-[#023347]"}`}
+            >
+              Academic Year {tab.batch_year}
+              {activeTab === tab.batch_year && (
+                <span className="absolute bottom-0 left-0 w-full h-[2px] bg-[#D4AF37] animate-in slide-in-from-left duration-500" />
+              )}
+            </button>
+          ))}
+        </nav>
+
+        {/* --- PRESTIGE TABLE LAYOUT --- */}
+        <div className="w-full space-y-3 mb-20">
+          {/* Table Header Row */}
+          <div className="hidden md:grid grid-cols-12 gap-4 px-10 py-4 text-[10px] font-bold uppercase tracking-[0.3em] text-[#023347]/40">
+            <div className="col-span-1">No.</div>
+            <div className="col-span-5">Member Name</div>
+            <div className="col-span-3">Register Number</div>
+            <div className="col-span-3 text-right">Designation</div>
+          </div>
+
+          {loading ? (
+             [...Array(8)].map((_, i) => <div key={i} className="h-16 bg-black/5 rounded-2xl animate-pulse" />)
+          ) : batchDetails?.members?.map((member, idx) => (
+            <div 
+              key={idx}
+              className={`group relative grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-white/[0.02] backdrop-blur-[4px] border border-black/5 rounded-2xl px-6 md:px-10 py-5 transition-all duration-500 hover:border-[#D4AF37]/40 hover:bg-white/[0.05] hover:shadow-xl hover:shadow-[#D4AF37]/5 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+              style={{ transitionDelay: `${idx * 40}ms` }}
+            >
+              {/* The Prestige Pillar (Vertical indicator) */}
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-0 group-hover:h-3/5 bg-[#D4AF37] transition-all duration-500 rounded-r-full" />
+              
+              <div className="col-span-1 text-[11px] font-mono text-[#D4AF37]/60 group-hover:text-[#D4AF37] transition-colors">
+                {String(idx + 1).padStart(2, '0')}
               </div>
-              <div className="pt-2 flex-1">
-                <h2 className="text-2xl font-bold text-[#023347] mb-3">{batchDetails.batch_info.title}</h2>
-                <p className="text-sm text-[#3C3E40] leading-relaxed max-w-2xl opacity-80">{batchDetails.batch_info.description}</p>
+
+              <div className="col-span-5">
+                <h3 className="text-sm font-bold text-[#023347] group-hover:translate-x-1 transition-transform duration-500">
+                  {member.name}
+                </h3>
               </div>
+
+              <div className="col-span-3">
+                <span className="text-[11px] font-medium text-[#023347]/50 tracking-wider">
+                  {member.register_number}
+                </span>
+              </div>
+
+              <div className="col-span-3 text-right">
+                <span className="inline-block text-[9px] font-bold tracking-[0.1em] uppercase bg-[#023347]/5 text-[#023347] px-4 py-1.5 rounded-full group-hover:bg-[#D4AF37] group-hover:text-white transition-all duration-500">
+                  {member.role}
+                </span>
+              </div>
+            </div>
+          ))}
+          
+          {!loading && (!batchDetails?.members || batchDetails.members.length === 0) && (
+            <div className="py-20 text-center italic text-[#023347]/30 text-sm">
+              No formal records found for this academic cycle.
             </div>
           )}
-
-          {/* --- TABS (Year Selection) --- */}
-          <div className={`flex gap-6 md:gap-8 mb-6 border-b border-gray-200 overflow-x-auto transition-all duration-1000 delay-200 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
-            {batches.map((tab) => (
-              <button
-                key={tab.batch_year}
-                onClick={() => setActiveTab(tab.batch_year)}
-                className={`pb-3 text-sm font-bold whitespace-nowrap transition-all duration-300 relative px-2 ${activeTab === tab.batch_year ? "text-[#023347]" : "text-gray-400 hover:text-[#388E9C]"}`}
-              >
-                {tab.batch_year}
-                <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-[#023347] transition-all duration-300 transform ${activeTab === tab.batch_year ? "scale-x-100" : "scale-x-0"}`}></span>
-              </button>
-            ))}
-          </div>
         </div>
+      </main>
 
-        {/* --- TABLE SECTION --- */}
-        <div className="px-6 md:px-12 max-w-7xl mx-auto w-full">
-          <div className={`bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-[60vh] transition-all duration-1000 delay-300 ${isVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-12 scale-[0.98]"}`}>
-            
-            {/* Table Header */}
-            <div className="hidden md:grid grid-cols-3 gap-4 bg-[#388E9C] px-6 py-4 border-b border-[#2c7582] flex-none z-10">
-              {["Name", "Register Number", "Role"].map((head) => (
-                <div key={head} className="text-center text-[10px] font-bold text-white uppercase tracking-wider">{head}</div>
-              ))}
-            </div>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;500;600;700&display=swap');
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        
+        .animate-in {
+          animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
 
-            {/* Table Body */}
-            <div className="flex-1 overflow-y-auto gray-scrollbar p-2 overscroll-auto touch-pan-y"> 
-              {loading ? (
-                <div className="flex items-center justify-center h-full text-gray-400">Loading members...</div>
-              ) : batchDetails?.members?.length > 0 ? (
-                batchDetails.members.map((member, idx) => (
-                  <div 
-                    key={idx} 
-                    className={`group/row relative grid grid-cols-1 md:grid-cols-3 gap-4 px-6 py-4 border-b border-gray-50 items-center rounded-xl transition-all duration-500 hover:bg-[#F5F9FA] hover:shadow-md
-                      ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
-                    style={{ transitionDelay: `${idx * 30}ms` }}
-                  >
-                    <div className="text-center flex flex-col md:block">
-                      <span className="md:hidden text-[10px] text-[#388E9C] font-bold uppercase mb-1">Name</span>
-                      <span className="text-sm font-semibold text-[#3C3E40] group-hover/row:text-[#023347] transition-colors">{member.name}</span>
-                    </div>
-                    <div className="text-center flex flex-col md:block">
-                      <span className="md:hidden text-[10px] text-[#388E9C] font-bold uppercase mb-1">Reg No</span>
-                      <span className="text-sm text-[#3C3E40] font-mono">{member.register_number}</span>
-                    </div>
-                    <div className="text-center flex flex-col md:block">
-                      <span className="md:hidden text-[10px] text-[#388E9C] font-bold uppercase mb-1">Role</span>
-                      <span className="text-sm font-medium text-[#3C3E40] bg-gray-50 px-3 py-1 rounded-full inline-block group-hover/row:bg-white transition-all">{member.role}</span>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="flex flex-col items-center justify-center h-full text-gray-400 italic text-sm">No members available for this batch.</div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
+        @keyframes fade-in-up {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+    </div>
   );
 }

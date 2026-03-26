@@ -1,9 +1,10 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Verification() {
   const [showOTP, setShowOTP] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -14,6 +15,10 @@ export default function Verification() {
   
   const navigate = useNavigate();
   const inputs = useRef([]);
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -28,11 +33,8 @@ export default function Verification() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: formData.email }),
       });
-      if (response.ok) {
-        setShowOTP(true);
-      } else {
-        alert("Failed to send OTP. Please check the email.");
-      }
+      if (response.ok) setShowOTP(true);
+      else alert("Failed to send OTP. Please check the email.");
     } catch (error) {
       console.error("Error:", error);
     } finally {
@@ -59,7 +61,6 @@ export default function Verification() {
 
   const handleSubmitOTP = async () => {
     const otpValue = inputs.current.map(input => input.value).join("");
-    
     try {
       const response = await fetch("http://localhost:3000/api/verify-otp", {
         method: "POST",
@@ -67,7 +68,6 @@ export default function Verification() {
         body: JSON.stringify({ email: formData.email, otp: otpValue }),
       });
       const result = await response.json();
-
       if (result.verified) {
         navigate("/add-problem", { state: { userDetails: formData } });
       } else {
@@ -84,106 +84,111 @@ export default function Verification() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F9FA] flex items-center justify-center px-6 py-12 relative">
-      <div className="w-full max-w-5xl bg-white rounded-2xl shadow-sm p-10 border border-gray-100">
+    <div className="relative min-h-screen bg-[#FDFCFB] text-[#023347] font-sans selection:bg-[#D4AF37]/20 overflow-x-hidden">
+      {/* --- AMBIENT LIGHTING --- */}
+      <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-[#D4AF37]/5 via-transparent to-transparent pointer-events-none" />
 
-        {/* Header row: title left, back button right */}
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-semibold text-[#023347]">Verification</h2>
-          <button
-            onClick={() => navigate("/problems")}
-            className="flex items-center gap-2 bg-[#023347] text-white px-6 py-2 rounded-xl text-xs font-bold shadow-sm
-              transition-all duration-300 ease-out
-              hover:bg-[#388E9C] hover:shadow-lg hover:scale-105 active:scale-95"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-3.5 h-3.5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M19 12H5M5 12l7 7M5 12l7-7" />
-            </svg>
-            Back
-          </button>
-        </div>
-
-        <form onSubmit={handleVerifyRequest}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <label className="block text-sm text-gray-600 mb-2">Name</label>
-              <input name="name" required onChange={handleChange} className="w-full border border-[#CFE8EC] rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-[#388E9C]" />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-600 mb-2">Email</label>
-              <input name="email" type="email" required onChange={handleChange} className="w-full border border-[#CFE8EC] rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-[#388E9C]" />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-600 mb-2">Mobile no.</label>
-              <input name="phone_number" required onChange={handleChange} className="w-full border border-[#CFE8EC] rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-[#388E9C]" />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-600 mb-2">Year</label>
-              <input name="year" required onChange={handleChange} className="w-full border border-[#CFE8EC] rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-[#388E9C]" />
-            </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm text-gray-600 mb-2">Section</label>
-              <input name="section" required onChange={handleChange} className="w-full border border-[#CFE8EC] rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-[#388E9C]" />
-            </div>
+      <main className="max-w-[1500px] mx-auto px-6 md:px-12 py-16 relative z-10">
+        
+        {/* --- LEFT-ALIGNED PRESTIGE HEADER --- */}
+        <header className="mb-16 border-b border-[#023347]/5 pb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
+          <div className="flex flex-col items-start text-left">
+            <span className={`text-[10px] font-bold tracking-[0.5em] uppercase text-[#D4AF37] mb-4 block transition-all duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+              Security Protocol
+            </span>
+            <h1 className={`font-serif text-5xl font-semibold leading-tight transition-all duration-[1200ms] ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
+              Identity <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] via-[#B8860B] to-[#D4AF37]">Verification</span>
+            </h1>
           </div>
 
-          {/* Verify button with loading spinner */}
           <button
-            type="submit"
-            disabled={loading}
-            className="mt-10 w-full bg-[#023347] text-white py-3 rounded-lg font-semibold hover:bg-[#388E9C] transition-all shadow-md flex items-center justify-center gap-3 disabled:opacity-80 disabled:cursor-not-allowed"
+            onClick={() => navigate("/problems")}
+            className="group flex items-center gap-3 bg-white border border-[#023347]/10 text-[#023347] px-8 py-3.5 rounded-2xl text-[10px] font-bold tracking-[0.2em] uppercase transition-all hover:bg-gray-50 active:scale-95 shadow-sm self-end md:self-auto"
           >
-            {loading ? (
-              <>
-                <svg
-                  className="animate-spin h-5 w-5 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-                </svg>
-                Sending OTP...
-              </>
-            ) : (
-              "Verify"
-            )}
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 transition-transform group-hover:-translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              <path d="M19 12H5M5 12l7 7M5 12l7-7" />
+            </svg>
+            Return to List
           </button>
-        </form>
-      </div>
+        </header>
 
+        {/* --- FORM MODULE --- */}
+        <div className={`bg-white/[0.02] backdrop-blur-[4px] border border-black/5 rounded-[2rem] p-10 md:p-16 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+          <form onSubmit={handleVerifyRequest} className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+              {[
+                { label: "Full Name", name: "name", type: "text" },
+                { label: "Academic Email", name: "email", type: "email" },
+                { label: "Mobile Number", name: "phone_number", type: "text" },
+                { label: "Batch Year", name: "year", type: "text" },
+                { label: "Section Assignment", name: "section", type: "text", full: true }
+              ].map((field) => (
+                <div key={field.name} className={`${field.full ? "md:col-span-2" : ""}`}>
+                  <label className="text-[10px] font-bold tracking-widest uppercase text-[#023347]/50 mb-3 block text-left">
+                    {field.label}
+                  </label>
+                  <input 
+                    name={field.name}
+                    type={field.type}
+                    required 
+                    onChange={handleChange} 
+                    className="w-full bg-transparent border-b border-[#023347]/10 py-3 font-sans text-lg outline-none focus:border-[#D4AF37] transition-colors placeholder:text-gray-300 text-left" 
+                  />
+                </div>
+              ))}
+            </div>
+
+            <div className="pt-10 flex justify-end">
+              <button
+                type="submit"
+                disabled={loading}
+                className="bg-[#023347] text-white px-16 py-4 rounded-2xl text-[11px] font-bold tracking-[0.2em] uppercase transition-all duration-500 hover:bg-[#D4AF37] hover:shadow-2xl hover:shadow-[#D4AF37]/20 active:scale-95 flex items-center gap-4 disabled:opacity-50"
+              >
+                {loading ? "Authenticating..." : "Verify Account"}
+              </button>
+            </div>
+          </form>
+        </div>
+      </main>
+
+      {/* --- OTP MODAL --- */}
       {showOTP && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="absolute inset-0 bg-white/60 backdrop-blur-sm"></div>
-          <div className="relative w-[500px] bg-white rounded-2xl border border-[#CDE4EC] shadow-xl flex flex-col items-center justify-center px-10 py-10">
-            <h2 className="text-xl font-semibold text-[#1C2B33] mb-8">Enter OTP</h2>
-            <div className="flex gap-4 mb-6">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+          <div className="absolute inset-0 bg-[#023347]/40 backdrop-blur-md animate-fade-in" onClick={handleCancel} />
+          <div className="relative w-full max-w-md bg-white rounded-[2.5rem] p-12 shadow-2xl border border-white/20 animate-slide-up overflow-hidden">
+            <div className="text-center mb-10">
+              <span className="text-[10px] font-bold tracking-[0.4em] uppercase text-[#D4AF37]">Secure Access</span>
+              <h2 className="font-serif text-3xl text-[#023347] mt-2">Enter OTP</h2>
+              <p className="text-xs text-gray-400 mt-2 font-sans italic">Verification code sent via email.</p>
+            </div>
+            <div className="flex justify-between gap-3 mb-10">
               {[...Array(6)].map((_, index) => (
-                <input
-                  key={index}
-                  maxLength="1"
-                  ref={(el) => (inputs.current[index] = el)}
+                <input 
+                  key={index} maxLength="1" 
+                  ref={(el) => (inputs.current[index] = el)} 
                   onChange={(e) => handleOtpChange(e, index)}
                   onKeyDown={(e) => handleOtpKeyDown(e, index)}
-                  className="w-[50px] h-[50px] border border-[#3A9FBF] rounded-[10px] text-center text-xl outline-none focus:ring-2 focus:ring-[#3A9FBF]"
+                  className="w-12 h-14 border border-[#023347]/10 rounded-xl text-center text-xl font-bold bg-gray-50/50 outline-none focus:border-[#D4AF37] transition-all" 
                 />
               ))}
             </div>
-            <button onClick={handleSubmitOTP} className="w-full h-[50px] bg-[#0B1C3D] text-white rounded-lg text-sm hover:bg-[#142d63] transition-all mb-3">Submit</button>
-            <button onClick={handleCancel} className="w-full h-[50px] bg-white text-[#0B1C3D] border border-[#CFE8EC] rounded-lg text-sm hover:bg-gray-50 transition-all">Cancel</button>
+            <div className="space-y-4">
+              <button onClick={handleSubmitOTP} className="w-full bg-[#023347] text-white py-4 rounded-xl text-[11px] font-bold tracking-widest uppercase hover:bg-[#D4AF37] transition-all">Confirm</button>
+              <button onClick={handleCancel} className="w-full bg-transparent text-[#023347]/40 py-2 text-[10px] font-bold tracking-widest uppercase hover:text-[#023347] transition-all">Cancel</button>
+            </div>
           </div>
         </div>
       )}
+
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;600;700&display=swap');
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .font-sans { font-family: 'Inter', sans-serif; }
+        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slide-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fade-in 0.5s ease-out; }
+        .animate-slide-up { animation: slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+      `}</style>
     </div>
   );
 }

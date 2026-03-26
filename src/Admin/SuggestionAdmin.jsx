@@ -1,112 +1,42 @@
 import React, { useState, useEffect } from "react";
 import AdminSidebar from "./AdminSidebar";
 
-const DEFAULT_ADMIN_EMAIL = "admin@college.edu"; // <-- Change to your default email
+const API_BASE = "http://localhost:3000/api";
 
 export default function SuggestionAdmin() {
   const [view, setView] = useState("list"); // "list" | "detail" | "history"
-  const [dashboardTab, setDashboardTab] = useState("overall");
+  const [dashboardTab, setDashboardTab] = useState("unacknowledged"); // "unacknowledged" | "acknowledged"
+  const [historyTab, setHistoryTab] = useState("rejected"); // "rejected" | "resolved"
   const [prevView, setPrevView] = useState("list");
+
   const [suggestionList, setSuggestionList] = useState([]);
-  const [ackList, setAckList] = useState([]);
+  const [historyList, setHistoryList] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
+  
   const [loading, setLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // History states
-  const [historyTab, setHistoryTab] = useState("rejected");
-  const [rejectedList, setRejectedList] = useState([]);
-  const [resolvedList, setResolvedList] = useState([]);
-  const [historyLoading, setHistoryLoading] = useState(false);
+  // Rejection Modal state
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectionMessage, setRejectionMessage] = useState("");
 
-  // Delete modal state
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleteTargetId, setDeleteTargetId] = useState(null);
-  const [deleteMessage, setDeleteMessage] = useState("");
-  const [deleteLoading, setDeleteLoading] = useState(false);
-
-  // Dummy data for acknowledge tab
-  const DUMMY_ACK = [
-    {
-      suggestion_id: "ack-001",
-      title: "Improve Library Timings",
-      name: "Priya Ramesh",
-      email: "priya.ramesh@college.edu",
-      year: "3rd Year",
-      section: "B",
-      phone_number: "9876543210",
-      description:
-        "The library should remain open until 9 PM on weekdays to help students prepare for exams without rushing. Currently it closes at 6 PM which is inconvenient for many students who have classes until 5 PM.",
-    },
-  ];
-
-  // Dummy data for history tabs
-  const DUMMY_REJECTED = [
-    {
-      suggestion_id: "rej-001",
-      title: "Outdoor Vending Machines",
-      name: "Karthik Sundar",
-      email: "karthik.s@college.edu",
-      year: "2nd Year",
-      section: "A",
-      phone_number: "9123456780",
-      description:
-        "Place vending machines near the sports ground so students can get refreshments without walking to the canteen.",
-    },
-    {
-      suggestion_id: "rej-002",
-      title: "24/7 Wi-Fi in Hostel",
-      name: "Ananya Menon",
-      email: "ananya.m@college.edu",
-      year: "4th Year",
-      section: "C",
-      phone_number: "9988776655",
-      description:
-        "Hostel Wi-Fi is switched off at 11 PM. Extending it to 24/7 would greatly help students doing late-night project work.",
-    },
-  ];
-
-  const DUMMY_RESOLVED = [
-    {
-      suggestion_id: "res-001",
-      title: "New Drinking Water Points",
-      name: "Divya Krishnan",
-      email: "divya.k@college.edu",
-      year: "1st Year",
-      section: "D",
-      phone_number: "9001234567",
-      description:
-        "There are not enough drinking water points near the labs. Adding two more water dispensers on the second floor would help a lot.",
-    },
-    {
-      suggestion_id: "res-002",
-      title: "Canteen Menu Variety",
-      name: "Rahul Nair",
-      email: "rahul.n@college.edu",
-      year: "3rd Year",
-      section: "A",
-      phone_number: "9876001234",
-      description:
-        "The canteen menu has remained the same for years. Introducing regional cuisine options once a week would be appreciated by students from different states.",
-    },
-  ];
-
+  // 1. Fetch Data
   useEffect(() => {
-    fetchSuggestions();
-    fetchAckSuggestions();
-  }, []);
-
-  useEffect(() => {
-    if (view === "history") {
-      if (historyTab === "rejected") fetchRejected();
-      if (historyTab === "resolved") fetchResolved();
+    if (view === "list") {
+      fetchDashboardSuggestions();
+    } else if (view === "history") {
+      fetchHistorySuggestions();
     }
-  }, [view, historyTab]);
+  }, [view, dashboardTab, historyTab]);
 
-  const fetchSuggestions = async () => {
+  const fetchDashboardSuggestions = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const response = await fetch("http://localhost:3000/api/admin/suggestions");
+      const endpoint = dashboardTab === "unacknowledged" 
+        ? "/admin/suggestions/unacknowledged" 
+        : "/admin/suggestions/acknowledged";
+      const response = await fetch(`${API_BASE}${endpoint}`);
       const result = await response.json();
       setSuggestionList(result.data || []);
     } catch (error) {
@@ -116,57 +46,34 @@ export default function SuggestionAdmin() {
     }
   };
 
-  const fetchAckSuggestions = async () => {
+  const fetchHistorySuggestions = async () => {
+    setLoading(true);
     try {
-      const response = await fetch("http://localhost:3000/api/admin/suggestions/acknowledge");
+      const endpoint = historyTab === "rejected" 
+        ? "/admin/suggestion-records/unresolved" 
+        : "/admin/suggestion-records/resolved";
+      const response = await fetch(`${API_BASE}${endpoint}`);
       const result = await response.json();
-      setAckList([...DUMMY_ACK, ...(result.data || [])]);
+      setHistoryList(result.data || []);
     } catch (error) {
-      setAckList(DUMMY_ACK);
-    }
-  };
-
-  const fetchRejected = async () => {
-    try {
-      setHistoryLoading(true);
-      const response = await fetch("http://localhost:3000/api/admin/suggestions/rejected");
-      const result = await response.json();
-      setRejectedList([...DUMMY_REJECTED, ...(result.data || [])]);
-    } catch (error) {
-      setRejectedList(DUMMY_REJECTED);
+      console.error("Error fetching history:", error);
     } finally {
-      setHistoryLoading(false);
+      setLoading(false);
     }
   };
 
-  const fetchResolved = async () => {
+  // 2. Navigation & Detail Logic
+  const handleViewDetail = async (id, source) => {
+    setLoading(true);
     try {
-      setHistoryLoading(true);
-      const response = await fetch("http://localhost:3000/api/admin/suggestions/resolved");
-      const result = await response.json();
-      setResolvedList([...DUMMY_RESOLVED, ...(result.data || [])]);
-    } catch (error) {
-      setResolvedList(DUMMY_RESOLVED);
-    } finally {
-      setHistoryLoading(false);
-    }
-  };
-
-  const handleViewDetail = async (id, from = "overall") => {
-    const allDummy = [...DUMMY_ACK, ...DUMMY_REJECTED, ...DUMMY_RESOLVED];
-    const dummyItem = allDummy.find((d) => d.suggestion_id === id);
-    if (dummyItem) {
-      setSelectedItem(dummyItem);
-      setPrevView(from);
-      setView("detail");
-      return;
-    }
-    try {
-      setLoading(true);
-      const response = await fetch(`http://localhost:3000/api/admin/suggestions/${id}`);
+      const endpoint = (source === "history") 
+        ? `/admin/suggestion-records/${id}` 
+        : `/admin/suggestions/${id}`;
+      
+      const response = await fetch(`${API_BASE}${endpoint}`);
       const result = await response.json();
       setSelectedItem(result.data);
-      setPrevView(from);
+      setPrevView(source);
       setView("detail");
     } catch (error) {
       alert("Error fetching details");
@@ -175,325 +82,153 @@ export default function SuggestionAdmin() {
     }
   };
 
-  const handleOpenDeleteModal = (id) => {
-    setDeleteTargetId(id);
-    setDeleteMessage("");
-    setShowDeleteModal(true);
-  };
-
-  const handleCancelDelete = () => {
-    setShowDeleteModal(false);
-    setDeleteTargetId(null);
-    setDeleteMessage("");
-  };
-
-  const handleSendDeleteRejection = async () => {
-    if (!deleteMessage.trim()) {
-      alert("Please enter a rejection message before sending.");
-      return;
-    }
+  // 3. Actions (Acknowledge, Resolve, Reject)
+  const handleAcknowledge = async () => {
+    setActionLoading(true);
     try {
-      setDeleteLoading(true);
-      const mailtoLink = `mailto:${DEFAULT_ADMIN_EMAIL}?subject=Suggestion%20Rejected%3A%20${encodeURIComponent(
-        selectedItem?.title || ""
-      )}&body=${encodeURIComponent(deleteMessage)}`;
-      window.location.href = mailtoLink;
-
-      await fetch(
-        `http://localhost:3000/api/admin/suggestions/${deleteTargetId}`,
-        { method: "DELETE" }
-      );
-
-      if (selectedItem) {
-        setRejectedList((prev) => [
-          { ...selectedItem, rejection_message: deleteMessage },
-          ...prev,
-        ]);
-      }
-
-      setShowDeleteModal(false);
-      setDeleteTargetId(null);
-      setDeleteMessage("");
-      setSelectedItem(null);
-      setView("list");
-      fetchSuggestions();
-    } catch (error) {
-      if (selectedItem) {
-        setRejectedList((prev) => [
-          { ...selectedItem, rejection_message: deleteMessage },
-          ...prev,
-        ]);
-      }
-      setShowDeleteModal(false);
-      setDeleteTargetId(null);
-      setDeleteMessage("");
-      setSelectedItem(null);
-      setView("list");
-      fetchSuggestions();
-    } finally {
-      setDeleteLoading(false);
-    }
-  };
-
-  const handleAcknowledge = async (id) => {
-    try {
-      setLoading(true);
-      const response = await fetch(
-        `http://localhost:3000/api/admin/suggestions/acknowledge/${id}`,
-        { method: "POST" }
-      );
-      const result = await response.json();
+      const response = await fetch(`${API_BASE}/admin/suggestions/${selectedItem.suggestion_id}/acknowledge`, {
+        method: "PATCH",
+      });
       if (response.ok) {
-        alert("Success: " + result.message);
+        alert("Suggestion Acknowledged and Email Sent!");
         setView("list");
-        fetchSuggestions();
-      } else {
-        alert("Failed: " + result.message);
+        setDashboardTab("acknowledged");
       }
     } catch (error) {
-      alert("Error connecting to server");
+      alert("Failed to acknowledge");
     } finally {
-      setLoading(false);
+      setActionLoading(false);
     }
   };
 
-  const handleResolved = async (email) => {
+  const handleResolve = async () => {
+    setActionLoading(true);
     try {
-      setLoading(true);
-      const response = await fetch(
-        "http://localhost:3000/api/admin/suggestions/accept-mail",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        }
-      );
-      const result = await response.json();
+      const response = await fetch(`${API_BASE}/admin/suggestions/${selectedItem.suggestion_id}/resolve`, {
+        method: "POST",
+      });
       if (response.ok) {
-        alert("Success: " + result.message);
-        setView("list");
-        fetchSuggestions();
-        fetchAckSuggestions();
-      } else {
-        alert("Failed: " + result.message);
+        alert("Suggestion marked as Resolved!");
+        setView("history");
+        setHistoryTab("resolved");
       }
     } catch (error) {
-      alert("Error connecting to mail server");
+      alert("Failed to resolve");
     } finally {
-      setLoading(false);
+      setActionLoading(false);
     }
   };
 
-  const filteredList = suggestionList.filter(
-    (item) =>
-      item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleRejectSubmit = async () => {
+    if (!rejectionMessage.trim()) return alert("Please enter a reason");
+    setActionLoading(true);
+    try {
+      const response = await fetch(`${API_BASE}/admin/suggestions/delete-send-mail`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          suggestion_id: selectedItem.suggestion_id,
+          mail_content: rejectionMessage
+        }),
+      });
+      if (response.ok) {
+        alert("Rejection email sent and record moved to history.");
+        setShowRejectModal(false);
+        setRejectionMessage("");
+        setView("history");
+        setHistoryTab("rejected");
+      }
+    } catch (error) {
+      alert("Error processing rejection");
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
-  const filteredAckList = ackList.filter(
-    (item) =>
-      item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const historyCurrentList =
-    historyTab === "rejected" ? rejectedList : resolvedList;
-
-  // ── DETAIL CARD ──
+  // ── RENDER DETAIL ──
   const renderDetailCard = () => (
-    <div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "20px",
-        }}
-      >
-        <h1 style={{ color: "#023347", fontSize: "24px", fontWeight: 800, margin: 0 }}>
-          Suggestion Description
-        </h1>
+    <div className="animate-fadeIn">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+        <h1 style={{ color: "#023347", fontSize: "24px", fontWeight: 800 }}>Suggestion Details</h1>
         <button
-          onClick={() => {
-            setSelectedItem(null);
-            setView(prevView === "history" ? "history" : "list");
-          }}
-          className="h-11 px-6 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5"
+          onClick={() => setView(prevView === "history" ? "history" : "list")}
+          className="h-11 px-6 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:bg-[#2A8E9E] transition-all"
         >
-          ← Back to {prevView === "history" ? "History" : "List"}
+          ← Back
         </button>
       </div>
 
-      <div
-        style={{
-          backgroundColor: "#FFFFFF",
-          borderRadius: "20px",
-          border: "1px solid #e2e8ec",
-          padding: "40px",
-        }}
-      >
+      <div style={{ backgroundColor: "#FFFFFF", borderRadius: "20px", border: "1px solid #e2e8ec", padding: "50px shadow-sm" }}>
         <h2 style={{ fontSize: "28px", fontWeight: 800, color: "#023347", marginBottom: "24px" }}>
           {selectedItem.title}
         </h2>
 
-        <div
-          style={{
-            backgroundColor: "#F8FAFC",
-            padding: "25px",
-            borderRadius: "15px",
-            marginBottom: "30px",
-          }}
-        >
+        <div style={{ backgroundColor: "#F8FAFC", padding: "25px", borderRadius: "15px", marginBottom: "30px" }}>
           <p style={{ margin: 0, color: "#1e293b", lineHeight: "1.6", whiteSpace: "pre-wrap" }}>
-            {selectedItem.description}
+            {selectedItem.description || selectedItem.suggestion}
           </p>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "20px",
-            padding: "20px",
-            backgroundColor: "#F8FAFC",
-            borderRadius: "15px",
-            marginBottom: "30px",
-          }}
-        >
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", padding: "20px", backgroundColor: "#F8FAFC", borderRadius: "15px", marginBottom: "30px" }}>
           <div><strong>Name:</strong> {selectedItem.name}</div>
           <div><strong>Email:</strong> {selectedItem.email}</div>
-          <div><strong>Year/Sec:</strong> {selectedItem.year} - {selectedItem.section}</div>
-          <div><strong>Phone:</strong> {selectedItem.phone_number}</div>
+          <div><strong>Year/Sec:</strong> {selectedItem.year} {selectedItem.section ? `- ${selectedItem.section}` : ""}</div>
+          <div><strong>Phone:</strong> {selectedItem.phone_number || selectedItem.phone}</div>
         </div>
 
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: "15px" }}>
-          {prevView === "overall" && (
-            <>
-              <button
-                onClick={() => handleOpenDeleteModal(selectedItem.suggestion_id)}
-                disabled={loading}
-                className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5"
-              >
-                {loading ? "Processing..." : "Delete Record"}
-              </button>
-              <button
-                onClick={() => handleAcknowledge(selectedItem.suggestion_id)}
-                disabled={loading}
-                className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5"
-              >
-                {loading ? "Processing..." : "Acknowledge"}
-              </button>
-              <button
-                onClick={() => handleResolved(selectedItem.email)}
-                disabled={loading}
-                className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5"
-              >
-                {loading ? "Sending..." : "Resolved"}
-              </button>
-            </>
-          )}
-
-          {prevView === "acknowledge" && (
+        {prevView !== "history" && (
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: "15px", borderTop: "1px solid #eee", paddingTop: "20px" }}>
             <button
-              onClick={() => handleResolved(selectedItem.email)}
-              disabled={loading}
-              className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5"
+              onClick={() => setShowRejectModal(true)}
+              className="h-11 px-8 bg-red-50 text-red-600 rounded-xl text-sm font-bold hover:bg-red-600 hover:text-white transition-all"
             >
-              {loading ? "Sending..." : "Resolved"}
+              Reject & Delete
             </button>
-          )}
+            
+            {dashboardTab === "unacknowledged" && (
+              <button
+                onClick={handleAcknowledge}
+                disabled={actionLoading}
+                className="h-11 px-8 bg-[#2A8E9E] text-white rounded-xl text-sm font-bold shadow-md hover:bg-[#023347] transition-all"
+              >
+                {actionLoading ? "Processing..." : "Acknowledge"}
+              </button>
+            )}
 
-          {prevView === "history" && null}
-        </div>
+            <button
+              onClick={handleResolve}
+              disabled={actionLoading}
+              className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-bold shadow-md hover:bg-[#2A8E9E] transition-all"
+            >
+              {actionLoading ? "Saving..." : "Resolved"}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
 
-  // ── DELETE MODAL ──
-  const renderDeleteModal = () => (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        backgroundColor: "rgba(0,0,0,0.45)",
-        zIndex: 1000,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <div
-        style={{
-          backgroundColor: "#fff",
-          borderRadius: "20px",
-          padding: "40px",
-          width: "100%",
-          maxWidth: "520px",
-          boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
-          border: "1px solid #e2e8ec",
-        }}
-      >
-        <h2 style={{ fontSize: "20px", fontWeight: 800, color: "#023347", marginBottom: "8px" }}>
-          Reject Suggestion
-        </h2>
-        <p style={{ color: "#6b7280", fontSize: "14px", marginBottom: "24px" }}>
-          Write a message explaining why this suggestion is being rejected. It will be sent to the
-          admin email.
-        </p>
-
+  // ── RENDER REJECT MODAL ──
+  const renderRejectModal = () => (
+    <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }}>
+      <div style={{ backgroundColor: "#fff", borderRadius: "20px", padding: "40px", width: "100%", maxWidth: "500px", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
+        <h2 style={{ fontSize: "20px", fontWeight: 800, color: "#023347", marginBottom: "8px" }}>Reject Suggestion</h2>
+        <p style={{ color: "#6b7280", fontSize: "14px", marginBottom: "20px" }}>Provide a reason for rejection. This will be sent to the user's email.</p>
         <textarea
-          value={deleteMessage}
-          onChange={(e) => setDeleteMessage(e.target.value)}
-          placeholder="Enter rejection reason or message..."
+          value={rejectionMessage}
+          onChange={(e) => setRejectionMessage(e.target.value)}
+          placeholder="Type the rejection message here..."
           rows={5}
-          style={{
-            width: "100%",
-            padding: "14px 16px",
-            borderRadius: "12px",
-            border: "1.5px solid #e2e8ec",
-            outline: "none",
-            fontSize: "14px",
-            color: "#023347",
-            backgroundColor: "#F8FAFC",
-            resize: "vertical",
-            boxSizing: "border-box",
-            fontFamily: "'Poppins', sans-serif",
-            lineHeight: "1.6",
-            transition: "border-color 0.2s, box-shadow 0.2s",
-          }}
-          onFocus={(e) => {
-            e.target.style.borderColor = "#2A8E9E";
-            e.target.style.boxShadow = "0 0 0 3px rgba(42,142,158,0.1)";
-            e.target.style.backgroundColor = "#fff";
-          }}
-          onBlur={(e) => {
-            e.target.style.borderColor = "#e2e8ec";
-            e.target.style.boxShadow = "none";
-            e.target.style.backgroundColor = "#F8FAFC";
-          }}
+          style={{ width: "100%", padding: "15px", borderRadius: "12px", border: "1.5px solid #e2e8ec", backgroundColor: "#F8FAFC", outline: "none", fontSize: "14px", resize: "none" }}
         />
-
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            gap: "12px",
-            marginTop: "24px",
-          }}
-        >
-          <button
-            onClick={handleCancelDelete}
-            disabled={deleteLoading}
-            className="h-11 px-7 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5"
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "24px" }}>
+          <button onClick={() => setShowRejectModal(false)} className="px-6 py-2 text-gray-500 font-bold">Cancel</button>
+          <button 
+            onClick={handleRejectSubmit} 
+            disabled={actionLoading}
+            className="h-11 px-8 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-all"
           >
-            Cancel
-          </button>
-          <button
-            onClick={handleSendDeleteRejection}
-            disabled={deleteLoading}
-            className="h-11 px-7 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5"
-          >
-            {deleteLoading ? "Sending..." : "Send"}
+            {actionLoading ? "Sending..." : "Reject & Send"}
           </button>
         </div>
       </div>
@@ -501,370 +236,114 @@ export default function SuggestionAdmin() {
   );
 
   return (
-    <div
-      style={{
-        display: "flex",
-        height: "100vh",
-        backgroundColor: "#F5F9FA",
-        fontFamily: "'Poppins', sans-serif",
-      }}
-    >
+    <div style={{ display: "flex", height: "100vh", backgroundColor: "#F5F9FA", fontFamily: "'Poppins', sans-serif" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
         * { font-family: 'Poppins', sans-serif !important; }
-        .sg-main::-webkit-scrollbar { width: 6px; }
-        .sg-main::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .sg-table-scroll::-webkit-scrollbar { width: 6px; }
         .sg-table-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
       `}</style>
 
-      {/* Delete Modal */}
-      {showDeleteModal && renderDeleteModal()}
-
+      {showRejectModal && renderRejectModal()}
       <AdminSidebar />
 
-      <main className="sg-main" style={{ flex: 1, padding: "32px 40px", overflowY: "auto" }}>
-
-        {/* ── LIST VIEW ── */}
-        {view === "list" && (
+      <main style={{ flex: 1, padding: "32px 40px", overflowY: "auto" }}>
+        {view === "list" || view === "history" ? (
           <>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "16px",
-              }}
-            >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
               <h1 style={{ color: "#023347", fontSize: "24px", fontWeight: 800 }}>
-                Suggestions Dashboard
+                {view === "list" ? "Suggestions Dashboard" : "Suggestion Records"}
               </h1>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <div style={{ display: "flex", gap: "12px" }}>
                 <button
-                  onClick={() => setView("history")}
-                  className="h-11 px-6 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5"
+                  onClick={() => setView(view === "list" ? "history" : "list")}
+                  className="h-11 px-6 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:bg-[#2A8E9E] transition-all"
                 >
-                  History
+                  {view === "list" ? "View History" : "← Dashboard"}
                 </button>
-                <div style={{ position: "relative", width: "300px" }}>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    style={{
-                      position: "absolute",
-                      left: "14px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      width: "16px",
-                      height: "16px",
-                      color: "#9ca3af",
-                      pointerEvents: "none",
-                    }}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"
-                    />
-                  </svg>
-                  <input
-                    type="text"
-                    placeholder="Search title or user..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    style={{
-                      width: "100%",
-                      padding: "10px 16px 10px 40px",
-                      borderRadius: "12px",
-                      border: "1.5px solid #e2e8ec",
-                      outline: "none",
-                      fontSize: "14px",
-                      color: "#023347",
-                      backgroundColor: "#F5F9FA",
-                      boxSizing: "border-box",
-                      fontFamily: "'Poppins', sans-serif",
-                      transition: "border-color 0.2s, box-shadow 0.2s",
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = "#2A8E9E";
-                      e.target.style.boxShadow = "0 0 0 3px rgba(42,142,158,0.1)";
-                      e.target.style.backgroundColor = "#fff";
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = "#e2e8ec";
-                      e.target.style.boxShadow = "none";
-                      e.target.style.backgroundColor = "#F5F9FA";
-                    }}
-                  />
-                </div>
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  style={{ padding: "10px 16px", borderRadius: "12px", border: "1.5px solid #e2e8ec", outline: "none", width: "250px" }}
+                />
               </div>
             </div>
 
-            {/* Dashboard Tabs */}
-            <div
-              style={{
-                display: "flex",
-                gap: "28px",
-                borderBottom: "2px solid #eee",
-                marginBottom: "20px",
-              }}
-            >
-              {[
-                { key: "overall", label: "Unacknowledged Suggestions" },
-                { key: "acknowledge", label: "Acknowledged Suggestions" },
-              ].map((tab) => (
-                <button
-                  key={tab.key}
-                  onClick={() => setDashboardTab(tab.key)}
-                  style={{
-                    paddingBottom: "10px",
-                    fontSize: "14px",
-                    fontWeight: dashboardTab === tab.key ? 700 : 500,
-                    color: dashboardTab === tab.key ? "#023347" : "#6b7280",
-                    background: "none",
-                    border: "none",
-                    borderBottom:
-                      dashboardTab === tab.key
-                        ? "2px solid #023347"
-                        : "2px solid transparent",
-                    marginBottom: "-2px",
-                    cursor: "pointer",
-                    transition: "color 0.2s",
-                    whiteSpace: "nowrap",
-                    fontFamily: "'Poppins', sans-serif",
-                  }}
-                >
-                  {tab.label}
-                </button>
-              ))}
+            {/* Tabs */}
+            <div style={{ display: "flex", gap: "28px", borderBottom: "2px solid #eee", marginBottom: "20px" }}>
+              {view === "list" ? (
+                <>
+                  <TabBtn active={dashboardTab === "unacknowledged"} label="Unacknowledged" onClick={() => setDashboardTab("unacknowledged")} />
+                  <TabBtn active={dashboardTab === "acknowledged"} label="Acknowledged" onClick={() => setDashboardTab("acknowledged")} />
+                </>
+              ) : (
+                <>
+                  <TabBtn active={historyTab === "rejected"} label="Rejected Suggestions" onClick={() => setHistoryTab("rejected")} />
+                  <TabBtn active={historyTab === "resolved"} label="Resolved Suggestions" onClick={() => setHistoryTab("resolved")} />
+                </>
+              )}
             </div>
 
-            <div
-              className="bg-white rounded-2xl shadow-sm border border-[#2A8E9E]/20 overflow-hidden flex flex-col"
-              style={{ maxHeight: "calc(100vh - 240px)" }}
-            >
-              <div className="overflow-y-auto sg-table-scroll">
-                <table
-                  className="w-full text-left border-collapse"
-                  style={{ minWidth: "700px" }}
-                >
-                  <thead className="bg-[#2A8E9E] sticky top-0 z-10">
-                    <tr className="text-white">
-                      <th className="px-6 py-4 font-semibold text-center text-sm">Title</th>
-                      <th className="px-6 py-4 font-semibold text-center text-sm">Submitted By</th>
-                      <th className="px-6 py-4 font-semibold text-center text-sm">Year</th>
-                      <th className="px-6 py-4 font-semibold text-center text-sm">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {loading && (
-                      <tr>
-                        <td colSpan="4" className="py-20 text-center text-gray-400">
-                          Processing...
+            {/* Table */}
+            <div style={{ backgroundColor: "white", borderRadius: "20px", overflow: "hidden", border: "1px solid #e2e8ec" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead style={{ backgroundColor: "#2A8E9E", color: "white" }}>
+                  <tr>
+                    <th style={{ padding: "16px", textAlign: "center" }}>Title</th>
+                    <th style={{ padding: "16px", textAlign: "center" }}>Submitted By</th>
+                    <th style={{ padding: "16px", textAlign: "center" }}>Year</th>
+                    <th style={{ padding: "16px", textAlign: "center" }}>Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {loading ? (
+                    <tr><td colSpan="4" style={{ padding: "40px", textAlign: "center", color: "#94a3b8" }}>Loading...</td></tr>
+                  ) : (view === "list" ? suggestionList : historyList)
+                    .filter(item => item.title.toLowerCase().includes(searchTerm.toLowerCase()))
+                    .map((item) => (
+                      <tr key={item.suggestion_id || item.record_id} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                        <td style={{ padding: "16px", textAlign: "center", fontWeight: 700, color: "#023347" }}>{item.title}</td>
+                        <td style={{ padding: "16px", textAlign: "center", color: "#64748b" }}>{item.name}</td>
+                        <td style={{ padding: "16px", textAlign: "center", color: "#64748b" }}>{item.year}</td>
+                        <td style={{ padding: "16px", textAlign: "center" }}>
+                          <button
+                            onClick={() => handleViewDetail(item.suggestion_id || item.record_id, view)}
+                            style={{ padding: "8px 20px", backgroundColor: "#023347", color: "white", borderRadius: "8px", border: "none", cursor: "pointer", fontSize: "13px", fontWeight: 600 }}
+                          >
+                            View
+                          </button>
                         </td>
                       </tr>
-                    )}
-
-                    {/* Overall Suggestions Tab */}
-                    {!loading &&
-                      dashboardTab === "overall" &&
-                      filteredList.map((item) => (
-                        <tr key={item.suggestion_id} className="hover:bg-gray-50">
-                          <td className="px-6 py-5 text-[#023347] font-bold text-center">
-                            {item.title}
-                          </td>
-                          <td className="px-6 py-5 text-center text-gray-600 text-sm">
-                            {item.name}
-                          </td>
-                          <td className="px-6 py-5 text-center text-gray-600 text-sm">
-                            {item.year}
-                          </td>
-                          <td className="px-6 py-5 text-center">
-                            <button
-                              onClick={() => handleViewDetail(item.suggestion_id, "overall")}
-                              className="bg-[#023347] text-white px-6 py-2 rounded-md text-sm font-semibold hover:bg-[#2A8E9E] transition-colors"
-                            >
-                              View
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    {!loading && dashboardTab === "overall" && filteredList.length === 0 && (
-                      <tr>
-                        <td colSpan="4" className="py-20 text-center text-gray-400">
-                          No suggestions found.
-                        </td>
-                      </tr>
-                    )}
-
-                    {/* Acknowledge Suggestions Tab */}
-                    {!loading &&
-                      dashboardTab === "acknowledge" &&
-                      filteredAckList.map((item) => (
-                        <tr key={item.suggestion_id} className="hover:bg-gray-50">
-                          <td className="px-6 py-5 text-[#023347] font-bold text-center">
-                            {item.title}
-                          </td>
-                          <td className="px-6 py-5 text-center text-gray-600 text-sm">
-                            {item.name}
-                          </td>
-                          <td className="px-6 py-5 text-center text-gray-600 text-sm">
-                            {item.year}
-                          </td>
-                          <td className="px-6 py-5 text-center">
-                            <button
-                              onClick={() => handleViewDetail(item.suggestion_id, "acknowledge")}
-                              className="bg-[#023347] text-white px-6 py-2 rounded-md text-sm font-semibold hover:bg-[#2A8E9E] transition-colors"
-                            >
-                              View
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    {!loading &&
-                      dashboardTab === "acknowledge" &&
-                      filteredAckList.length === 0 && (
-                        <tr>
-                          <td colSpan="4" className="py-20 text-center text-gray-400">
-                            No acknowledge suggestions found.
-                          </td>
-                        </tr>
-                      )}
-                  </tbody>
-                </table>
-              </div>
+                    ))}
+                </tbody>
+              </table>
             </div>
           </>
-        )}
-
-        {/* ── DETAIL VIEW ── */}
-        {view === "detail" && selectedItem && renderDetailCard()}
-
-        {/* ── HISTORY VIEW ── */}
-        {view === "history" && (
-          <>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "24px",
-              }}
-            >
-              <h1 style={{ color: "#023347", fontSize: "24px", fontWeight: 800 }}>
-                Suggestion Records
-              </h1>
-              <button
-                onClick={() => setView("list")}
-                className="h-11 px-6 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5"
-              >
-                ← Back
-              </button>
-            </div>
-
-            {/* History Tabs */}
-            <div
-              style={{
-                display: "flex",
-                gap: "28px",
-                borderBottom: "2px solid #eee",
-                marginBottom: "24px",
-              }}
-            >
-              {[
-                { key: "rejected", label: "Rejected Suggestions" },
-                { key: "resolved", label: "Resolved Suggestions" },
-              ].map((tab) => (
-                <button
-                  key={tab.key}
-                  onClick={() => setHistoryTab(tab.key)}
-                  style={{
-                    paddingBottom: "10px",
-                    fontSize: "14px",
-                    fontWeight: historyTab === tab.key ? 700 : 500,
-                    color: historyTab === tab.key ? "#023347" : "#6b7280",
-                    background: "none",
-                    border: "none",
-                    borderBottom:
-                      historyTab === tab.key
-                        ? "2px solid #023347"
-                        : "2px solid transparent",
-                    marginBottom: "-2px",
-                    cursor: "pointer",
-                    transition: "color 0.2s",
-                    whiteSpace: "nowrap",
-                    fontFamily: "'Poppins', sans-serif",
-                  }}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-
-            {/* History Table */}
-            <div
-              className="bg-white rounded-2xl shadow-sm border border-[#2A8E9E]/20 overflow-hidden flex flex-col"
-              style={{ maxHeight: "calc(100vh - 220px)" }}
-            >
-              <div className="overflow-y-auto sg-table-scroll">
-                <table
-                  className="w-full text-left border-collapse"
-                  style={{ minWidth: "600px" }}
-                >
-                  <thead className="bg-[#2A8E9E] sticky top-0 z-10">
-                    <tr className="text-white">
-                      <th className="px-6 py-4 font-semibold text-center text-sm">Title</th>
-                      <th className="px-6 py-4 font-semibold text-center text-sm">Name</th>
-                      <th className="px-6 py-4 font-semibold text-center text-sm">Year</th>
-                      <th className="px-6 py-4 font-semibold text-center text-sm">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {historyLoading ? (
-                      <tr>
-                        <td colSpan="4" className="py-20 text-center text-gray-400">
-                          Loading...
-                        </td>
-                      </tr>
-                    ) : historyCurrentList.length === 0 ? (
-                      <tr>
-                        <td colSpan="4" className="py-20 text-center text-gray-400">
-                          No records found.
-                        </td>
-                      </tr>
-                    ) : (
-                      historyCurrentList.map((item) => (
-                        <tr key={item.suggestion_id} className="hover:bg-gray-50">
-                          <td className="px-6 py-5 text-[#023347] font-bold text-center">
-                            {item.title}
-                          </td>
-                          <td className="px-6 py-5 text-center text-gray-600 text-sm">
-                            {item.name}
-                          </td>
-                          <td className="px-6 py-5 text-center text-gray-600 text-sm">
-                            {item.year}
-                          </td>
-                          <td className="px-6 py-5 text-center">
-                            <button
-                              onClick={() => handleViewDetail(item.suggestion_id, "history")}
-                              className="bg-[#023347] text-white px-6 py-2 rounded-md text-sm font-semibold hover:bg-[#2A8E9E] transition-colors"
-                            >
-                              View
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </>
+        ) : (
+          renderDetailCard()
         )}
       </main>
     </div>
   );
 }
+
+const TabBtn = ({ active, label, onClick }) => (
+  <button
+    onClick={onClick}
+    style={{
+      paddingBottom: "10px",
+      fontSize: "14px",
+      fontWeight: active ? 700 : 500,
+      color: active ? "#023347" : "#6b7280",
+      background: "none",
+      border: "none",
+      borderBottom: active ? "2px solid #023347" : "2px solid transparent",
+      marginBottom: "-2px",
+      cursor: "pointer",
+    }}
+  >
+    {label}
+  </button>
+);

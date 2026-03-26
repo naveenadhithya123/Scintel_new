@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-function Activities() {
+function ActivitiesDetail() {
   const navigate = useNavigate();
   const { batch } = useParams(); 
   
@@ -10,6 +10,7 @@ function Activities() {
   const sectionRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
 
+  // 1. DATA FETCHING
   useEffect(() => {
     const fetchBatchData = async () => {
       try {
@@ -23,13 +24,13 @@ function Activities() {
         setLoading(false);
       }
     };
-
     if (batch) fetchBatchData();
   }, [batch]);
 
+  // 2. ENTRANCE REVEAL
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => setIsVisible(entry.isIntersecting),
+      ([entry]) => { if (entry.isIntersecting) setIsVisible(true); },
       { threshold: 0.1 }
     );
     if (sectionRef.current) observer.observe(sectionRef.current);
@@ -37,76 +38,115 @@ function Activities() {
   }, []);
 
   return (
-    <div ref={sectionRef} className='min-h-screen bg-[#F5F9FA] flex flex-col font-sans py-12 perspective-[1000px] relative z-40 select-none'>
-      <div className='max-w-7xl mx-auto px-6 md:px-12 w-full'>
+    <div 
+      ref={sectionRef} 
+      className="relative min-h-screen bg-[#FDFCFB] text-[#1A1A1A] font-poppins selection:bg-[#D4AF37]/20 overflow-hidden flex flex-col"
+    >
+      {/* --- AMBIENT DEPTH LAYER --- */}
+      <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-[#D4AF37]/5 via-transparent to-transparent pointer-events-none" />
+
+      <main className="max-w-[1500px] mx-auto px-6 md:px-10 py-16 relative z-10 w-full">
         
-        <div className="pb-8 flex justify-between items-end">
-          <h1 className={`text-[40px] font-extrabold text-[#023347] tracking-tight transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
-            {batch} Events
-          </h1>
+        {/* --- PROFESSIONAL HEADER SECTION --- */}
+        <header className="mb-16 flex flex-col md:flex-row items-start md:items-end justify-between gap-8 border-b border-[#023347]/5 pb-10">
+          <div className="max-w-2xl">
+            <div className="flex items-center gap-4 mb-4">
+              <span className={`text-[10px] font-bold tracking-[0.5em] uppercase text-[#D4AF37] transition-all duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+                Archive Selection
+              </span>
+              <div className={`h-[1px] bg-[#D4AF37]/30 transition-all duration-[1.5s] ${isVisible ? 'w-12' : 'w-0'}`} />
+            </div>
+            
+            <h1 className={`text-4xl md:text-6xl font-semibold font-poppins text-[#023347] tracking-tight transition-all duration-[1200ms] ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}>
+              {batch} <span className="bg-gradient-to-r from-[#D4AF37] via-[#B8860B] to-[#D4AF37] bg-clip-text text-transparent">Records</span>
+            </h1>
+          </div>
 
           <button
             onClick={() => navigate(-1)}
-            className={`flex items-center gap-2 bg-[#023347] text-white px-6 py-2 rounded-xl text-xs font-bold shadow-sm mb-3
-              transition-all duration-300 ease-out
-              hover:bg-[#388E9C] hover:shadow-lg hover:scale-105 active:scale-95
-              transform ${isVisible ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0"}
-            `}
-            style={{ transitionDuration: "1000ms", transitionTimingFunction: "cubic-bezier(0.22,1,0.36,1)" }}
+            className={`group flex items-center gap-3 bg-[#023347] text-white px-8 py-3.5 rounded-2xl text-[10px] font-bold tracking-[0.2em] uppercase transition-all duration-500 hover:bg-[#D4AF37] hover:shadow-xl hover:shadow-[#D4AF37]/20 active:scale-95 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-3.5 h-3.5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M19 12H5M5 12l7 7M5 12l7-7" />
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
-            Back
+            Go Back
           </button>
-        </div>
+        </header>
 
-        {loading ? (
-          <div className="text-center py-20 text-gray-500">Loading activities...</div>
-        ) : (
-          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8'>
-            {activities.map((item, index) => (
-              <div
+        {/* --- MATCHED CORPORATE GRID (Compact Size) --- */}
+        <div className="max-w-7xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+          {loading ? (
+             [...Array(6)].map((_, i) => (
+              <div key={i} className="aspect-video bg-black/5 rounded-[2rem] animate-pulse" />
+            ))
+          ) : (
+            activities.map((item, index) => (
+              <article
                 key={item.activity_id || index}
                 onClick={() => navigate(`/activities/event/${item.activity_id}`)}
-                className={`group relative bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm flex flex-col cursor-pointer
-                  transform-gpu transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]
-                  hover:-translate-y-2 hover:shadow-2xl hover:border-[#388E9C]/20 hover:scale-[1.02]
-                  ${isVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-24 scale-95"}`}
-                style={{ transitionDelay: `${index * 50}ms` }}
+                className={`group relative p-3 rounded-[2rem] border border-black/5 bg-white/[0.02] backdrop-blur-[4px] cursor-pointer transition-all duration-700 hover:border-[#D4AF37]/40 hover:shadow-2xl hover:shadow-[#D4AF37]/10 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}
+                style={{ 
+                  transitionDelay: `${(index % 3) * 150}ms`,
+                  animation: isVisible ? `gentle-float ${4 + (index % 3)}s ease-in-out infinite alternate` : 'none',
+                  animationDelay: `${index * 0.1}s`
+                }}
               >
-                <div className='w-full h-56 overflow-hidden relative bg-gray-200'>
+                {/* Image Frame - Matched to Glories Aspect Ratio */}
+                <div className="relative aspect-video rounded-[1.5rem] overflow-hidden mb-5">
                   <img
                     src={item.event_image_url || 'https://via.placeholder.com/600x400'}
                     alt={item.title}
-                    className='w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110'
+                    className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-all duration-[1.5s] ease-out group-hover:scale-105"
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#023347]/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                 </div>
 
-                <div className='px-6 py-6 flex-1 flex flex-col'>
-                  <h2 className='text-xl font-bold text-[#023347] mb-2 group-hover:text-[#388E9C] transition-colors duration-300'>
+                {/* Content Area - Professional Sans-Serif */}
+                <div className="px-4 pb-4 font-sans">
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="text-[9px] font-bold text-[#D4AF37] tracking-[0.3em] uppercase">
+                      Ref. {String(index + 1).padStart(2, '0')}
+                    </span>
+                  </div>
+                  
+                  <h3 className="text-xl font-bold text-[#023347] mb-3 tracking-tight group-hover:text-[#B8860B] transition-colors duration-500 line-clamp-1">
                     {item.title}
-                  </h2>
-                  <p className='text-sm text-[#3C3E40] leading-relaxed opacity-80'>
+                  </h3>
+                  
+                  <p className="text-[13px] text-[#023347]/60 leading-relaxed font-medium line-clamp-2">
                     {item.description}
                   </p>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+
+                {/* Aesthetic Dot Marker */}
+                <div className="absolute top-6 right-6 w-1.5 h-1.5 rounded-full bg-[#D4AF37]/10 group-hover:bg-[#D4AF37] transition-all duration-500" />
+              </article>
+            ))
+          )}
+        </div>
+      </main>
+
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .font-sans { font-family: 'Poppins', sans-serif; }
+
+        @keyframes gentle-float {
+          0% { transform: translateY(0px); }
+          100% { transform: translateY(-12px); }
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #FDFCFB; }
+        ::-webkit-scrollbar-thumb { 
+          background: #02334715; 
+          border-radius: 20px; 
+        }
+        ::-webkit-scrollbar-thumb:hover { background: #D4AF37; }
+      `}</style>
     </div>
   );
 }
 
-export default Activities;
+export default ActivitiesDetail;

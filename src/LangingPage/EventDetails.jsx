@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 
 const EventDetails = () => {
-  const { id } = useParams(); 
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [eventData, setEventData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const sectionRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     const fetchEvent = async () => {
       try {
         setLoading(true);
-        // Using your localhost API structure
         const response = await fetch(`http://localhost:3000/api/activities/event/${id}`);
         const data = await response.json();
         setEventData(data);
@@ -20,102 +22,159 @@ const EventDetails = () => {
         setLoading(false);
       }
     };
-
     if (id) fetchEvent();
   }, [id]);
 
-  if (loading) return <div className="p-10 text-center font-bold">Loading Event Details...</div>;
-  if (!eventData) return <div className="p-10 text-center">Event not found.</div>;
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setIsVisible(true); },
+      { threshold: 0.1 }
+    );
+    if (sectionRef.current) observer.observe(sectionRef.current);
+    return () => { if (sectionRef.current) observer.unobserve(sectionRef.current); };
+  }, []);
 
-  // Transform single string values into arrays for the gallery
+  if (loading) return (
+    <div className="min-h-screen bg-[#FDFCFB] flex items-center justify-center">
+      <div className="w-12 h-12 border-4 border-[#D4AF37]/20 border-t-[#D4AF37] rounded-full animate-spin" />
+    </div>
+  );
+
+  if (!eventData) return <div className="min-h-screen bg-[#FDFCFB] flex items-center justify-center font-serif text-[#023347]">Record Not Found.</div>;
+
   const photos = eventData.event_image_url ? [eventData.event_image_url] : [];
-  
+
   return (
-    <div className="max-w-5xl mx-auto p-6 md:p-12 bg-white text-slate-800">
+    <div ref={sectionRef} className="relative min-h-screen bg-[#FDFCFB] text-[#023347] font-poppins selection:bg-[#D4AF37]/20 overflow-x-hidden">
       
-      {/* 1. Header & Description (Always Visible) */}
-      <section className="mb-10">
-        <h1 className="text-3xl font-bold text-[#0a2e3f] mb-2">{eventData.title}</h1>
-        <p className="text-sm font-semibold text-blue-600 mb-6 italic tracking-wide">Batch: {eventData.batch}</p>
-        <h2 className="text-lg font-bold text-[#0a2e3f] mb-2">Description</h2>
-        <p className="text-sm text-gray-600 leading-relaxed max-w-3xl">{eventData.description}</p>
-      </section>
+      {/* --- 4. AMBIENT LIGHTING (God Ray) --- */}
+      <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-[#D4AF37]/10 via-transparent to-transparent pointer-events-none" />
 
-      {/* 2. Resource Person - Conditional Rendering */}
-      {eventData.resource_person_name && (
-        <section className="mb-10 animate-fade-in">
-          <h2 className="text-lg font-bold text-[#0a2e3f] mb-4">Resource Person</h2>
-          <div className="flex flex-col md:flex-row gap-8">
-            <div className="w-full md:w-1/2 aspect-video bg-[#0a2e3f] rounded-lg overflow-hidden">
-              <img 
-                src={`/images/${eventData.resource_person_image_url}`} 
-                alt={eventData.resource_person_name} 
-                className="w-full h-full object-cover"
-                onError={(e) => e.target.style.display = 'none'} 
-              />
-            </div>
-            <div className="md:w-1/2">
-              <h3 className="text-md font-bold text-[#0a2e3f]">{eventData.resource_person_name}</h3>
-              <p className="text-xs text-gray-600 mt-3 leading-relaxed">{eventData.resource_person_description}</p>
-            </div>
+      <main className="max-w-[1500px] mx-auto px-6 md:px-12 py-20 relative z-10">
+        
+        {/* --- 1. UNIFIED HEADER SECTION --- */}
+        <header className="mb-16 border-b border-[#023347]/5 pb-12 flex flex-col md:flex-row justify-between items-end gap-8">
+          <div className="max-w-3xl">
+            <span className={`text-[10px] font-bold tracking-[0.5em] uppercase text-[#D4AF37] mb-5 block transition-all duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+              Batch Archive: {eventData.batch}
+            </span>
+            <h1 className={`font-serif text-4xl md:text-6xl font-semibold leading-tight transition-all duration-[1200ms] delay-200 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
+              {eventData.title.split(' ').slice(0, -1).join(' ')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-[#B8860B]">{eventData.title.split(' ').pop()}</span>
+            </h1>
+            <p className={`mt-6 text-[#023347]/70 leading-relaxed max-w-2xl transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+              {eventData.description}
+            </p>
           </div>
-        </section>
-      )}
 
-      {/* 3. Participants */}
-      <section className="mb-10">
-        <h2 className="text-lg font-bold text-[#0a2e3f] mb-1">Participants</h2>
-        <p className="text-sm text-gray-500">{eventData.participants} Students</p>
-      </section>
+          <button
+            onClick={() => navigate(-1)}
+            className="group flex items-center gap-3 bg-[#023347] text-white px-10 py-4 rounded-2xl text-[11px] font-bold tracking-[0.2em] uppercase transition-all duration-500 hover:bg-[#D4AF37] hover:shadow-2xl hover:shadow-[#D4AF37]/20 active:scale-95"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 transition-transform group-hover:-translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              <path d="M19 12H5M5 12l7 7M5 12l7-7" />
+            </svg>
+            Back to Batch
+          </button>
+        </header>
 
-      {/* 4. Event Gallery */}
-      {photos.length > 0 && (
-        <section className="mb-10">
-          <h2 className="text-lg font-bold text-[#0a2e3f] mb-4">Photos</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {photos.map((photo, index) => (
-              <div key={index} className="aspect-video bg-[#0a2e3f] rounded-lg overflow-hidden">
-                 <img src={`/images/${photo}`} alt="Event Gallery" className="w-full h-full object-cover" />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+          
+          {/* LEFT COLUMN: Media & Participants */}
+          <div className="lg:col-span-7 space-y-12">
+            
+            {/* Main Gallery Frame */}
+            <section className={`transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+              <div className="flex items-center gap-4 mb-6">
+                <h2 className="text-[11px] font-bold tracking-[0.3em] uppercase text-[#D4AF37]">Event Gallery</h2>
+                <div className="h-[1px] flex-1 bg-[#D4AF37]/20" />
               </div>
-            ))}
-          </div>
-        </section>
-      )}
+              <div className="grid grid-cols-1 gap-6">
+                {photos.map((photo, index) => (
+                  <div key={index} className="group relative aspect-video rounded-[2.5rem] overflow-hidden border border-black/5 shadow-inner">
+                    <img 
+                      src={`/images/${photo}`} 
+                      className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110" 
+                      alt="Event" 
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#023347]/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                ))}
+              </div>
+            </section>
 
-      {/* 5. Winner Section - Conditional Rendering */}
-      {eventData.winner_name && (
-        <section className="mb-10 animate-fade-in">
-          <h2 className="text-lg font-bold text-[#0a2e3f] mb-4">Winner</h2>
-          <div className="flex flex-col md:flex-row gap-8">
-            <div className="w-full md:w-1/2 aspect-video bg-[#0a2e3f] rounded-lg overflow-hidden">
-              <img src={`/images/${eventData.winner_image}`} alt={eventData.winner_name} className="w-full h-full object-cover" />
-            </div>
-            <div className="md:w-1/2">
-              <h3 className="text-md font-bold text-[#0a2e3f]">{eventData.winner_name}</h3>
-              <h4 className="text-xs font-bold mt-4 uppercase tracking-wider text-gray-400">Feedback</h4>
-              <p className="text-xs text-gray-600 mt-1 italic">"{eventData.winner_description}"</p>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* 6. Testimonials - Conditional Rendering */}
-      {eventData.testimonials_name && (
-        <section>
-          <h2 className="text-lg font-bold text-[#0a2e3f] mb-4">Testimonials</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-[#f8fafc] p-6 rounded-xl border border-gray-100 flex flex-col justify-between shadow-sm">
-              <p className="text-[11px] leading-relaxed font-medium text-gray-700">
-                {eventData.testimonials_feedback}
-              </p>
-              <div className="mt-6 text-right">
-                <p className="text-[10px] font-bold text-[#0a2e3f] leading-none">-{eventData.testimonials_name}</p>
-                <p className="text-[9px] font-bold text-gray-400 mt-1">{eventData.testimonials_class}</p>
+            {/* Participants Module */}
+            <div className="bg-white/[0.02] backdrop-blur-[4px] border border-black/5 rounded-[2rem] p-8 flex items-center justify-between">
+              <div>
+                <h3 className="font-bold text-[#023347] uppercase tracking-widest text-[10px] mb-1">Engagement</h3>
+                <p className="text-2xl font-bold text-[#D4AF37]">{eventData.participants} <span className="text-sm font-medium text-[#023347]/50 italic">Students Enrolled</span></p>
+              </div>
+              <div className="w-12 h-12 rounded-full border border-[#D4AF37]/20 flex items-center justify-center">
+                 <div className="w-2 h-2 rounded-full bg-[#D4AF37] animate-ping" />
               </div>
             </div>
           </div>
-        </section>
-      )}
+
+          {/* RIGHT COLUMN: Personnel & Recognition */}
+          <div className="lg:col-span-5 space-y-10">
+            
+            {/* Resource Person: Corporate Glass Module */}
+            {eventData.resource_person_name && (
+              <section className={`group bg-white/[0.02] backdrop-blur-[4px] border border-black/5 rounded-[2.5rem] p-8 transition-all duration-700 hover:border-[#D4AF37]/40 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="w-2 h-8 bg-[#023347] group-hover:bg-[#D4AF37] transition-colors" />
+                  <h2 className="font-bold tracking-[0.2em] uppercase text-[11px]">Lead Facilitator</h2>
+                </div>
+                <div className="space-y-6">
+                  <div className="aspect-square w-32 rounded-3xl overflow-hidden border-2 border-[#D4AF37]/10">
+                    <img src={`/images/${eventData.resource_person_image_url}`} className="w-full h-full object-cover" alt="Facilitator" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold mb-2">{eventData.resource_person_name}</h3>
+                    <p className="text-sm text-[#023347]/60 leading-relaxed italic">"{eventData.resource_person_description}"</p>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* Winner Spotlight */}
+            {eventData.winner_name && (
+              <section className="relative overflow-hidden bg-[#023347] rounded-[2.5rem] p-10 text-white shadow-2xl shadow-[#023347]/20">
+                <div className="absolute top-0 right-0 p-8">
+                   <span className="text-[40px] opacity-10 font-serif">"</span>
+                </div>
+                <h2 className="text-[#D4AF37] font-bold tracking-[0.3em] uppercase text-[10px] mb-6">Excellence Award</h2>
+                <div className="relative z-10">
+                  <h3 className="text-2xl font-bold mb-4">{eventData.winner_name}</h3>
+                  <p className="text-sm text-white/70 leading-relaxed mb-6 italic">
+                    {eventData.winner_description}
+                  </p>
+                  <div className="h-[1px] w-12 bg-[#D4AF37] mb-2" />
+                  <p className="text-[10px] font-bold tracking-widest text-[#D4AF37] uppercase">Top Achiever</p>
+                </div>
+              </section>
+            )}
+
+            {/* Testimonials */}
+            {eventData.testimonials_name && (
+              <div className="border-l-2 border-[#D4AF37]/30 pl-8 py-4">
+                <p className="text-sm text-[#023347]/80 italic leading-relaxed mb-4">
+                  "{eventData.testimonials_feedback}"
+                </p>
+                <p className="font-bold text-[11px] uppercase tracking-widest text-[#023347]">
+                  — {eventData.testimonials_name}
+                </p>
+                <p className="text-[9px] text-[#D4AF37] font-bold uppercase tracking-tighter mt-1">{eventData.testimonials_class}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
+
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;500;600;700;800&display=swap');
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .font-poppins { font-family: 'Poppins', sans-serif; }
+      `}</style>
     </div>
   );
 };

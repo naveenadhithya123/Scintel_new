@@ -4,45 +4,69 @@ import { useNavigate, useLocation } from "react-router-dom";
 export default function SuggesstionVerification() {
   const location = useLocation();
   const navigate = useNavigate();
-  
-  // 1. Data passed from Suggestions.jsx via state
   const suggestionData = location.state?.suggestionData;
-  const proofFile = location.state?.proofFile;
 
   const [showOTP, setShowOTP] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   
-  // 2. State for current verification form
+  // Resend Timer State
+  const [timer, setTimer] = useState(300); // 5 minutes in seconds
+  const [canResend, setCanResend] = useState(false);
+
+  // Custom Toast State
+  const [toast, setToast] = useState({ show: false, type: '', message: '', subMessage: '' });
+
   const [formData, setFormData] = useState({
-    name: "", 
-    email: "", 
-    phone_number: "", 
-    year: "", 
-    section: ""
+    name: "",
+    email: "",
+    phone_number: "",
+    year: "I", // Defaulting to first dropdown value
   });
-  
+
   const inputs = useRef([]);
 
-  // Redirect if user tries to access this page directly without suggestion data
   useEffect(() => {
-    if (!suggestionData) {
-      alert("No suggestion data found. Returning to form.");
-      navigate("/suggestions");
-    }
+    setIsVisible(true);
+    if (!suggestionData) navigate("/suggestions");
   }, [suggestionData, navigate]);
 
+  // Timer Logic
+  useEffect(() => {
+    let interval;
+    if (showOTP && timer > 0) {
+      interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
+    } else if (timer === 0) {
+      setCanResend(true);
+      clearInterval(interval);
+    }
+    return () => clearInterval(interval);
+  }, [showOTP, timer]);
+
+  const showFeedback = (type, message, subMessage) => {
+    setToast({ show: true, type, message, subMessage });
+    if (type === 'success') {
+        setTimeout(() => navigate("/"), 3000);
+    } else {
+        setTimeout(() => setToast({ ...toast, show: false }), 4000);
+    }
+  };
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    // Mobile Number Validation: Only numbers, max 10 digits
+    if (name === "phone_number") {
+      const val = value.replace(/\D/g, "");
+      if (val.length <= 10) setFormData({ ...formData, [name]: val });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleVerifyRequest = async (e) => {
-    e.preventDefault();
-    
-    // Manual validation check to prevent "All fields required" error
-    const emptyFields = Object.values(formData).some(val => val.trim() === "");
-    if (emptyFields) {
-      alert("All fields are required");
-      return;
+    if (e) e.preventDefault();
+    if (Object.values(formData).some(val => val.trim() === "")) {
+        return showFeedback('error', 'SYSTEM INTERRUPTION', 'Please complete all identification fields.');
     }
 
     try {
@@ -53,210 +77,183 @@ export default function SuggesstionVerification() {
         body: JSON.stringify({ email: formData.email }),
       });
       if (response.ok) {
-        setShowOTP(true);
+          setShowOTP(true);
+          setTimer(300);
+          setCanResend(false);
       } else {
-        alert("Failed to send OTP. Please check the email provided.");
+          showFeedback('error', 'HANDSHAKE FAILED', 'Check email credentials and retry.');
       }
     } catch (error) {
-      console.error("Error:", error);
-      alert("Network error. Please try again later.");
+        showFeedback('error', 'NETWORK ERROR', 'Unable to reach security server.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleOtpChange = (e, index) => {
-    if (e.target.value.length === 1 && index < 5) {
-      inputs.current[index + 1].focus();
-    }
+    if (e.target.value.length === 1 && index < 5) inputs.current[index + 1].focus();
   };
 
-  // ✅ CHANGE 1: Handle backspace to clear current field and move focus back
   const handleOtpKeyDown = (e, index) => {
-    if (e.key === "Backspace") {
-      e.preventDefault();
-      if (inputs.current[index].value !== "") {
-        // If current field has a value, just clear it
-        inputs.current[index].value = "";
-      } else if (index > 0) {
-        // If current field is already empty, move to previous and clear it
-        inputs.current[index - 1].focus();
-        inputs.current[index - 1].value = "";
-      }
-    }
+    if (e.key === "Backspace" && !e.target.value && index > 0) inputs.current[index - 1].focus();
   };
 
   const handleSubmitOTP = async () => {
     const otpValue = inputs.current.map(input => input.value).join("");
-    if (otpValue.length < 6) return alert("Enter full OTP");
-    
+    if (otpValue.length < 6) return showFeedback('error', 'INCOMPLETE OTP', '6-digit protocol required.');
+
     setLoading(true);
     try {
-      // Step 1: Verify the OTP
       const verifyRes = await fetch("http://localhost:3000/api/verify-otp", {
-        method: "POST", 
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: formData.email, otp: otpValue }),
       });
-      
       const verifyResult = await verifyRes.json();
 
       if (verifyRes.ok && verifyResult.verified) {
-        // Step 2: Prepare Multipart Form Data
-        const finalPayload = new FormData();
-        
-        // Append Suggestion Data (title, description, etc.)
-        Object.keys(suggestionData).forEach(key => {
-          finalPayload.append(key, suggestionData[key]);
-        });
+        const finalPayload = {
+          title: suggestionData.title,
+          description: suggestionData.description,
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone_number,
+          year: formData.year
+        };
 
-        // Append User Data (name, email, year, etc.)
-        Object.keys(formData).forEach(key => {
-          finalPayload.append(key, formData[key]);
-        });
-
-        // Append File
-        if (proofFile) {
-          finalPayload.append('proof', proofFile);
-        }
-
-        // Step 3: Final Submit to Database
         const saveRes = await fetch("http://localhost:3000/api/add-suggestion", {
           method: "POST",
-          // NOTE: Do NOT set Content-Type header manually for FormData
-          body: finalPayload, 
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(finalPayload),
         });
 
         if (saveRes.ok) {
-          alert("Success! Your suggestion has been recorded.");
-          navigate("/"); 
+            showFeedback('success', 'ARCHIVAL COMPLETE', 'Your suggestion has been securely logged.');
         } else {
-          const err = await saveRes.json();
-          alert(`Database Error: ${err.message || "Submission failed"}`);
+            showFeedback('error', 'LOGGING FAILED', 'Verification passed but record could not be saved.');
         }
       } else {
-        alert(verifyResult.message || "Invalid or expired OTP");
+          showFeedback('error', 'INVALID PROTOCOL', verifyResult.message || 'The OTP entered is incorrect.');
       }
     } catch (error) {
-      console.error("Submission error:", error);
-      alert("An unexpected error occurred.");
+        showFeedback('error', 'SYSTEM ERROR', 'An unexpected interruption occurred.');
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ CHANGE 2: Cancel handler to close OTP modal and clear OTP inputs
-  const handleCancelOTP = () => {
-    inputs.current.forEach(input => {
-      if (input) input.value = "";
-    });
-    setShowOTP(false);
+  const formatTime = (seconds) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F9FA] flex items-center justify-center px-6 py-12 relative">
-      <div className="w-full max-w-5xl bg-white rounded-2xl shadow-sm p-10 border border-gray-100">
-        <h2 className="text-2xl font-semibold text-[#023347] mb-8">Verification</h2>
-        <form onSubmit={handleVerifyRequest}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <label className="block text-sm text-gray-600 mb-2">Name</label>
-              <input 
-                name="name" 
-                value={formData.name}
-                required 
-                onChange={handleChange} 
-                className="w-full border border-[#CFE8EC] rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-[#388E9C]" 
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-600 mb-2">Email</label>
-              <input 
-                name="email" 
-                value={formData.email}
-                type="email" 
-                required 
-                onChange={handleChange} 
-                className="w-full border border-[#CFE8EC] rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-[#388E9C]" 
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-600 mb-2">Mobile no.</label>
-              <input 
-                name="phone_number" 
-                value={formData.phone_number}
-                required 
-                onChange={handleChange} 
-                className="w-full border border-[#CFE8EC] rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-[#388E9C]" 
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-600 mb-2">Year</label>
-              <input 
-                name="year" 
-                value={formData.year}
-                required 
-                onChange={handleChange} 
-                className="w-full border border-[#CFE8EC] rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-[#388E9C]" 
-              />
-            </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm text-gray-600 mb-2">Section</label>
-              <input 
-                name="section" 
-                value={formData.section}
-                required 
-                onChange={handleChange} 
-                className="w-full border border-[#CFE8EC] rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-[#388E9C]" 
-              />
-            </div>
-          </div>
-          <button 
-            type="submit" 
-            disabled={loading} 
-            className="mt-10 w-full bg-[#023347] text-white py-3 rounded-lg font-semibold hover:bg-[#388E9C] transition-all shadow-md"
-          >
-            {loading ? "Processing..." : "Verify"}
-          </button>
-        </form>
-      </div>
+    <div className="relative min-h-screen bg-[#FDFCFB] text-[#023347] font-sans overflow-x-hidden">
+      <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-[#D4AF37]/5 via-transparent to-transparent pointer-events-none" />
 
-      {showOTP && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
-          <div className="relative w-[500px] bg-white rounded-2xl border border-[#CDE4EC] shadow-xl flex flex-col items-center justify-center px-10 py-10">
-            <h2 className="text-xl font-semibold text-[#1C2B33] mb-8">Enter OTP</h2>
-            <div className="flex gap-4 mb-6">
-              {[...Array(6)].map((_, index) => (
-                <input 
-                  key={index} 
-                  maxLength="1" 
-                  ref={(el) => (inputs.current[index] = el)} 
-                  onChange={(e) => handleOtpChange(e, index)}
-                  onKeyDown={(e) => handleOtpKeyDown(e, index)}
-                  className="w-[50px] h-[50px] border border-[#3A9FBF] rounded-[10px] text-center text-xl outline-none focus:ring-2 focus:ring-[#3A9FBF]" 
-                />
-              ))}
-            </div>
-            {/* ✅ Submit Button */}
-            <button 
-              disabled={loading} 
-              onClick={handleSubmitOTP} 
-              className="w-full h-[50px] bg-[#0B1C3D] text-white rounded-lg text-sm hover:bg-[#142d63] transition-all mb-3"
-            >
-              {loading ? "Submitting..." : "Submit"}
-            </button>
-            {/* ✅ CHANGE 2: Cancel Button */}
-            <button 
-              disabled={loading}
-              onClick={handleCancelOTP} 
-              className="w-full h-[50px] bg-white text-[#0B1C3D] border border-[#0B1C3D] rounded-lg text-sm hover:bg-gray-100 transition-all"
-            >
-              Cancel
-            </button>
+      {/* --- FEEDBACK TOASTS --- */}
+      {toast.show && (
+        <div className="fixed top-10 right-10 z-[200] flex animate-gentle-float">
+          <div className={`w-1.5 rounded-l-full ${toast.type === 'success' ? 'bg-[#D4AF37]' : 'bg-[#8E2424]'}`} />
+          <div className="bg-white shadow-2xl p-6 rounded-r-2xl border border-black/5 min-w-[300px]">
+             <h5 className="font-sans font-bold text-[11px] tracking-widest uppercase mb-1">{toast.message}</h5>
+             <p className="text-[13px] text-[#023347]/70">{toast.subMessage}</p>
           </div>
         </div>
       )}
+
+      <main className="max-w-[1500px] mx-auto px-6 md:px-12 py-16 relative z-10">
+        <header className="mb-16 border-b border-[#023347]/5 pb-10">
+          <span className="text-[10px] font-bold tracking-[0.5em] uppercase text-[#D4AF37] mb-4 block">Security Protocol</span>
+          <h1 className="font-serif text-5xl font-semibold leading-tight">Identity <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] via-[#B8860B] to-[#D4AF37]">Verification</span></h1>
+        </header>
+
+        <div className={`bg-white/[0.02] backdrop-blur-[4px] border border-black/5 rounded-[2rem] p-10 md:p-16 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+          <div className="mb-10 p-6 bg-[#023347]/5 rounded-2xl border-l-4 border-[#D4AF37]">
+            <h4 className="text-[10px] font-bold uppercase tracking-widest text-[#D4AF37] mb-2">Suggestion Preview:</h4>
+            <p className=" text-xl text-[#023347]">{suggestionData?.title}</p>
+          </div>
+
+          <form onSubmit={handleVerifyRequest} className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+                <div>
+                    <label className="text-[10px] font-bold tracking-widest uppercase text-[#023347]/50 mb-3 block">Full Name</label>
+                    <input name="name" type="text" value={formData.name} onChange={handleChange} className="w-full bg-transparent border-b border-[#023347]/10 py-3 font-sans text-lg outline-none focus:border-[#D4AF37] transition-colors" />
+                </div>
+                <div>
+                    <label className="text-[10px] font-bold tracking-widest uppercase text-[#023347]/50 mb-3 block">Institutional Email</label>
+                    <input name="email" type="email" value={formData.email} onChange={handleChange} className="w-full bg-transparent border-b border-[#023347]/10 py-3 font-sans text-lg outline-none focus:border-[#D4AF37] transition-colors" />
+                </div>
+                <div>
+                    <label className="text-[10px] font-bold tracking-widest uppercase text-[#023347]/50 mb-3 block">Contact Number</label>
+                    <input name="phone_number" type="tel" value={formData.phone_number} onChange={handleChange} placeholder="0000000000" className="w-full bg-transparent border-b border-[#023347]/10 py-3 font-sans text-lg outline-none focus:border-[#D4AF37] transition-colors" />
+                </div>
+                <div>
+                    <label className="text-[10px] font-bold tracking-widest uppercase text-[#023347]/50 mb-3 block">Academic Year</label>
+                    <select name="year" value={formData.year} onChange={handleChange} className="w-full bg-transparent border-b border-[#023347]/10 py-3 font-sans text-lg outline-none focus:border-[#D4AF37] transition-colors cursor-pointer appearance-none">
+                        <option value="I">I</option>
+                        <option value="II">II</option>
+                        <option value="III">III</option>
+                        <option value="IV">IV</option>
+                    </select>
+                </div>
+            </div>
+
+            <div className="pt-10 flex justify-end">
+              <button type="submit" disabled={loading} className="bg-[#023347] text-white px-16 py-4 rounded-2xl text-[11px] font-bold tracking-[0.2em] uppercase transition-all hover:bg-[#D4AF37] active:scale-95 disabled:opacity-50 shadow-xl shadow-[#023347]/10 hover:shadow-[#D4AF37]/20">
+                {loading ? "Authenticating..." : "Request OTP"}
+              </button>
+            </div>
+          </form>
+        </div>
+      </main>
+
+      {/* OTP MODAL */}
+      {showOTP && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+          <div className="absolute inset-0 bg-[#023347]/40 backdrop-blur-md" />
+          <div className="relative w-full max-w-md bg-white rounded-[2.5rem] p-12 shadow-2xl border border-white/20 overflow-hidden">
+            {/* Modal Pillar */}
+            <div className="absolute left-0 top-0 w-2 h-full bg-[#023347]" />
+            
+            <div className="text-center mb-10">
+              <h2 className=" text-3xl text-[#023347]">Enter OTP</h2>
+              <p className="text-xs text-gray-400 mt-2 font-sans italic">Protocol sent to {formData.email}</p>
+            </div>
+
+            <div className="flex justify-between gap-3 mb-8">
+              {[...Array(6)].map((_, index) => (
+                <input key={index} maxLength="1" ref={(el) => (inputs.current[index] = el)} onChange={(e) => handleOtpChange(e, index)} onKeyDown={(e) => handleOtpKeyDown(e, index)} className="w-12 h-14 border border-[#023347]/10 rounded-xl text-center text-xl font-bold bg-gray-50/50 outline-none focus:border-[#D4AF37]" />
+              ))}
+            </div>
+
+            <div className="text-center mb-8">
+                {timer > 0 ? (
+                    <p className="text-[10px] font-bold tracking-widest text-gray-400 uppercase">Resend available in {formatTime(timer)}</p>
+                ) : (
+                    <button onClick={handleVerifyRequest} className="text-[10px] font-bold tracking-widest text-[#D4AF37] uppercase hover:underline">Resend OTP Now</button>
+                )}
+            </div>
+
+            <button onClick={handleSubmitOTP} disabled={loading} className="w-full bg-[#023347] text-white py-4 rounded-xl text-[11px] font-bold tracking-widest uppercase hover:bg-[#D4AF37] transition-all shadow-lg">
+              {loading ? "Verifying..." : "Confirm & Submit"}
+            </button>
+            <button onClick={() => setShowOTP(false)} className="w-full mt-4 text-[#023347]/40 text-[10px] font-bold tracking-widest uppercase hover:text-[#023347]">Cancel</button>
+          </div>
+        </div>
+      )}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;600;700&display=swap');
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .font-sans { font-family: 'Inter', sans-serif; }
+        @keyframes gentle-float {
+            0% { transform: translateY(0px); opacity: 0; }
+            20% { opacity: 1; }
+            100% { transform: translateY(-5px); }
+        }
+        .animate-gentle-float { animation: gentle-float 0.5s ease-out forwards; }
+      `}</style>
     </div>
   );
 }
