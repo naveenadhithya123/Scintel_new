@@ -79,7 +79,7 @@ export default function AdminMembers() {
             {/* Remove Batch — Delete style */}
             <button
               onClick={() => { if(window.confirm(`Remove batch ${selectedBatchYear}?`)) {} }}
-              className="h-11 px-6 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5"
+              className="h-11 px-6 bg-[#023347] text-white rounded-xl  text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5"
             >
               Remove Batch
             </button>

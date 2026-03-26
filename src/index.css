@@ -56,3 +56,6 @@ html {
 * {
   -webkit-tap-highlight-color: transparent;
 }
+* {
+  font-family: 'Poppins', sans-serif;
+}
