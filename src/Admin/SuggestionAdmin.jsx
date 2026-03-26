@@ -613,8 +613,8 @@ export default function SuggestionAdmin() {
               }}
             >
               {[
-                { key: "overall", label: "Overall Suggestions" },
-                { key: "acknowledge", label: "Acknowledge Suggestions" },
+                { key: "overall", label: "Unacknowledged Suggestions" },
+                { key: "acknowledge", label: "Acknowledged Suggestions" },
               ].map((tab) => (
                 <button
                   key={tab.key}

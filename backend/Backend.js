@@ -60,8 +60,7 @@ import AdminDenyProblemSolverRequestRoutes from "./routes/Admin_DenyProblemSolve
 import AdminDeleteSpecificBatchActivityRoutes from "./routes/Admin_DeleteSpecificBatchActivityRoutes.js";
 import AdminDeleteSpecificActivityRoutes from "./routes/Admin_DeleteSpecificActivityRoutes.js";
 
-
-
+const port = Number(process.env.PORT) || 3000;
 
 const app = express();
 
@@ -136,6 +135,6 @@ app.use("/api", AdminDenyProblemSolverRequestRoutes);
 app.use("/api", AdminDeleteSpecificBatchActivityRoutes);
 app.use("/api", AdminDeleteSpecificActivityRoutes);
 
-app.listen(3000, () => {
-  console.log("Server running on port 3000");
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });

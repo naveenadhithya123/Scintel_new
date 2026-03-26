@@ -142,7 +142,6 @@ export default function GloriesAdmin() {
   const [glories, setGlories] = useState([]);
   const [view, setView] = useState("list");
   const [editTarget, setEditTarget] = useState(null);
-  const [deleteTarget, setDeleteTarget] = useState(null);
 
   useEffect(() => { loadData(); }, []);
 
@@ -151,7 +150,29 @@ export default function GloriesAdmin() {
       const res = await fetch(API_BASE_URL);
       const json = await res.json();
       setGlories(json.data || []);
-    } catch (err) { console.error(err); }
+    } catch (err) { console.error("Error loading data:", err); }
+  };
+
+  // --- NEW DELETE LOGIC ---
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this glory?")) return;
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/${id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        // Remove from UI state immediately
+        setGlories((prev) => prev.filter((item) => item.glorie_id !== id));
+      } else {
+        const errorData = await res.json();
+        alert(errorData.message || "Failed to delete the entry.");
+      }
+    } catch (err) {
+      console.error("Delete Error:", err);
+      alert("An error occurred while deleting.");
+    }
   };
 
   const handleSaveAdd = async ({ title, description, imageFile }) => {
@@ -205,7 +226,6 @@ export default function GloriesAdmin() {
                 <h3 style={{ margin: "0 0 5px 0", fontSize: '16px' }}>{g.title}</h3>
                 <p style={{ fontSize: "12px", color: "#6b7280", height: '36px', overflow: 'hidden' }}>{g.description}</p>
 
-                {/* ── ONLY THESE BUTTONS CHANGED ── */}
                 <div className="gl-card-btns" style={{ marginTop: '12px' }}>
                   <button
                     onClick={() => { setEditTarget(g); setView("edit"); }}
@@ -214,7 +234,7 @@ export default function GloriesAdmin() {
                     Edit
                   </button>
                   <button
-                    onClick={() => { if(window.confirm("Delete?")) { /* delete logic */ } }}
+                    onClick={() => handleDelete(g.glorie_id)}
                     className="flex-1 h-11 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5"
                   >
                     Delete
