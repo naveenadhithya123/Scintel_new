@@ -12,8 +12,8 @@ export const addEvent = async (req, res) => {
       student_contact,
       event_type,
       event_link,
-      registration_start_date,   // ✅ added
-      registration_end_date      // ✅ added
+      registration_start_date,
+      registration_end_date
     } = req.body;
 
     const fileUrl = req.file?.path;
@@ -22,7 +22,66 @@ export const addEvent = async (req, res) => {
       return res.status(400).json({ message: "File upload failed" });
     }
 
-    const [data] = await sequelize.query(
+    if (!title || !event_type) {
+      return res.status(400).json({
+        message: "Title and event type are required"
+      });
+    }
+
+    let data;
+
+    if (event_type === "celebration") {
+      [data] = await sequelize.query(
+        `INSERT INTO upcoming_celebrations
+        (
+          event_title,
+          short_description,
+          event_description,
+          brochure_url,
+          start_date,
+          end_date,
+          faculty_contact,
+          student_contact
+        )
+        VALUES
+        (
+          :title,
+          :short_desc,
+          :desc,
+          :url,
+          :start,
+          :end,
+          :faculty,
+          :student
+        )
+        RETURNING *`,
+        {
+          replacements: {
+            title,
+            short_desc: short_description || null,
+            desc: description || null,
+            url: fileUrl,
+            start: start_date || null,
+            end: end_date || null,
+            faculty: faculty_contact || null,
+            student: student_contact || null
+          }
+        }
+      );
+
+      return res.status(201).json({
+        message: "Celebration added successfully",
+        data: data[0]
+      });
+    }
+
+    if (event_type !== "event") {
+      return res.status(400).json({
+        message: "Invalid event type"
+      });
+    }
+
+    [data] = await sequelize.query(
       `INSERT INTO upcoming_events 
       (
         event_title, 
@@ -57,17 +116,17 @@ export const addEvent = async (req, res) => {
       {
         replacements: {
           title,
-          short_desc: short_description,
-          desc: description,
+          short_desc: short_description || null,
+          desc: description || null,
           url: fileUrl,
-          start: start_date,
-          end: end_date,
-          faculty: faculty_contact,
-          student: student_contact,
+          start: start_date || null,
+          end: end_date || null,
+          faculty: faculty_contact || null,
+          student: student_contact || null,
           type: event_type,
-          link: event_link,
-          reg_start: registration_start_date || null,  // ✅ safe handling
-          reg_end: registration_end_date || null       // ✅ safe handling
+          link: event_link || null,
+          reg_start: registration_start_date || null,
+          reg_end: registration_end_date || null
         }
       }
     );

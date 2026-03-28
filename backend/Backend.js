@@ -2,8 +2,6 @@ import express from "express";
 import cors from "cors";
 import sequelize from "./config/database.js";
 
-import upcomingEventRoutes from "./routes/upcomingEventRoutes.js";
-import upcomingEventWithSpecificIdRoutes from "./routes/upcomingEventFetchWithSpecificIdRoutes.js";
 import activityFetchWithBatchRoutes from "./routes/activityFetchWithBatchRoutes.js";
 import activityFetchWithSpecificBatchRoutes from "./routes/activityFetchWithSpecificBatchRoutes.js";
 import activityFetchWithSpecificEventRoutes from "./routes/activityFetchWithSpecificEventRoutes.js";
@@ -85,8 +83,6 @@ sequelize.authenticate()
     console.error("Unable to connect to database:", error);
   });
 
-app.use("/api", upcomingEventRoutes);
-app.use("/api", upcomingEventWithSpecificIdRoutes);
 app.use("/api", activityFetchWithBatchRoutes);
 app.use("/api", activityFetchWithSpecificBatchRoutes);
 app.use("/api", activityFetchWithSpecificEventRoutes);
@@ -150,6 +146,6 @@ app.use("/api", AdminDenyProblemSolverRequestRoutes);
 app.use("/api", AdminDeleteSpecificBatchActivityRoutes);
 app.use("/api", AdminDeleteSpecificActivityRoutes);
 
-app.listen(3000,  () => {
+app.listen(3000, () => {
   console.log("Server running on port 3000");
 });

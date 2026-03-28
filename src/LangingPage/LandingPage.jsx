@@ -161,7 +161,7 @@ return (
 
 <Route path="/events" element={<Events />} />
 <Route path="/activities/event/:id" element={<EventDetails />} />
-<Route path="/event-register/:id" element={<EventRegister />} />
+<Route path="/event-register/:id/:type" element={<EventRegister />} />
 
 
 <Route path="/ProblemStatementVerification" element={<ProblemStatementVerification/>} />

@@ -23,6 +23,8 @@ export const getSpecificAnnouncement = async (req, res) => {
                     brochure_url,
                     start_date,
                     end_date,
+                    registration_start_date,
+                    registration_end_date,
                     faculty_contact,
                     student_contact,
                     event_link

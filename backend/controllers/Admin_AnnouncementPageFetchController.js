@@ -6,6 +6,7 @@ export const getAdminAnnouncementFeed = async (req, res) => {
         const [results] = await sequelize.query(`
 
             SELECT 
+                event_id AS id,
                 event_title AS title,
                 event_short_description AS short_description,
                 brochure_url,
@@ -15,6 +16,7 @@ export const getAdminAnnouncementFeed = async (req, res) => {
             UNION ALL
 
             SELECT 
+                event_id AS id,
                 event_title AS title,
                 short_description AS short_description,
                 brochure_url,
