@@ -4,9 +4,9 @@ import AdminSidebar from "./AdminSidebar";
 const API_BASE = "http://localhost:3000/api";
 
 export default function SuggestionAdmin() {
-  const [view, setView] = useState("list"); // "list" | "detail" | "history"
-  const [dashboardTab, setDashboardTab] = useState("unacknowledged"); // "unacknowledged" | "acknowledged"
-  const [historyTab, setHistoryTab] = useState("rejected"); // "rejected" | "resolved"
+  const [view, setView] = useState("list");
+  const [dashboardTab, setDashboardTab] = useState("unacknowledged");
+  const [historyTab, setHistoryTab] = useState("rejected");
   const [prevView, setPrevView] = useState("list");
 
   const [suggestionList, setSuggestionList] = useState([]);
@@ -17,11 +17,9 @@ export default function SuggestionAdmin() {
   const [actionLoading, setActionLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Rejection Modal state
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectionMessage, setRejectionMessage] = useState("");
 
-  // 1. Fetch Data
   useEffect(() => {
     if (view === "list") {
       fetchDashboardSuggestions();
@@ -33,8 +31,8 @@ export default function SuggestionAdmin() {
   const fetchDashboardSuggestions = async () => {
     setLoading(true);
     try {
-      const endpoint = dashboardTab === "unacknowledged" 
-        ? "/admin/suggestions/unacknowledged" 
+      const endpoint = dashboardTab === "unacknowledged"
+        ? "/admin/suggestions/unacknowledged"
         : "/admin/suggestions/acknowledged";
       const response = await fetch(`${API_BASE}${endpoint}`);
       const result = await response.json();
@@ -49,8 +47,8 @@ export default function SuggestionAdmin() {
   const fetchHistorySuggestions = async () => {
     setLoading(true);
     try {
-      const endpoint = historyTab === "rejected" 
-        ? "/admin/suggestion-records/unresolved" 
+      const endpoint = historyTab === "rejected"
+        ? "/admin/suggestion-records/unresolved"
         : "/admin/suggestion-records/resolved";
       const response = await fetch(`${API_BASE}${endpoint}`);
       const result = await response.json();
@@ -62,27 +60,24 @@ export default function SuggestionAdmin() {
     }
   };
 
-  // 2. Navigation & Detail Logic
   const handleViewDetail = async (id, source) => {
     setLoading(true);
     try {
-      const endpoint = (source === "history") 
-        ? `/admin/suggestion-records/${id}` 
+      const endpoint = (source === "history")
+        ? `/admin/suggestion-records/${id}`
         : `/admin/suggestions/${id}`;
-      
       const response = await fetch(`${API_BASE}${endpoint}`);
       const result = await response.json();
       setSelectedItem(result.data);
       setPrevView(source);
       setView("detail");
-    } catch (error) {
+    } catch {
       alert("Error fetching details");
     } finally {
       setLoading(false);
     }
   };
 
-  // 3. Actions (Acknowledge, Resolve, Reject)
   const handleAcknowledge = async () => {
     setActionLoading(true);
     try {
@@ -94,7 +89,7 @@ export default function SuggestionAdmin() {
         setView("list");
         setDashboardTab("acknowledged");
       }
-    } catch (error) {
+    } catch {
       alert("Failed to acknowledge");
     } finally {
       setActionLoading(false);
@@ -112,7 +107,7 @@ export default function SuggestionAdmin() {
         setView("history");
         setHistoryTab("resolved");
       }
-    } catch (error) {
+    } catch {
       alert("Failed to resolve");
     } finally {
       setActionLoading(false);
@@ -138,38 +133,59 @@ export default function SuggestionAdmin() {
         setView("history");
         setHistoryTab("rejected");
       }
-    } catch (error) {
+    } catch {
       alert("Error processing rejection");
     } finally {
       setActionLoading(false);
     }
   };
 
-  // ── RENDER DETAIL ──
+  // Base style for all dark buttons
+  const btnBase = {
+    height: "44px",
+    padding: "0 28px",
+    backgroundColor: "#023347",
+    color: "#ffffff",
+    borderRadius: "10px",
+    border: "none",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: 600,
+    transition: "background-color 0.2s",
+  };
+
+  // Base style for the Delete/red-hover button (default dark, red on hover)
+  const btnDelete = {
+    ...btnBase,
+    backgroundColor: "#023347",
+  };
+
   const renderDetailCard = () => (
     <div className="animate-fadeIn">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-        <h1 style={{ color: "#023347", fontSize: "24px", fontWeight: 800 }}>Suggestion Details</h1>
+        <h1 style={{ color: "#023347", fontSize: "24px", fontWeight: 800 }}>Suggestion Description</h1>
         <button
           onClick={() => setView(prevView === "history" ? "history" : "list")}
-          className="h-11 px-6 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:bg-[#2A8E9E] transition-all"
+          style={{ ...btnBase }}
+          onMouseEnter={e => e.currentTarget.style.backgroundColor = "#2A8E9E"}
+          onMouseLeave={e => e.currentTarget.style.backgroundColor = "#023347"}
         >
-          ← Back
+          ← Back to List
         </button>
       </div>
 
-      <div style={{ backgroundColor: "#FFFFFF", borderRadius: "20px", border: "1px solid #e2e8ec", padding: "50px shadow-sm" }}>
-        <h2 style={{ fontSize: "28px", fontWeight: 800, color: "#023347", marginBottom: "24px" }}>
+      <div style={{ backgroundColor: "#FFFFFF", borderRadius: "20px", border: "1px solid #e2e8ec", padding: "40px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+        <h2 style={{ fontSize: "22px", fontWeight: 800, color: "#023347", marginBottom: "24px" }}>
           {selectedItem.title}
         </h2>
 
-        <div style={{ backgroundColor: "#F8FAFC", padding: "25px", borderRadius: "15px", marginBottom: "30px" }}>
+        <div style={{ backgroundColor: "#F8FAFC", padding: "25px", borderRadius: "15px", marginBottom: "24px" }}>
           <p style={{ margin: 0, color: "#1e293b", lineHeight: "1.6", whiteSpace: "pre-wrap" }}>
             {selectedItem.description || selectedItem.suggestion}
           </p>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", padding: "20px", backgroundColor: "#F8FAFC", borderRadius: "15px", marginBottom: "30px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", padding: "20px", backgroundColor: "#F8FAFC", borderRadius: "15px", marginBottom: "30px" }}>
           <div><strong>Name:</strong> {selectedItem.name}</div>
           <div><strong>Email:</strong> {selectedItem.email}</div>
           <div><strong>Year/Sec:</strong> {selectedItem.year} {selectedItem.section ? `- ${selectedItem.section}` : ""}</div>
@@ -177,19 +193,26 @@ export default function SuggestionAdmin() {
         </div>
 
         {prevView !== "history" && (
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: "15px", borderTop: "1px solid #eee", paddingTop: "20px" }}>
+          // ── Changed: justifyContent "center" → "flex-end" so buttons sit at right ──
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: "16px", borderTop: "1px solid #eee", paddingTop: "24px" }}>
+
+            {/* Delete Record — dark by default, turns RED on hover */}
             <button
               onClick={() => setShowRejectModal(true)}
-              className="h-11 px-8 bg-red-50 text-red-600 rounded-xl text-sm font-bold hover:bg-red-600 hover:text-white transition-all"
+              style={{ ...btnDelete }}
+              onMouseEnter={e => e.currentTarget.style.backgroundColor = "#dc2626"}
+              onMouseLeave={e => e.currentTarget.style.backgroundColor = "#023347"}
             >
-              Reject & Delete
+              Delete Record
             </button>
-            
+
             {dashboardTab === "unacknowledged" && (
               <button
                 onClick={handleAcknowledge}
                 disabled={actionLoading}
-                className="h-11 px-8 bg-[#2A8E9E] text-white rounded-xl text-sm font-bold shadow-md hover:bg-[#023347] transition-all"
+                style={{ ...btnBase, opacity: actionLoading ? 0.7 : 1, cursor: actionLoading ? "not-allowed" : "pointer" }}
+                onMouseEnter={e => { if (!actionLoading) e.currentTarget.style.backgroundColor = "#2A8E9E"; }}
+                onMouseLeave={e => { if (!actionLoading) e.currentTarget.style.backgroundColor = "#023347"; }}
               >
                 {actionLoading ? "Processing..." : "Acknowledge"}
               </button>
@@ -198,7 +221,9 @@ export default function SuggestionAdmin() {
             <button
               onClick={handleResolve}
               disabled={actionLoading}
-              className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-bold shadow-md hover:bg-[#2A8E9E] transition-all"
+              style={{ ...btnBase, opacity: actionLoading ? 0.7 : 1, cursor: actionLoading ? "not-allowed" : "pointer" }}
+              onMouseEnter={e => { if (!actionLoading) e.currentTarget.style.backgroundColor = "#2A8E9E"; }}
+              onMouseLeave={e => { if (!actionLoading) e.currentTarget.style.backgroundColor = "#023347"; }}
             >
               {actionLoading ? "Saving..." : "Resolved"}
             </button>
@@ -208,7 +233,6 @@ export default function SuggestionAdmin() {
     </div>
   );
 
-  // ── RENDER REJECT MODAL ──
   const renderRejectModal = () => (
     <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }}>
       <div style={{ backgroundColor: "#fff", borderRadius: "20px", padding: "40px", width: "100%", maxWidth: "500px", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
@@ -219,17 +243,27 @@ export default function SuggestionAdmin() {
           onChange={(e) => setRejectionMessage(e.target.value)}
           placeholder="Type the rejection message here..."
           rows={5}
-          style={{ width: "100%", padding: "15px", borderRadius: "12px", border: "1.5px solid #e2e8ec", backgroundColor: "#F8FAFC", outline: "none", fontSize: "14px", resize: "none" }}
+          style={{ width: "100%", padding: "15px", borderRadius: "12px", border: "1.5px solid #e2e8ec", backgroundColor: "#F8FAFC", outline: "none", fontSize: "14px", resize: "none", boxSizing: "border-box" }}
         />
         <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "24px" }}>
-          <button onClick={() => setShowRejectModal(false)} className="px-6 py-2 text-gray-500 font-bold">Cancel</button>
-          <button 
-            onClick={handleRejectSubmit} 
-            disabled={actionLoading}
-            className="h-11 px-8 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-all"
+          {/* Cancel — dark by default, turns RED on hover */}
+          <button
+            onClick={() => setShowRejectModal(false)}
+            style={{ ...btnBase }}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = "#dc2626"}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = "#023347"}
           >
-            {actionLoading ? "Sending..." : "Reject & Send"}
+            Cancel
           </button>
+         <button
+  onClick={handleRejectSubmit}
+  disabled={actionLoading}
+  style={{ ...btnBase, opacity: actionLoading ? 0.7 : 1, cursor: actionLoading ? "not-allowed" : "pointer" }}
+  onMouseEnter={e => { if (!actionLoading) e.currentTarget.style.backgroundColor = "#2A8E9E"; }}
+  onMouseLeave={e => { if (!actionLoading) e.currentTarget.style.backgroundColor = "#023347"; }}
+>
+  {actionLoading ? "Sending..." : "Send"}
+</button>
         </div>
       </div>
     </div>
@@ -247,17 +281,21 @@ export default function SuggestionAdmin() {
       {showRejectModal && renderRejectModal()}
       <AdminSidebar />
 
-      <main style={{ flex: 1, padding: "32px 40px", overflowY: "auto" }}>
+      <main style={{ flex: 1, padding: "32px 40px", overflow: "hidden", display: "flex", flexDirection: "column" }}>
         {view === "list" || view === "history" ? (
-          <>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+          <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+
+            {/* Header row */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexShrink: 0 }}>
               <h1 style={{ color: "#023347", fontSize: "24px", fontWeight: 800 }}>
                 {view === "list" ? "Suggestions Dashboard" : "Suggestion Records"}
               </h1>
               <div style={{ display: "flex", gap: "12px" }}>
                 <button
                   onClick={() => setView(view === "list" ? "history" : "list")}
-                  className="h-11 px-6 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:bg-[#2A8E9E] transition-all"
+                  style={{ ...btnBase }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = "#2A8E9E"}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = "#023347"}
                 >
                   {view === "list" ? "View History" : "← Dashboard"}
                 </button>
@@ -272,7 +310,7 @@ export default function SuggestionAdmin() {
             </div>
 
             {/* Tabs */}
-            <div style={{ display: "flex", gap: "28px", borderBottom: "2px solid #eee", marginBottom: "20px" }}>
+            <div style={{ display: "flex", gap: "28px", borderBottom: "2px solid #eee", marginBottom: "20px", flexShrink: 0 }}>
               {view === "list" ? (
                 <>
                   <TabBtn active={dashboardTab === "unacknowledged"} label="Unacknowledged" onClick={() => setDashboardTab("unacknowledged")} />
@@ -286,9 +324,15 @@ export default function SuggestionAdmin() {
               )}
             </div>
 
-            {/* Table */}
-            <div style={{ backgroundColor: "white", borderRadius: "20px", overflow: "hidden", border: "1px solid #e2e8ec" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            {/* Table card */}
+            <div style={{ backgroundColor: "white", borderRadius: "20px", border: "1px solid #e2e8ec", display: "flex", flexDirection: "column", flex: 1, overflow: "hidden" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
+                <colgroup>
+                  <col style={{ width: "35%" }} />
+                  <col style={{ width: "25%" }} />
+                  <col style={{ width: "15%" }} />
+                  <col style={{ width: "25%" }} />
+                </colgroup>
                 <thead style={{ backgroundColor: "#2A8E9E", color: "white" }}>
                   <tr>
                     <th style={{ padding: "16px", textAlign: "center" }}>Title</th>
@@ -297,32 +341,46 @@ export default function SuggestionAdmin() {
                     <th style={{ padding: "16px", textAlign: "center" }}>Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {loading ? (
-                    <tr><td colSpan="4" style={{ padding: "40px", textAlign: "center", color: "#94a3b8" }}>Loading...</td></tr>
-                  ) : (view === "list" ? suggestionList : historyList)
-                    .filter(item => item.title.toLowerCase().includes(searchTerm.toLowerCase()))
-                    .map((item) => (
-                      <tr key={item.suggestion_id || item.record_id} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                        <td style={{ padding: "16px", textAlign: "center", fontWeight: 700, color: "#023347" }}>{item.title}</td>
-                        <td style={{ padding: "16px", textAlign: "center", color: "#64748b" }}>{item.name}</td>
-                        <td style={{ padding: "16px", textAlign: "center", color: "#64748b" }}>{item.year}</td>
-                        <td style={{ padding: "16px", textAlign: "center" }}>
-                          <button
-                            onClick={() => handleViewDetail(item.suggestion_id || item.record_id, view)}
-                            style={{ padding: "8px 20px", backgroundColor: "#023347", color: "white", borderRadius: "8px", border: "none", cursor: "pointer", fontSize: "13px", fontWeight: 600 }}
-                          >
-                            View
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
               </table>
+
+              <div className="sg-table-scroll" style={{ overflowY: "auto", flex: 1 }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
+                  <colgroup>
+                    <col style={{ width: "35%" }} />
+                    <col style={{ width: "25%" }} />
+                    <col style={{ width: "15%" }} />
+                    <col style={{ width: "25%" }} />
+                  </colgroup>
+                  <tbody>
+                    {loading ? (
+                      <tr><td colSpan="4" style={{ padding: "40px", textAlign: "center", color: "#94a3b8" }}>Loading...</td></tr>
+                    ) : (view === "list" ? suggestionList : historyList)
+                      .filter(item => item.title.toLowerCase().includes(searchTerm.toLowerCase()))
+                      .map((item) => (
+                        <tr key={item.suggestion_id || item.record_id} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                          <td style={{ padding: "16px", textAlign: "center", fontWeight: 700, color: "#023347" }}>{item.title}</td>
+                          <td style={{ padding: "16px", textAlign: "center", color: "#64748b" }}>{item.name}</td>
+                          <td style={{ padding: "16px", textAlign: "center", color: "#64748b" }}>{item.year}</td>
+                          <td style={{ padding: "16px", textAlign: "center" }}>
+                            <button
+                              onClick={() => handleViewDetail(item.suggestion_id || item.record_id, view)}
+                              style={{ padding: "8px 20px", backgroundColor: "#023347", color: "white", borderRadius: "8px", border: "none", cursor: "pointer", fontSize: "13px", fontWeight: 600 }}
+                            >
+                              View
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </>
+
+          </div>
         ) : (
-          renderDetailCard()
+          <div style={{ overflowY: "auto", height: "100%" }}>
+            {renderDetailCard()}
+          </div>
         )}
       </main>
     </div>

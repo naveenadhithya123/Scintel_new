@@ -139,7 +139,7 @@ export default function EventsGrid() {
     <div style={{ display: 'flex' }}>
       <AdminSidebar />
       <main style={{ flex: 1, padding: '32px 36px', backgroundColor: '#F5F9FA', minHeight: '100vh', overflowY: 'auto' }}>
-        
+
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 }}>
           <h1 style={{ fontSize: 26, fontWeight: 700, color: '#0d2233' }}>
@@ -171,7 +171,7 @@ export default function EventsGrid() {
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
             gap: 24,
-            maxWidth: '1200px' 
+            maxWidth: '1200px'
           }}>
             {events.map(event => (
               <div
@@ -183,23 +183,22 @@ export default function EventsGrid() {
                 }}
               >
                 <div style={{
-                  width: '100%', height: 180, 
-                  backgroundColor: '#e2e8f0', 
-                  backgroundImage: `url(${event.thumbnail})`, 
-                  backgroundSize: 'cover', 
+                  width: '100%', height: 180,
+                  backgroundColor: '#e2e8f0',
+                  backgroundImage: `url(${event.thumbnail})`,
+                  backgroundSize: 'cover',
                   backgroundPosition: 'center'
                 }} />
 
                 <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
                   <h3 style={{ fontSize: 17, fontWeight: 700, color: '#0d2233', marginBottom: 10 }}>{event.title}</h3>
-                  <p style={{ 
+                  <p style={{
                     fontSize: 13, color: '#64748b', lineHeight: 1.6, marginBottom: 20, flex: 1,
                     display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden'
                   }}>
                     {event.description}
                   </p>
-                  
-                  {/* ── ONLY THESE BUTTONS CHANGED ── */}
+
                   <div className="flex gap-4 mt-2">
                     <button
                       onClick={() => navigate(`/admin/activities/${year}/edit-event/${event.id}`)}
