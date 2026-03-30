@@ -73,9 +73,7 @@ export default function ProblemDetails() {
                 {problem.title.split(' ').pop()}
               </span>
             </h1>
-            <p className="text-[10px] font-bold text-[#023347]/40 uppercase tracking-[0.2em] mt-4 italic">
-              Sector: {problem.category}
-            </p>
+            
           </div>
 
           <button

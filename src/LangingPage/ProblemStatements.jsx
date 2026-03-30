@@ -84,7 +84,7 @@ function ProblemStatements() {
                   className="relative flex flex-col md:flex-row bg-white/[0.03] border border-black/5 rounded-[2rem] overflow-hidden animate-pulse"
                 >
                   {/* Ghost Pillar */}
-                  <div className="hidden md:block w-1.5 h-24 bg-[#023347]/10" />
+                  <div className="w-full md:w-1.5 h-2 md:h-auto bg-[#023347]/10" />
                   
                   <div className="flex-1 grid grid-cols-1 md:grid-cols-12 items-center p-8 md:p-10 gap-8">
                     {/* Ghost Title Zone */}
@@ -114,10 +114,10 @@ function ProblemStatements() {
             problems.map((item, idx) => (
               <div 
                 key={item.problem_id || idx}
-                className={`group relative flex flex-col md:flex-row items-center gap-6 bg-white/[0.02] backdrop-blur-[4px] border border-black/5 rounded-[2rem] p-6 md:p-8 transition-all duration-700 hover:border-[#D4AF37]/40 hover:shadow-2xl hover:-translate-y-1.5 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}
+                className={`group relative flex flex-col md:flex-row items-center gap-6 bg-white/[0.02] backdrop-blur-[4px] border border-black/5 rounded-[2rem] overflow-hidden p-6 md:p-8 transition-all duration-700 hover:border-[#D4AF37]/40 hover:shadow-2xl hover:-translate-y-1.5 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}
                 style={{ transitionDelay: `${idx * 100}ms` }}
               >
-                <div className="hidden md:block w-1.5 h-16 bg-[#023347] rounded-full group-hover:bg-[#D4AF37] transition-all duration-500" />
+                <div className="absolute left-0 top-0 w-full md:w-1.5 h-2 md:h-full bg-[#023347] group-hover:bg-[#D4AF37] transition-all duration-500" />
                 <div className="flex-1 md:max-w-[30%]">
                   <span className="text-[9px] font-bold text-[#D4AF37] uppercase tracking-[0.2em] mb-1 block">Case #{idx + 1}</span>
                   <h3 className="text-lg font-bold text-[#023347] leading-snug group-hover:text-[#B8860B] transition-colors">

@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import AdminSidebar from "./AdminSidebar";
 
 const API_BASE = "http://localhost:3000/api";
+const YEAR_OPTIONS = ["I", "II", "III", "IV"];
 
 export default function EditMember() {
   const navigate = useNavigate();
@@ -51,6 +52,10 @@ export default function EditMember() {
     }
     if (!form.batch_year) {
       alert("Batch Year is missing. Required for update.");
+      return;
+    }
+    if (!form.year) {
+      alert("Year is required.");
       return;
     }
 
@@ -137,7 +142,12 @@ export default function EditMember() {
 
           <div>
             <label style={labelStyle}>Year</label>
-            <input name="year" value={form.year} onChange={handleChange} style={inputStyle} />
+            <select name="year" value={form.year} onChange={handleChange} style={inputStyle}>
+              <option value="">Select year</option>
+              {YEAR_OPTIONS.map((year) => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
           </div>
         </div>
 

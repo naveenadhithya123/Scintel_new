@@ -1,5 +1,7 @@
 import sequelize from "../config/database.js";
 
+const VALID_YEARS = new Set(["I", "II", "III", "IV"]);
+
 export const addAssociationMember = async (req, res) => {
   try {
     const {
@@ -17,9 +19,15 @@ export const addAssociationMember = async (req, res) => {
     // VALIDATION
     // ============================
 
-    if (!finalPhoneNumber || !name || !role || !batch_year) {
+    if (!finalPhoneNumber || !name || !role || !batch_year || !year) {
       return res.status(400).json({
-        message: "Phone number, Name, Role and Batch year are required",
+        message: "Phone number, Name, Role, Year and Batch year are required",
+      });
+    }
+
+    if (!VALID_YEARS.has(year)) {
+      return res.status(400).json({
+        message: "Year must be one of I, II, III or IV",
       });
     }
 
@@ -39,7 +47,7 @@ export const addAssociationMember = async (req, res) => {
           name,
           batch_year,
           role,
-          year: year || null,
+          year,
         },
       }
     );
@@ -55,7 +63,7 @@ export const addAssociationMember = async (req, res) => {
         register_number: finalPhoneNumber,
         name,
         role,
-        year: year || null,
+        year,
         batch_year,
       },
     });

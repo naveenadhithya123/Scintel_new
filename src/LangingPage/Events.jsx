@@ -105,7 +105,7 @@ function ActivitiesDetail() {
                 <div className="px-4 pb-4 font-sans">
                   <div className="flex items-center gap-3 mb-4">
                     <span className="text-[9px] font-bold text-[#D4AF37] tracking-[0.3em] uppercase">
-                      Ref. {String(index + 1).padStart(2, '0')}
+                      no. {String(index + 1).padStart(2, '0')}
                     </span>
                   </div>
                   

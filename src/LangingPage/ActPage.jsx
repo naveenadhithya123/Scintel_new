@@ -69,12 +69,12 @@ function Activities() {
         </header>
 
         {/* --- 2. STAGGERED DECK TABLE LAYOUT --- */}
-        <div className="grid grid-cols-1 gap-8">
+        <div className="grid grid-cols-1 gap-6">
           {activitiesData.length > 0 ? (
             activitiesData.map((item, index) => (
               <div
                 key={item.id || index}
-                className={`group relative flex flex-col md:flex-row bg-white/[0.02] backdrop-blur-[6px] border border-black/5 rounded-[2rem] overflow-hidden transition-all duration-700 hover:border-[#D4AF37]/40 hover:bg-white hover:shadow-[0_30px_60px_-15px_rgba(2,51,71,0.08)] hover:-translate-y-3 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}
+                className={`group relative flex flex-col md:flex-row bg-white/[0.02] backdrop-blur-[4px] border border-black/5 rounded-[2rem] overflow-hidden transition-all duration-700 hover:border-[#D4AF37]/40 hover:shadow-2xl hover:-translate-y-1.5 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}
                 style={{ 
                   transitionDelay: `${index * 100}ms`,
                   animation: isVisible ? `gentle-float ${5 + index}s ease-in-out infinite alternate` : 'none'
@@ -83,20 +83,20 @@ function Activities() {
                 {/* Prestige Pillar */}
                 <div className="w-full md:w-3 h-3 md:h-auto bg-[#023347] group-hover:bg-[#D4AF37] transition-colors duration-500" />
 
-                <div className="flex-1 grid grid-cols-1 md:grid-cols-12 items-center p-8 md:p-10 gap-6">
+                <div className="flex-1 grid grid-cols-1 md:grid-cols-12 items-center p-6 md:p-7 gap-4 md:gap-5">
                   {/* Year Display */}
                   <div className="md:col-span-4">
-                    <p className="text-[10px] font-bold text-[#D4AF37] tracking-[0.3em] uppercase mb-2">Batch Period</p>
-                    <h3 className="text-3xl font-extrabold text-[#023347] group-hover:text-[#B8860B] transition-colors duration-500">
+                    <p className="text-[10px] font-bold text-[#D4AF37] tracking-[0.25em] uppercase mb-1.5">Batch Period</p>
+                    <h3 className="text-2xl md:text-[1.7rem] font-extrabold text-[#023347] group-hover:text-[#B8860B] transition-colors duration-500">
                       {item.batch}
                     </h3>
                   </div>
 
                   {/* Count Display */}
                   <div className="md:col-span-4 flex flex-col md:items-center">
-                    <div className="bg-[#023347]/5 px-6 py-3 rounded-2xl group-hover:bg-[#023347]/10 transition-colors">
+                    <div className="bg-[#023347]/5 px-5 py-2.5 rounded-2xl group-hover:bg-[#023347]/10 transition-colors">
                         <p className="text-[9px] font-bold text-[#023347]/40 tracking-widest uppercase mb-1">Activity Volume</p>
-                        <p className="text-lg font-bold text-[#023347]">
+                        <p className="text-base md:text-[1.05rem] font-bold text-[#023347]">
                             {item.activity_count} <span className="text-xs font-medium text-[#023347]/50 ml-1 italic">Published Records</span>
                         </p>
                     </div>
@@ -106,7 +106,7 @@ function Activities() {
                   <div className="md:col-span-4 flex justify-end">
                     <button
                       onClick={() => handleViewDetail(item.batch)}
-                      className="group flex items-center justify-center gap-3 bg-[#023347] text-white w-full md:w-auto px-10 py-4 rounded-2xl text-[11px] font-bold tracking-[0.2em] uppercase transition-all duration-500 hover:bg-[#D4AF37] hover:shadow-2xl hover:shadow-[#D4AF37]/20 active:scale-95"
+                      className="group flex items-center justify-center gap-3 bg-[#023347] text-white w-full md:w-auto px-8 py-3.5 rounded-2xl text-[10px] md:text-[11px] font-bold tracking-[0.18em] uppercase transition-all duration-500 hover:bg-[#D4AF37] hover:shadow-2xl hover:shadow-[#D4AF37]/20 active:scale-95"
                     >
                       Explore Records
                       <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 transition-transform group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">

@@ -71,10 +71,10 @@ function Suggestions() {
         </header>
 
         {/* --- FORM MODULE (Corporate Glass) --- */}
-        <div className={`relative bg-white/[0.02] backdrop-blur-[4px] border border-black/5 rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-16 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+        <div className={`group relative bg-white/[0.02] backdrop-blur-[4px] border border-black/5 rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-16 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
           
-          {/* Prestige Pillar Anchor (Hidden on very small screens to save space) */}
-          <div className="absolute left-0 top-12 w-1 md:w-1.5 h-16 md:h-24 bg-[#023347] rounded-r-full hidden xs:block" />
+          {/* Prestige Pillar Anchor */}
+          <div className="absolute left-0 top-12 w-1 md:w-1.5 h-24 md:h-28 bg-[#023347] rounded-r-full group-hover:bg-[#D4AF37] transition-all duration-500" />
 
           <div className="space-y-8 md:space-y-12">
             <div className="flex flex-col gap-y-8 md:gap-y-12 text-left">

@@ -187,11 +187,11 @@ export default function AssociationMembers() {
           ) : batchDetails?.members?.map((member, idx) => (
             <div 
               key={idx}
-              className={`group relative grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-white/[0.02] backdrop-blur-[4px] border border-black/5 rounded-2xl px-6 md:px-10 py-5 transition-all duration-500 hover:border-[#D4AF37]/40 hover:bg-white/[0.05] hover:shadow-xl hover:shadow-[#D4AF37]/5 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+              className={`group relative grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-white/[0.02] backdrop-blur-[4px] border border-black/5 rounded-2xl overflow-hidden px-6 md:px-10 py-5 transition-all duration-700 hover:border-[#D4AF37]/40 hover:shadow-2xl hover:-translate-y-1.5 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
               style={{ transitionDelay: `${idx * 40}ms` }}
             >
-              {/* The Prestige Pillar (Vertical indicator) */}
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-0 group-hover:h-3/5 bg-[#D4AF37] transition-all duration-500 rounded-r-full" />
+              {/* The Prestige Pillar */}
+              <div className="absolute left-0 top-0 w-full md:w-1 h-1 md:h-full bg-[#023347] group-hover:bg-[#D4AF37] transition-all duration-500" />
               
               <div className="col-span-1 text-[11px] font-mono text-[#D4AF37]/60 group-hover:text-[#D4AF37] transition-colors">
                 {String(idx + 1).padStart(2, '0')}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 /**
  * GLORIES COMPONENT
@@ -8,9 +9,10 @@ function Glories() {
   const [glories, setGlories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [activeIndex, setActiveIndex] = useState(0);
 
+  const scrollRef = useRef(null);
   const sectionRef = useRef(null);
-  const scrollContainerRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
 
   // 1. DATA FETCHING
@@ -40,14 +42,22 @@ function Glories() {
     return () => { if (sectionRef.current) observer.unobserve(sectionRef.current); };
   }, []);
 
-  // 3. SCROLL LOGIC
-  const scroll = (direction) => {
-    if (scrollContainerRef.current) {
-      const { scrollLeft, clientWidth } = scrollContainerRef.current;
-      const scrollAmount = clientWidth * 0.7; 
-      const scrollTo = direction === 'left' ? scrollLeft - scrollAmount : scrollLeft + scrollAmount;
-      scrollContainerRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
-    }
+  const cardsPerPage = 6;
+  const pages = [];
+
+  for (let i = 0; i < glories.length; i += cardsPerPage) {
+    pages.push(glories.slice(i, i + cardsPerPage));
+  }
+
+  const scrollToPage = (pageIndex) => {
+    if (!scrollRef.current) return;
+
+    const containerWidth = scrollRef.current.offsetWidth;
+    scrollRef.current.scrollTo({
+      left: containerWidth * pageIndex,
+      behavior: "smooth",
+    });
+    setActiveIndex(pageIndex);
   };
 
   return (
@@ -98,71 +108,93 @@ function Glories() {
             </h1>
           </div>
 
-          <div className={`hidden sm:flex gap-4 transition-all duration-1000 delay-700 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
-            <button onClick={() => scroll('left')} className="group p-3 md:p-4 rounded-full border border-[#023347]/10 text-[#023347] hover:border-[#D4AF37] transition-all">
-              <svg className="w-4 h-4 md:w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" /></svg>
+          <div className={`flex gap-4 transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+            <button
+              onClick={() => activeIndex > 0 && scrollToPage(activeIndex - 1)}
+              disabled={activeIndex === 0}
+              className={`p-4 rounded-full border border-[#023347]/10 text-[#023347] transition-all duration-300 ${activeIndex === 0 ? 'opacity-20 cursor-not-allowed' : 'hover:border-[#D4AF37] hover:bg-white'}`}
+            >
+              <ChevronLeft size={20} />
             </button>
-            <button onClick={() => scroll('right')} className="group p-3 md:p-4 rounded-full bg-[#023347] text-white shadow-xl shadow-[#023347]/20 hover:bg-[#D4AF37] transition-all">
-              <svg className="w-4 h-4 md:w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" /></svg>
+            <button
+              onClick={() => activeIndex < pages.length - 1 && scrollToPage(activeIndex + 1)}
+              disabled={activeIndex === pages.length - 1 || pages.length === 0}
+              className={`p-4 rounded-full bg-[#023347] text-white shadow-xl shadow-[#023347]/20 transition-all duration-300 ${activeIndex === pages.length - 1 || pages.length === 0 ? 'opacity-20 cursor-not-allowed' : 'hover:bg-[#D4AF37] hover:scale-105 active:scale-95'}`}
+            >
+              <ChevronRight size={20} />
             </button>
           </div>
         </header>
 
         {/* --- CORPORATE SNAP GRID --- */}
-        {/* Added pt-12 to container to give floating cards room to move upward */}
-        <div 
-          ref={scrollContainerRef}
-          className="grid grid-rows-2 grid-flow-col gap-x-6 md:gap-x-12 gap-y-8 md:gap-y-16 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-10 pt-12"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        <div
+          ref={scrollRef}
+          className="flex overflow-x-hidden snap-x snap-mandatory scroll-smooth no-scrollbar pt-6"
         >
           {loading ? (
-              [...Array(6)].map((_, i) => <div key={i} className="w-[260px] md:w-[460px] aspect-video bg-black/5 rounded-2xl animate-pulse" />)
-          ) : (
-            glories.map((item, index) => (
-              <article
-                key={item.id || index}
-                className={`w-[260px] md:w-[460px] snap-start group transition-all duration-1000 ease-out ${
-                  isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
-                }`}
-                style={{ 
-                  transitionDelay: `${(index % 4) * 150}ms`,
-                  animation: isVisible ? `gentle-float ${4 + (index % 3)}s ease-in-out infinite alternate` : 'none',
-                  animationDelay: `${index * 0.1}s`
-                }}
-              >
-                {/* Darkened border to border-[#023347]/15 for better contrast */}
-                <div className="relative p-2.5 md:p-3 rounded-[1.5rem] md:rounded-[2rem] border border-[#023347]/15 bg-white/80 backdrop-blur-[6px] transition-all duration-700 hover:border-[#D4AF37]/60 hover:shadow-2xl hover:shadow-[#D4AF37]/10 md:group-hover:-translate-y-4">
-                  
-                  <div 
-                    className="relative aspect-video rounded-[1rem] md:rounded-[1.5rem] overflow-hidden cursor-zoom-in"
-                    onClick={() => setSelectedImage(item.image_url || item.img)}
-                  >
-                    <img
-                      src={item.image_url || item.img}
-                      alt={item.title}
-                      className="w-full h-full object-cover opacity-95 group-hover:opacity-100 transition-all duration-[1.5s] ease-out md:group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#023347]/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                  </div>
+            <div className="flex-none w-full snap-center">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 md:gap-10 pb-10">
+                {[...Array(6)].map((_, i) => <div key={i} className="w-full aspect-video bg-black/5 rounded-2xl animate-pulse" />)}
+              </div>
+            </div>
+          ) : pages.length > 0 ? (
+            pages.map((pageCards, pageIndex) => (
+              <div key={pageIndex} className="flex-none w-full snap-center">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 md:gap-10 pb-10">
+                  {pageCards.map((item, index) => {
+                    const absoluteIndex = pageIndex * cardsPerPage + index;
 
-                  <div className="mt-4 md:mt-6 px-2 md:px-4 pb-2 md:pb-4 font-sans">
-                    <div className="flex items-center gap-3 mb-2 md:mb-4">
-                      <span className="text-[8px] md:text-[9px] font-bold text-[#D4AF37] tracking-[0.2em] md:tracking-[0.3em] uppercase">Bulletin {String(index + 1).padStart(2, '0')}</span>
-                    </div>
-                    
-                    <h3 className="text-lg md:text-xl font-bold text-[#023347] mb-2 md:mb-3 tracking-tight group-hover:text-[#B8860B] transition-colors duration-500 line-clamp-1">
-                      {item.title}
-                    </h3>
-                    
-                    <p className="text-[11px] md:text-[13px] text-[#023347]/60 leading-relaxed font-medium line-clamp-2">
-                      {item.description}
-                    </p>
-                  </div>
+                    return (
+                      <article
+                        key={item.id || absoluteIndex}
+                        className={`w-full group transition-all duration-1000 ease-out ${
+                          isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
+                        }`}
+                        style={{
+                          transitionDelay: `${(index % 4) * 150}ms`,
+                          animation: isVisible ? `gentle-float ${4 + (index % 3)}s ease-in-out infinite alternate` : 'none',
+                          animationDelay: `${index * 0.1}s`
+                        }}
+                      >
+                        <div className="relative p-2.5 md:p-3 rounded-[1.5rem] md:rounded-[2rem] border border-[#023347]/15 bg-white/80 backdrop-blur-[6px] transition-all duration-700 hover:border-[#D4AF37]/60 hover:shadow-2xl hover:shadow-[#D4AF37]/10 md:group-hover:-translate-y-4">
+                          <div
+                            className="relative aspect-video rounded-[1rem] md:rounded-[1.5rem] overflow-hidden cursor-zoom-in"
+                            onClick={() => setSelectedImage(item.image_url || item.img)}
+                          >
+                            <img
+                              src={item.image_url || item.img}
+                              alt={item.title}
+                              className="w-full h-full object-cover opacity-95 group-hover:opacity-100 transition-all duration-[1.5s] ease-out md:group-hover:scale-105"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#023347]/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                          </div>
 
-                  <div className="absolute top-5 right-5 md:top-6 md:right-6 w-1 md:w-1.5 h-1 md:h-1.5 rounded-full bg-[#D4AF37]/10 group-hover:bg-[#D4AF37] transition-all duration-500" />
+                          <div className="mt-4 md:mt-6 px-2 md:px-4 pb-2 md:pb-4 font-sans">
+                            <div className="flex items-center gap-3 mb-2 md:mb-4">
+                              <span className="text-[8px] md:text-[9px] font-bold text-[#D4AF37] tracking-[0.2em] md:tracking-[0.3em] uppercase">Article {String(absoluteIndex + 1).padStart(2, '0')}</span>
+                            </div>
+
+                            <h3 className="text-lg md:text-xl font-bold text-[#023347] mb-2 md:mb-3 tracking-tight group-hover:text-[#B8860B] transition-colors duration-500 line-clamp-1">
+                              {item.title}
+                            </h3>
+
+                            <p className="text-[11px] md:text-[13px] text-[#023347]/60 leading-relaxed font-medium line-clamp-2">
+                              {item.description}
+                            </p>
+                          </div>
+
+                          <div className="absolute top-5 right-5 md:top-6 md:right-6 w-1 md:w-1.5 h-1 md:h-1.5 rounded-full bg-[#D4AF37]/10 group-hover:bg-[#D4AF37] transition-all duration-500" />
+                        </div>
+                      </article>
+                    );
+                  })}
                 </div>
-              </article>
+              </div>
             ))
+          ) : (
+            <div className="w-full py-20 text-center">
+              <p className="text-[#023347]/40 font-sans tracking-widest uppercase text-xs">No glories available right now.</p>
+            </div>
           )}
         </div>
       </section>

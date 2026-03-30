@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import AdminSidebar from "./AdminSidebar";
 
 const API_BASE = "http://localhost:3000/api";
+const YEAR_OPTIONS = ["I", "II", "III", "IV"];
 
 export default function EditBatch() {
   const navigate = useNavigate();
@@ -53,11 +54,11 @@ export default function EditBatch() {
     }
 
     const hasInvalidMember = members.some(
-      (member) => !member.name.trim() || !member.register_number.trim() || !member.role.trim()
+      (member) => !member.name.trim() || !member.register_number.trim() || !member.role.trim() || !member.year
     );
 
     if (hasInvalidMember) {
-      alert("Each member needs a name, register number and role.");
+      alert("Each member needs a name, register number, role and year.");
       return;
     }
 
@@ -234,7 +235,12 @@ export default function EditBatch() {
                       <input className="eb-input" value={m.role} onChange={e => { const u = [...members]; u[index].role = e.target.value; setMembers(u); }} />
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <input className="eb-input" value={m.year} onChange={e => { const u = [...members]; u[index].year = e.target.value; setMembers(u); }} />
+                      <select className="eb-input" value={m.year} onChange={e => { const u = [...members]; u[index].year = e.target.value; setMembers(u); }}>
+                        <option value="">Select year</option>
+                        {YEAR_OPTIONS.map((year) => (
+                          <option key={year} value={year}>{year}</option>
+                        ))}
+                      </select>
                     </td>
                     <td className="px-6 py-4 text-center">
                       <button

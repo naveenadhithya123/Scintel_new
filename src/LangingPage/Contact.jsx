@@ -174,13 +174,17 @@ export default function Contact() {
                 <span className="text-[13px] font-bold text-white/60 group-hover:text-white">Email Portal</span>
                 <div className="w-1 h-1 rounded-full bg-[#D4AF37] opacity-0 group-hover:opacity-100 transition-all shadow-[0_0_8px_#D4AF37]" />
               </a>
+              <a href="#" className="flex items-center justify-between p-5 rounded-2xl border border-white/5 hover:border-[#D4AF37]/30 hover:bg-white/[0.03] transition-all duration-500 group">
+                <span className="text-[13px] font-bold text-white/60 group-hover:text-white">Instagram</span>
+                <div className="w-1 h-1 rounded-full bg-[#D4AF37] opacity-0 group-hover:opacity-100 transition-all shadow-[0_0_8px_#D4AF37]" />
+              </a>
             </div>
           </div>
         </div>
 
         <div className="max-w-[1500px] mx-auto px-8 mt-24 pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 font-sans">
-          <p className="text-[10px] tracking-[0.2em] text-white/20 uppercase font-bold">
-            © 2026 Scintel Prestige . Secured & Verified Institutional Portal
+          <p className="text-[10px] tracking-[0.2em] text-[#D4AF37] uppercase font-bold">
+            © 2026 Built with excellence by Synergy Squad 4.0 Consultancy Project Team
           </p>
           <div className="flex gap-10">
              <span className="text-[10px] font-bold text-white/20 hover:text-[#D4AF37] cursor-pointer transition-colors uppercase tracking-widest">Privacy</span>

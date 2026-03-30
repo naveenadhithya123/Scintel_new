@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import AdminSidebar from "./AdminSidebar";
 
 const API_BASE = "http://localhost:3000/api";
+const YEAR_OPTIONS = ["I", "II", "III", "IV"];
 
 export default function AddMember() {
   const navigate = useNavigate();
@@ -20,8 +21,8 @@ export default function AddMember() {
 
   const handleAdd = async () => {
     // Basic validation
-    if (!form.name || !form.reg) {
-      alert("Name and Register Number are required.");
+    if (!form.name || !form.reg || !form.year) {
+      alert("Name, Register Number and Year are required.");
       return;
     }
 
@@ -178,13 +179,17 @@ export default function AddMember() {
 
           <div>
             <label style={labelStyle}>Year</label>
-            <input
+            <select
               name="year"
-              placeholder="e.g. III, IV"
               value={form.year}
               onChange={handleChange}
               style={inputStyle}
-            />
+            >
+              <option value="">Select year</option>
+              {YEAR_OPTIONS.map((year) => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
           </div>
         </div>
 

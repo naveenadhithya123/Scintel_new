@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import AdminSidebar from "./AdminSidebar";
 
 const API_BASE = "http://localhost:3000/api";
+const YEAR_OPTIONS = ["I", "II", "III", "IV"];
 
 export default function AddBatch() {
   const navigate = useNavigate();
@@ -33,8 +34,8 @@ export default function AddBatch() {
 
   /* ── Add member to local list ── */
   const handleAddMember = () => {
-    if (!memberForm.name.trim() || !memberForm.reg.trim()) {
-      alert("Name and Register Number are required.");
+    if (!memberForm.name.trim() || !memberForm.reg.trim() || !memberForm.year) {
+      alert("Name, Register Number and Year are required.");
       return;
     }
     setMembers((prev) => [...prev, memberForm]);
@@ -296,7 +297,6 @@ export default function AddBatch() {
                 { label: "Name", key: "name", placeholder: "Full name" },
                 { label: "Register Number", key: "reg", placeholder: "611..." },
                 { label: "Role", key: "role", placeholder: "Secretary" },
-                { label: "Year", key: "year", placeholder: "4" },
               ].map(({ label, key, placeholder }) => (
                 <div key={key}>
                   <label style={labelStyle}>{label}</label>
@@ -309,6 +309,19 @@ export default function AddBatch() {
                   />
                 </div>
               ))}
+              <div>
+                <label style={labelStyle}>Year</label>
+                <select
+                  style={inputStyle}
+                  value={memberForm.year}
+                  onChange={(e) => setMemberForm((prev) => ({ ...prev, year: e.target.value }))}
+                >
+                  <option value="">Select year</option>
+                  {YEAR_OPTIONS.map((year) => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+              </div>
             </div>
             <div className="ab-modal-btns">
               <button onClick={() => setShowAddModal(false)} style={{ ...btnPrimary, background: "#f1f5f9", color: "#374151" }}>Cancel</button>
