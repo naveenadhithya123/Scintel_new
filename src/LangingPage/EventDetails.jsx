@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom'; // ← added useNavigate
 
 const EventDetails = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
+  const { id } = useParams(); 
+  const navigate = useNavigate(); // ← added
   const [eventData, setEventData] = useState(null);
   const [loading, setLoading] = useState(true);
   const sectionRef = useRef(null);

@@ -68,12 +68,24 @@ export default function AssociationMembers() {
 
       {/* --- IMAGE LIGHTBOX --- */}
       {selectedImage && (
-        <div 
-          className="fixed inset-0 z-[5000] bg-[#023347]/95 backdrop-blur-xl flex items-center justify-center p-4 cursor-zoom-out"
-          onClick={() => setSelectedImage(null)}
-        >
-          <img src={selectedImage} alt="Full View" className="max-w-5xl w-full rounded-2xl shadow-2xl object-contain animate-in zoom-in-95 duration-300" />
-        </div>
+       <div 
+  className="fixed inset-0 z-[5000] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 cursor-zoom-out animate-in fade-in duration-300"
+  onClick={() => setSelectedImage(null)}
+>
+  <button
+    onClick={(e) => { e.stopPropagation(); setSelectedImage(null); }}
+    className="absolute top-4 right-4 text-white bg-white/10 hover:bg-white/25 transition-all duration-200 rounded-full w-9 h-9 flex items-center justify-center z-10"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 6L6 18M6 6l12 12" />
+    </svg>
+  </button>
+  <img 
+    src={selectedImage} 
+    alt="Full View" 
+    className="max-w-full max-h-[95vh] rounded-md shadow-2xl object-contain" 
+  />
+</div>
       )}
 
       <main className="max-w-[1500px] mx-auto px-6 md:px-12 py-16 relative z-10">
