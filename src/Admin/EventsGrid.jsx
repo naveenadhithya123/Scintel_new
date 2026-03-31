@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import AdminSidebar from './AdminSidebar';
+import { API_BASE } from "../config/api";
 
 /* ─── Toast ─────────────────────────────────────────────────────────────── */
 function Toast({ toasts, removeToast }) {
@@ -189,7 +190,7 @@ export default function EventsGrid() {
   const fetchEvents = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:3000/api/admin/activities/${encodeURIComponent(year)}`);
+      const response = await fetch(`${API_BASE}/admin/activities/${encodeURIComponent(year)}`);
       const result = await response.json();
       if (result.success && Array.isArray(result.data)) {
         setEvents(result.data.map(item => ({
@@ -213,7 +214,7 @@ export default function EventsGrid() {
     const { id, title } = deleteTarget;
     setDeleteTarget(null);
     try {
-      const response = await fetch(`http://localhost:3000/api/admin/activities/${id}`, { method: 'DELETE' });
+      const response = await fetch(`${API_BASE}/admin/activities/${id}`, { method: 'DELETE' });
       if (response.ok) {
         setEvents(prev => prev.filter(e => e.id !== id));
         showToast('success', 'Event Deleted', `"${title}" has been permanently deleted.`);

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE } from "../config/api";
 
 export default function UpcomingEvents() {
   const navigate = useNavigate();
@@ -15,7 +16,7 @@ export default function UpcomingEvents() {
     const fetchEvents = async () => {
       try {
         setLoading(true);
-        const response = await fetch("http://localhost:3000/api/announcements");
+        const response = await fetch(`${API_BASE}/announcements`);
         const result = await response.json();
 
         if (result.success && Array.isArray(result.data)) {
@@ -228,3 +229,4 @@ export default function UpcomingEvents() {
     </div>
   );
 }
+

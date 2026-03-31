@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { API_BASE } from "../config/api";
 
 export default function SuggesstionVerification() {
   const location = useLocation();
@@ -66,7 +67,7 @@ export default function SuggesstionVerification() {
 
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:3000/api/send-otp", {
+      const response = await fetch(`${API_BASE}/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: formData.email }),
@@ -99,7 +100,7 @@ export default function SuggesstionVerification() {
 
     setLoading(true);
     try {
-      const verifyRes = await fetch("http://localhost:3000/api/verify-otp", {
+      const verifyRes = await fetch(`${API_BASE}/verify-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: formData.email, otp: otpValue }),
@@ -116,7 +117,7 @@ export default function SuggesstionVerification() {
           year: formData.year
         };
 
-        const saveRes = await fetch("http://localhost:3000/api/add-suggestion", {
+        const saveRes = await fetch(`${API_BASE}/add-suggestion`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(finalPayload),
@@ -253,3 +254,4 @@ export default function SuggesstionVerification() {
     </div>
   );
 }
+

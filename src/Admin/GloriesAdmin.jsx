@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import AdminSidebar from "./AdminSidebar";
+import { API_BASE } from "../config/api";
 
-const API_BASE_URL = "http://localhost:3000/api/admin/glories";
+const API_BASE_URL = `${API_BASE}/admin/glories`;
 
 const STYLES = `
   .gl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }

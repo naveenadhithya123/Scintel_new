@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { API_BASE } from "../config/api";
 
-const API_BASE = "http://localhost:3000/api";
 const ROLE_ORDER = [
   "Secretary",
   "Joint-Secretary",

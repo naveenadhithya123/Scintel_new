@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { API_BASE } from "../config/api";
 
 const CATEGORY_OPTIONS = [
   "Artificial Intelligence and Machine Learning",
@@ -38,7 +39,7 @@ export default function AddProblemStatement() {
       detailed_description: form.detailedDescription,
     };
     try {
-      const response = await fetch("http://localhost:3000/api/problem-creation-request", {
+      const response = await fetch(`${API_BASE}/problem-creation-request`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -160,3 +161,4 @@ export default function AddProblemStatement() {
     </div>
   );
 }
+

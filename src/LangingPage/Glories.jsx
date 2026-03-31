@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { API_BASE } from "../config/api";
 
 /**
  * GLORIES COMPONENT
@@ -20,7 +21,7 @@ function Glories() {
   useEffect(() => {
     const fetchGlories = async () => {
       try {
-        const API_URL = "http://localhost:3000/api/glories";
+        const API_URL = `${API_BASE}/glories`;
         const response = await fetch(API_URL);
         const data = await response.json();
         setGlories(data);

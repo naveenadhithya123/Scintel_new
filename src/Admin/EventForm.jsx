@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import AdminSidebar from './AdminSidebar';
+import { API_BASE } from "../config/api";
 
 /* ─────────────────────────────────────────
    GLOBAL KEYFRAMES
@@ -419,7 +420,7 @@ export function EditEvent() {
   useEffect(() => {
     const fetchEventData = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/api/admin/activity/${id}`);
+        const response = await fetch(`${API_BASE}/admin/activity/${id}`);
         const result   = await response.json();
         const data     = result.data || result;
         if (data) {
@@ -479,7 +480,7 @@ export function EditEvent() {
     else                                          formData.append('existing_winner_image', formState.winnerImage || '');
 
     try {
-      const response = await fetch(`http://localhost:3000/api/admin/activity/${id}`, { method: 'PUT', body: formData });
+      const response = await fetch(`${API_BASE}/admin/activity/${id}`, { method: 'PUT', body: formData });
       if (response.ok) {
         showToast('success', 'Event Updated', `"${formState.title}" has been successfully updated.`);
         setTimeout(() => navigate(`/admin/activities/${year}`), 2000);
@@ -537,7 +538,7 @@ export function AddEvent() {
     formState.eventImages.forEach(img => { if (img) formData.append('event_images', img); });
 
     try {
-      const response = await fetch('http://localhost:3000/api/admin/activity', { method: 'POST', body: formData });
+      const response = await fetch(`${API_BASE}/admin/activity`, { method: 'POST', body: formData });
       if (response.ok) {
         showToast('success', 'Event Added', `"${formState.title}" has been successfully added to batch ${year}.`);
         setTimeout(() => navigate(`/admin/activities/${year}`), 2000);
@@ -603,7 +604,7 @@ export function AddNewYear() {
     formState.eventImages.forEach(img => { if (img) formData.append('event_images', img); });
 
     try {
-      const response = await fetch('http://localhost:3000/api/admin/activity', { method: 'POST', body: formData });
+      const response = await fetch(`${API_BASE}/admin/activity`, { method: 'POST', body: formData });
       if (response.ok) {
         showToast('success', 'Academic Year Created', `Batch "${batch}" has been successfully created with its first event.`);
         setTimeout(() => navigate(`/admin/activities/${batch}`), 2000);

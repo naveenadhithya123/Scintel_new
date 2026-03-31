@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { API_BASE } from "../config/api";
 
 function ActivitiesDetail() {
   const navigate = useNavigate();
@@ -15,7 +16,7 @@ function ActivitiesDetail() {
     const fetchBatchData = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:3000/api/activities/batch/${encodeURIComponent(batch)}`);
+        const response = await fetch(`${API_BASE}/activities/batch/${encodeURIComponent(batch)}`);
         const data = await response.json();
         setActivities(data);
       } catch (error) {
@@ -162,3 +163,4 @@ function ActivitiesDetail() {
 }
 
 export default ActivitiesDetail;
+

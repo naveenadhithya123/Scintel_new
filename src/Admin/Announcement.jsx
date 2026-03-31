@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { BrowserRouter, useNavigate, useLocation, useInRouterContext } from "react-router-dom";
 import { clearAdminSession } from "../auth/adminAuth";
+import { API_BASE } from "../config/api";
 
 /* =========================================
    1. ADMIN SIDEBAR COMPONENTS (Icons & Layout)
@@ -239,7 +240,7 @@ const AnnouncementAdmin = () => {
   const fetchAnnouncements = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:3000/api/admin/announcements");
+      const res = await fetch(`${API_BASE}/admin/announcements`);
       const result = await res.json();
       if (result.success) setEventList(result.data);
     } catch (err) {
@@ -323,7 +324,7 @@ const AnnouncementAdmin = () => {
 
   const handleEditClick = async (id, type) => {
     try {
-      const res = await fetch(`http://localhost:3000/api/admin/announcement/${id}/${type}`);
+      const res = await fetch(`${API_BASE}/admin/announcement/${id}/${type}`);
       const result = await res.json();
       if (result.success) {
         const d = result.data;
@@ -417,10 +418,10 @@ const AnnouncementAdmin = () => {
     }
 
     const url = formData.id
-      ? `http://localhost:3000/api/admin/announcementEdit/${formData.id}/${typeValue}`
+      ? `${API_BASE}/admin/announcementEdit/${formData.id}/${typeValue}`
       : typeValue === 'event'
-        ? `http://localhost:3000/api/admin/add-event`
-        : `http://localhost:3000/api/admin/add-celebration`;
+        ? `${API_BASE}/admin/add-event`
+        : `${API_BASE}/admin/add-celebration`;
 
     try {
       setIsSubmitting(true);
@@ -471,7 +472,7 @@ const AnnouncementAdmin = () => {
 
   const confirmDelete = async () => {
     try {
-      const res = await fetch(`http://localhost:3000/api/admin/announcement/${deleteModal.id}/${deleteModal.type}`, {
+      const res = await fetch(`${API_BASE}/admin/announcement/${deleteModal.id}/${deleteModal.type}`, {
         method: 'DELETE'
       });
       if (res.ok) {
@@ -804,3 +805,4 @@ const AnnouncementAdmin = () => {
 };
 
 export default AnnouncementAdmin;
+

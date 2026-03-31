@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE } from "../config/api";
 
 export default function Verification() {
   const [showOTP, setShowOTP] = useState(false);
@@ -31,7 +32,7 @@ export default function Verification() {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:3000/api/send-otp", {
+      const response = await fetch(`${API_BASE}/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: formData.email }),
@@ -70,7 +71,7 @@ export default function Verification() {
   const handleSubmitOTP = async () => {
     const otpValue = inputs.current.map(input => input.value).join("");
     try {
-      const response = await fetch("http://localhost:3000/api/verify-otp", {
+      const response = await fetch(`${API_BASE}/verify-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: formData.email, otp: otpValue }),
@@ -217,3 +218,4 @@ export default function Verification() {
     </div>
   );
 }
+

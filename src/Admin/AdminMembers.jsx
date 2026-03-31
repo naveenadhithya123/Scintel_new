@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminSidebar from "./AdminSidebar";
+import { API_BASE } from "../config/api";
 
-const API_BASE = "http://localhost:3000/api";
 const ROLE_ORDER = [
   "Secretary",
   "Joint-Secretary",

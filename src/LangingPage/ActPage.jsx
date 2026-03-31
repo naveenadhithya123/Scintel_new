@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from "react-router-dom";
+import { API_BASE } from "../config/api";
 
 function Activities() {
   const navigate = useNavigate();
@@ -11,7 +12,7 @@ function Activities() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const API_URL = "http://localhost:3000/api/activities";
+        const API_URL = `${API_BASE}/activities`;
         const response = await fetch(API_URL);
         const data = await response.json();
         setActivitiesData(data);

@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import AdminSidebar from "./AdminSidebar";
+import { API_BASE } from "../config/api";
 
-const API_BASE = "http://localhost:3000/api";
 const YEAR_OPTIONS = ["I", "II", "III", "IV"];
 const ROLE_OPTIONS = ["Secretary", "Joint-Secretary", "Treasurer", "Joint-Treasurer", "Executive member"];
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import AdminSidebar from "./AdminSidebar";
+import { API_BASE } from "../config/api";
 
-const API_BASE = "http://localhost:3000/api";
 
 // ── Toast Component ──────────────────────────────────────────────────────────
 const Toast = ({ toasts, removeToast }) => (

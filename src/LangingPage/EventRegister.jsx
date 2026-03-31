@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeft, Calendar, User, FileText, ExternalLink, AlertCircle, Clock } from "lucide-react";
+import { API_BASE } from "../config/api";
 
 function EventRegister() {
   const { id, type } = useParams();
@@ -34,7 +35,7 @@ function EventRegister() {
       try {
         setLoading(true);
         setError(null);
-        const response = await fetch(`http://localhost:3000/api/announcement/${id}/${type}`);
+        const response = await fetch(`${API_BASE}/announcement/${id}/${type}`);
         
         if (!response.ok) {
           throw new Error(`Server responded with status ${response.status}`);
@@ -202,3 +203,4 @@ function EventRegister() {
 }
 
 export default EventRegister;
+

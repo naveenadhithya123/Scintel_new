@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { API_BASE } from "../config/api";
 
 const cleanValue = (value) => {
   if (value === null || value === undefined) return "";
@@ -53,7 +54,7 @@ const EventDetails = () => {
       try {
         setLoading(true);
         setError("");
-        const response = await fetch(`http://localhost:3000/api/activities/event/${id}`);
+        const response = await fetch(`${API_BASE}/activities/event/${id}`);
         if (!response.ok) throw new Error(`Failed to load event ${id}`);
         const data = await response.json();
         setEventData(data);
@@ -395,3 +396,4 @@ const EventDetails = () => {
 };
 
 export default EventDetails;
+

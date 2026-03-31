@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { API_BASE } from "../config/api";
 
 const YEAR_OPTIONS = ["I", "II", "III", "IV"];
 
@@ -51,7 +52,7 @@ export default function ProblemDetails() {
     const fetchDetail = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:3000/api/current-problem/${id}`);
+        const response = await fetch(`${API_BASE}/current-problem/${id}`);
         const data = await response.json();
         setProblem(response.ok ? data : null);
         window.scrollTo(0, 0);
@@ -153,7 +154,7 @@ export default function ProblemDetails() {
     try {
       setSubmitting(true);
 
-      const response = await fetch("http://localhost:3000/api/send-otp", {
+      const response = await fetch(`${API_BASE}/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: requestPayload.email }),
@@ -219,7 +220,7 @@ export default function ProblemDetails() {
     try {
       setOtpLoading(true);
 
-      const verifyResponse = await fetch("http://localhost:3000/api/verify-otp", {
+      const verifyResponse = await fetch(`${API_BASE}/verify-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -238,7 +239,7 @@ export default function ProblemDetails() {
         return;
       }
 
-      const submitResponse = await fetch("http://localhost:3000/api/add-problem-solver-request", {
+      const submitResponse = await fetch(`${API_BASE}/add-problem-solver-request`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(pendingPayload),
@@ -598,3 +599,4 @@ export default function ProblemDetails() {
     </div>
   );
 }
+

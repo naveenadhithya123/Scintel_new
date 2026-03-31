@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { API_BASE } from "../config/api";
 import { useNavigate, useParams } from "react-router-dom"; 
 
 export default function ProblemDetails() {
@@ -14,7 +15,7 @@ export default function ProblemDetails() {
     const fetchDetail = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:3000/api/current-problem/${id}`);
+        const response = await fetch(`${API_BASE}/current-problem/${id}`);
         const data = await response.json();
         setProblem(data);
         window.scrollTo(0, 0);

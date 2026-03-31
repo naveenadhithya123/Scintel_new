@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from "react-router-dom";
+import { API_BASE } from "../config/api";
 
 function ProblemStatements() {
   const navigate = useNavigate();
@@ -31,7 +32,7 @@ function ProblemStatements() {
   useEffect(() => {
     const fetchProblems = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/current-problems");
+        const response = await fetch(`${API_BASE}/current-problems`);
         const data = await response.json();
         setProblems(data || []);
       } catch (error) {
@@ -192,3 +193,4 @@ function ProblemStatements() {
 }
 
 export default ProblemStatements;
+
