@@ -54,7 +54,7 @@ export default function AdminLogin() {
           <section className="flex flex-col justify-between bg-[#023347] px-8 py-10 text-white md:px-12">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-[#d4af37]">
-                Scintel Admin
+                SCINTEL Admin
               </p>
               <h1 className="mt-4 max-w-md text-4xl font-semibold leading-tight md:text-5xl">
                 Protected controls for announcements, activities, and member management.

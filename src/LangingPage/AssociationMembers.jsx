@@ -126,26 +126,26 @@ export default function AssociationMembers() {
 </div>
       )}
 
-      <main className="max-w-[1500px] mx-auto px-6 md:px-12 py-16 relative z-10">
+      <main className="relative z-10 mx-auto max-w-[1500px] px-5 py-12 md:px-12 md:py-16">
         
         {/* --- PROFESSIONAL HEADER --- */}
         <header className="mb-16 flex flex-col md:flex-row items-start md:items-end justify-between gap-8 border-b border-[#023347]/5 pb-10">
           <div className="max-w-2xl">
             <div className="flex items-center gap-4 mb-4">
               <span className={`text-[10px] font-bold tracking-[0.5em] uppercase text-[#D4AF37] transition-all duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
-                Institutional Leadership
+                The Members Who Shape Our Community
               </span>
-              <div className={`h-[1px] bg-[#D4AF37]/30 transition-all duration-[1.5s] ${isVisible ? 'w-12' : 'w-0'}`} />
+              
             </div>
             
-            <h1 className={`text-4xl md:text-6xl font-semibold text-[#023347] tracking-tight transition-all duration-[1200ms] ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}>
+            <h1 className={`text-3xl md:text-6xl font-semibold text-[#023347] tracking-tight transition-all duration-[1200ms] ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}>
               Association <span className="bg-gradient-to-r from-[#D4AF37] via-[#B8860B] to-[#D4AF37] bg-clip-text text-transparent">Members</span>
             </h1>
           </div>
 
           <button
             onClick={() => navigate(-1)}
-            className="group flex items-center gap-3 bg-[#023347] text-white px-8 py-3.5 rounded-2xl text-[10px] font-bold tracking-[0.2em] uppercase transition-all duration-500 hover:bg-[#D4AF37] hover:shadow-xl active:scale-95"
+            className="landing-btn-primary landing-btn-compact-mobile"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -175,7 +175,7 @@ export default function AssociationMembers() {
         )}
 
         {/* --- YEAR TABS --- */}
-        <nav className="flex gap-10 mb-8 border-b border-[#023347]/5 overflow-x-auto no-scrollbar">
+        <nav className="mb-8 flex gap-6 overflow-x-auto border-b border-[#023347]/5 no-scrollbar md:gap-10">
           {batches.map((tab) => (
             <button
               key={tab.batch_year}
@@ -211,23 +211,27 @@ export default function AssociationMembers() {
               {/* The Prestige Pillar */}
               <div className="absolute left-0 top-0 w-full md:w-1 h-1 md:h-full bg-[#023347] group-hover:bg-[#D4AF37] transition-all duration-500" />
               
-              <div className="col-span-1 text-[11px] font-mono text-[#D4AF37]/60 group-hover:text-[#D4AF37] transition-colors">
+              <div className="col-span-1 text-[11px] font-mono text-[#D4AF37]/60 transition-colors group-hover:text-[#D4AF37]">
+                <span className="mr-2 font-sans text-[10px] uppercase tracking-[0.2em] text-[#023347]/45 md:hidden">No.</span>
                 {String(idx + 1).padStart(2, '0')}
               </div>
 
               <div className="col-span-5">
+                <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[#023347]/45 md:hidden">Member Name</p>
                 <h3 className="text-sm font-bold text-[#023347] group-hover:translate-x-1 transition-transform duration-500">
                   {member.name}
                 </h3>
               </div>
 
               <div className="col-span-3">
+                <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[#023347]/45 md:hidden">Phone Number</p>
                 <span className="text-[11px] font-medium text-[#023347]/50 tracking-wider">
                   {member.register_number || member.phone_number}
                 </span>
               </div>
 
-              <div className="col-span-3 text-right">
+              <div className="col-span-3 text-left md:text-right">
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[#023347]/45 md:hidden">Designation</p>
                 <span className="inline-block text-[9px] font-bold tracking-[0.1em] uppercase bg-[#023347]/5 text-[#023347] px-4 py-1.5 rounded-full group-hover:bg-[#D4AF37] group-hover:text-white transition-all duration-500">
                   {member.role}
                 </span>

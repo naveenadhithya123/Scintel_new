@@ -10,6 +10,7 @@ function Glories() {
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [cardsPerPage, setCardsPerPage] = useState(6);
 
   const scrollRef = useRef(null);
   const sectionRef = useRef(null);
@@ -42,8 +43,20 @@ function Glories() {
     return () => { if (sectionRef.current) observer.unobserve(sectionRef.current); };
   }, []);
 
-  const cardsPerPage = 6;
   const pages = [];
+
+  useEffect(() => {
+    const updateCardsPerPage = () => {
+      const nextCardsPerPage = window.innerWidth < 768 ? 2 : 6;
+      setCardsPerPage(nextCardsPerPage);
+      setActiveIndex(0);
+      scrollRef.current?.scrollTo({ left: 0, behavior: "auto" });
+    };
+
+    updateCardsPerPage();
+    window.addEventListener("resize", updateCardsPerPage);
+    return () => window.removeEventListener("resize", updateCardsPerPage);
+  }, []);
 
   for (let i = 0; i < glories.length; i += cardsPerPage) {
     pages.push(glories.slice(i, i + cardsPerPage));
@@ -98,12 +111,12 @@ function Glories() {
           <div className="max-w-2xl">
             <div className="flex items-center gap-4 mb-3 md:mb-4">
               <span className={`text-[9px] md:text-[10px] font-bold tracking-[0.4em] md:tracking-[0.5em] uppercase text-[#D4AF37] transition-all duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
-                Institutional Prestige
+                Milestones of Excellence
               </span>
             </div>
             
             <h1 className={`text-3xl md:text-6xl font-semibold text-[#023347] tracking-tight transition-all duration-[1200ms] ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}>
-              Glories of <span className="bg-gradient-to-r from-[#D4AF37] via-[#B8860B] to-[#D4AF37] bg-clip-text text-transparent">Scintel</span>
+              Glories of <span className="bg-gradient-to-r from-[#D4AF37] via-[#B8860B] to-[#D4AF37] bg-clip-text text-transparent">SCINTEL</span>
             </h1>
           </div>
 
@@ -130,11 +143,23 @@ function Glories() {
         <div
           ref={scrollRef}
           className="flex overflow-x-hidden snap-x snap-mandatory scroll-smooth no-scrollbar pt-6"
+          style={{ touchAction: "pan-y" }}
         >
           {loading ? (
             <div className="flex-none w-full snap-center">
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 md:gap-10 pb-10">
-                {[...Array(6)].map((_, i) => <div key={i} className="w-full aspect-video bg-black/5 rounded-2xl animate-pulse" />)}
+                {Array.from({ length: cardsPerPage }).map((_, i) => (
+                  <div key={i} className="relative overflow-hidden rounded-[2rem] border border-[#023347]/10 bg-white/80 p-3">
+                    <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.8s_infinite] bg-gradient-to-r from-transparent via-white/75 to-transparent" />
+                    <div className="aspect-video rounded-[1.5rem] bg-[#023347]/8" />
+                    <div className="space-y-3 px-3 pb-4 pt-5">
+                      <div className="h-3 w-24 rounded-full bg-[#D4AF37]/20" />
+                      <div className="h-5 w-3/4 rounded-full bg-[#023347]/10" />
+                      <div className="h-4 w-full rounded-full bg-[#023347]/8" />
+                      <div className="h-4 w-5/6 rounded-full bg-[#023347]/8" />
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           ) : pages.length > 0 ? (
@@ -211,6 +236,10 @@ function Glories() {
         @keyframes gentle-float {
           0% { transform: translateY(0px); }
           100% { transform: translateY(-12px); }
+        }
+        
+        @keyframes shimmer {
+          100% { transform: translateX(200%); }
         }
 
         .animate-in { 

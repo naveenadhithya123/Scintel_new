@@ -52,7 +52,7 @@ function Suggestions() {
         <header className="mb-10 md:mb-16 border-b border-[#023347]/5 pb-8 md:pb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 md:gap-8">
           <div className="flex flex-col items-start text-left">
             <span className={`text-[9px] md:text-[10px] font-bold tracking-[0.4em] md:tracking-[0.5em] uppercase text-[#D4AF37] mb-3 md:mb-4 block transition-all duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
-              Community Voice
+              Thoughtful Ideas, Meaningful Change
             </span>
             <h1 className={`text-3xl md:text-5xl font-semibold leading-tight transition-all duration-[1200ms] ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 md:translate-y-12 opacity-0'}`}>
               Submit <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] via-[#B8860B] to-[#D4AF37]">Suggestions</span>
@@ -61,7 +61,7 @@ function Suggestions() {
           
           <button
             onClick={() => navigate(-1)}
-            className="group flex items-center gap-3 bg-white border border-[#023347]/10 text-[#023347] px-6 md:px-8 py-3 md:py-3.5 rounded-xl md:rounded-2xl text-[9px] md:text-[10px] font-bold tracking-[0.2em] uppercase transition-all hover:bg-gray-50 active:scale-95 shadow-sm"
+            className="landing-btn-secondary landing-btn-compact-mobile"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 md:w-4 h-4 transition-transform group-hover:-translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
               <path d="M19 12H5M5 12l7 7M5 12l7-7" />
@@ -122,7 +122,7 @@ function Suggestions() {
             <div className="flex justify-center md:justify-end pt-4 md:pt-6">
               <button 
                 onClick={handleSubmit} 
-                className={`w-full md:w-auto bg-[#023347] text-white px-12 md:px-20 py-4 md:py-5 rounded-xl md:rounded-2xl text-[10px] md:text-[11px] font-bold tracking-[0.2em] uppercase transition-all duration-500 hover:bg-[#D4AF37] hover:shadow-2xl hover:shadow-[#D4AF37]/20 active:scale-95 ${isShaking ? 'animate-shake bg-red-500' : ''}`}
+                className={`landing-btn-primary w-full md:w-auto ${isShaking ? 'animate-shake bg-red-500 hover:bg-red-500' : ''}`}
               >
                 Submit
               </button>

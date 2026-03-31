@@ -97,6 +97,8 @@ export default function ProblemDetails() {
     };
   }, [problem?.title]);
 
+  const isProblemInProgress = (problem?.status || "").trim().toLowerCase() === "in progress";
+
   const handleLeadFieldChange = (event) => {
     const { name, value } = event.target;
     setSolverForm((current) => ({ ...current, [name]: value }));
@@ -307,13 +309,13 @@ export default function ProblemDetails() {
     >
       <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-[#D4AF37]/5 via-transparent to-transparent pointer-events-none" />
 
-      <main className="max-w-[1500px] mx-auto px-6 md:px-12 py-16 relative z-10">
-        <header className="mb-16 border-b border-[#023347]/5 pb-10 flex flex-col md:flex-row justify-between items-end gap-8">
+      <main className="relative z-10 mx-auto max-w-[1500px] px-5 py-12 md:px-12 md:py-16">
+        <header className="mb-16 flex flex-col gap-6 border-b border-[#023347]/5 pb-10 md:flex-row md:items-end md:justify-between md:gap-8">
           <div className="overflow-visible">
             <span className={`text-[10px] font-bold tracking-[0.5em] uppercase text-[#D4AF37] mb-4 block transition-all duration-1000 ${isVisible ? "opacity-100" : "opacity-0"}`}>
-              Case Analysis #{id}
+              From Problem Insight to Practical Action
             </span>
-            <h1 className={`font-serif text-4xl md:text-5xl font-semibold leading-tight transition-all duration-[1200ms] ${isVisible ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"}`}>
+            <h1 className={`font-serif text-3xl md:text-5xl font-semibold leading-tight transition-all duration-[1200ms] ${isVisible ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"}`}>
               {titleParts.primary}
               {titleParts.accent ? (
                 <>
@@ -328,7 +330,7 @@ export default function ProblemDetails() {
 
           <button
             onClick={() => navigate(-1)}
-            className="group flex items-center gap-3 bg-white border border-[#023347]/10 text-[#023347] px-8 py-3.5 rounded-2xl text-[10px] font-bold tracking-[0.2em] uppercase transition-all hover:bg-gray-50 active:scale-95 shadow-sm"
+            className="landing-btn-secondary landing-btn-compact-mobile"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 transition-transform group-hover:-translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
               <path d="M19 12H5M5 12l7 7M5 12l7-7" />
@@ -340,7 +342,7 @@ export default function ProblemDetails() {
         <div className={`group relative bg-white/[0.02] backdrop-blur-[4px] border border-black/5 rounded-[2rem] p-8 md:p-16 transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}>
           <div className="absolute left-0 top-12 w-1.5 h-24 bg-[#023347] rounded-r-full group-hover:bg-[#D4AF37] transition-all duration-500" />
 
-          <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_340px] gap-12">
+          <div className="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,1fr)_340px] xl:gap-12">
             <div className="max-w-5xl">
               <header className="mb-10 flex items-center gap-4">
                 <div className="w-10 h-10 border border-[#023347]/10 flex items-center justify-center rounded-2xl text-lg font-serif italic bg-white/5 text-[#D4AF37]">P</div>
@@ -376,8 +378,19 @@ export default function ProblemDetails() {
                 Submit the mentor details and student team information to request ownership of this problem statement.
               </p>
               <button
-                onClick={() => setShowLockForm((current) => !current)}
-                className="w-full bg-[#023347] text-white px-8 py-4 rounded-2xl text-[11px] font-bold tracking-[0.2em] uppercase transition-all duration-500 hover:bg-[#D4AF37] hover:shadow-2xl hover:shadow-[#D4AF37]/20 active:scale-95"
+                onClick={() => {
+                  if (isProblemInProgress) {
+                    setSubmissionState({
+                      type: "error",
+                      message: "This problem statement is already in progress and cannot be locked right now.",
+                    });
+                    setShowLockForm(false);
+                    return;
+                  }
+                  setSubmissionState(null);
+                  setShowLockForm((current) => !current);
+                }}
+                className="landing-btn-primary w-full"
               >
                 {showLockForm ? "Close Form" : "Lock Statement"}
               </button>
@@ -386,7 +399,7 @@ export default function ProblemDetails() {
         </div>
 
         {submissionState ? (
-          <div className={`mt-8 rounded-[1.5rem] border px-6 py-4 text-sm font-medium ${submissionState.type === "success" ? "border-[#D4AF37]/40 bg-[#D4AF37]/10 text-[#7C5A05]" : "border-red-200 bg-red-50 text-red-700"}`}>
+          <div className={`mt-8 rounded-[1.5rem] border px-4 py-4 text-sm font-medium md:px-6 ${submissionState.type === "success" ? "border-[#D4AF37]/40 bg-[#D4AF37]/10 text-[#7C5A05]" : "border-red-200 bg-red-50 text-red-700"}`}>
             {submissionState.message}
           </div>
         ) : null}
@@ -505,14 +518,14 @@ export default function ProblemDetails() {
                 <button
                   type="button"
                   onClick={() => setShowLockForm(false)}
-                  className="px-8 py-4 rounded-2xl border border-[#023347]/10 text-[#023347] text-[11px] font-bold tracking-[0.2em] uppercase transition-all hover:bg-white"
+                  className="landing-btn-secondary"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="bg-[#023347] text-white px-10 py-4 rounded-2xl text-[11px] font-bold tracking-[0.2em] uppercase transition-all duration-500 hover:bg-[#D4AF37] hover:shadow-2xl hover:shadow-[#D4AF37]/20 active:scale-95 disabled:opacity-50"
+                  className="landing-btn-primary"
                 >
                   {submitting ? "Submitting..." : "Submit Lock Request"}
                 </button>
@@ -544,7 +557,7 @@ export default function ProblemDetails() {
       {showOtpModal ? (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
           <div className="absolute inset-0 bg-[#023347]/40 backdrop-blur-md" onClick={resetOtpFlow} />
-          <div className="relative w-full max-w-md bg-white rounded-[2.5rem] p-12 shadow-2xl border border-white/20">
+          <div className="relative w-full max-w-md rounded-[2rem] border border-white/20 bg-white p-6 shadow-2xl md:rounded-[2.5rem] md:p-12">
             <div className="text-center mb-10">
               <span className="text-[10px] font-bold tracking-[0.4em] uppercase text-[#D4AF37]">Lead Verification</span>
               <h2 className="font-serif text-3xl text-[#023347] mt-2">Enter OTP</h2>
@@ -568,13 +581,13 @@ export default function ProblemDetails() {
               <button
                 onClick={handleOtpVerification}
                 disabled={otpLoading}
-                className="w-full bg-[#023347] text-white py-4 rounded-xl text-[11px] font-bold tracking-widest uppercase hover:bg-[#D4AF37] transition-all disabled:opacity-50"
+                className="landing-btn-primary w-full"
               >
                 {otpLoading ? "Verifying..." : "Confirm OTP"}
               </button>
               <button
                 onClick={resetOtpFlow}
-                className="w-full bg-transparent text-[#023347]/40 py-2 text-[10px] font-bold tracking-widest uppercase hover:text-[#023347] transition-all"
+                className="landing-btn-secondary w-full"
               >
                 Cancel
               </button>

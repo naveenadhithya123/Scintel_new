@@ -44,22 +44,22 @@ function Activities() {
       {/* --- AMBIENT LIGHTING (God Ray) --- */}
       <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-[#D4AF37]/5 via-transparent to-transparent pointer-events-none" />
 
-      <main className="max-w-[1500px] mx-auto px-6 md:px-12 py-12 relative z-10">
+      <main className="relative z-10 mx-auto max-w-[1500px] px-5 py-10 md:px-12 md:py-12">
         
         {/* --- 1. UNIFIED HEADER SECTION --- */}
-        <header className="mb-20 border-b border-[#023347]/5 pb-12 flex flex-col md:flex-row justify-between items-end gap-8">
+        <header className="mb-14 flex flex-col gap-6 border-b border-[#023347]/5 pb-10 md:mb-20 md:flex-row md:items-end md:justify-between md:gap-8 md:pb-12">
           <div className="overflow-visible">
             <span className={`text-[10px] font-bold tracking-[0.5em] uppercase text-[#D4AF37] mb-5 block transition-all duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
-              Institutional Archives
+             Every Batch, Every Effort, Every Milestone 
             </span>
-            <h1 className={`text-4xl md:text-6xl font-semibold text-[#023347] transition-all duration-[1200ms] delay-200 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
-              Academic <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-[#B8860B]">Activities</span>
+            <h1 className={`text-3xl md:text-6xl font-semibold text-[#023347] transition-all duration-[1200ms] delay-200 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
+              SCINTEL <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-[#B8860B]">Activities</span>
             </h1>
           </div>
 
           <button
             onClick={() => navigate("/")}
-            className={`group flex items-center gap-3 bg-[#023347] text-white px-10 py-4 rounded-2xl text-[11px] font-bold tracking-[0.2em] uppercase transition-all duration-500 hover:bg-[#D4AF37] hover:shadow-2xl hover:shadow-[#D4AF37]/20 active:scale-95 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+            className={`landing-btn-primary landing-btn-compact-mobile ${isVisible ? 'opacity-100' : 'opacity-0'}`}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 transition-transform group-hover:-translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
               <path d="M19 12H5M5 12l7 7M5 12l7-7" />
@@ -70,7 +70,28 @@ function Activities() {
 
         {/* --- 2. STAGGERED DECK TABLE LAYOUT --- */}
         <div className="grid grid-cols-1 gap-6">
-          {activitiesData.length > 0 ? (
+          {!loaded ? (
+            Array.from({ length: 4 }).map((_, index) => (
+              <div
+                key={index}
+                className="relative overflow-hidden rounded-[2rem] border border-[#023347]/10 bg-white/75"
+              >
+                <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.8s_infinite] bg-gradient-to-r from-transparent via-white/75 to-transparent" />
+                <div className="grid grid-cols-1 gap-4 p-6 md:grid-cols-12 md:items-center md:gap-5 md:p-7">
+                  <div className="space-y-3 md:col-span-4">
+                    <div className="h-3 w-24 rounded-full bg-[#D4AF37]/20" />
+                    <div className="h-8 w-40 rounded-xl bg-[#023347]/10" />
+                  </div>
+                  <div className="md:col-span-4 md:flex md:justify-center">
+                    <div className="h-14 w-full rounded-2xl bg-[#023347]/8 md:max-w-[220px]" />
+                  </div>
+                  <div className="md:col-span-4 md:flex md:justify-end">
+                    <div className="h-12 w-full rounded-2xl bg-[#023347]/10 md:max-w-[220px]" />
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : activitiesData.length > 0 ? (
             activitiesData.map((item, index) => (
               <div
                 key={item.id || index}
@@ -103,10 +124,10 @@ function Activities() {
                   </div>
 
                   {/* Action Zone - SYNCHRONIZED BUTTON STYLE */}
-                  <div className="md:col-span-4 flex justify-end">
+                  <div className="md:col-span-4 flex justify-start md:justify-end">
                     <button
                       onClick={() => handleViewDetail(item.batch)}
-                      className="group flex items-center justify-center gap-3 bg-[#023347] text-white w-full md:w-auto px-8 py-3.5 rounded-2xl text-[10px] md:text-[11px] font-bold tracking-[0.18em] uppercase transition-all duration-500 hover:bg-[#D4AF37] hover:shadow-2xl hover:shadow-[#D4AF37]/20 active:scale-95"
+                      className="landing-btn-primary w-full md:w-auto"
                     >
                       Explore Records
                       <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 transition-transform group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
@@ -122,9 +143,8 @@ function Activities() {
             ))
           ) : (
             <div className="h-80 flex flex-col items-center justify-center border-2 border-dashed border-[#023347]/5 rounded-[3rem] bg-white/40">
-              <div className="w-12 h-12 border-4 border-[#D4AF37]/20 border-t-[#D4AF37] rounded-full animate-spin mb-4" />
               <p className="text-sm font-bold text-[#023347]/40 uppercase tracking-[0.4em]">
-                {loaded ? "No Archives Located" : "Synchronizing Database"}
+                No Archives Located
               </p>
             </div>
           )}
@@ -136,10 +156,13 @@ function Activities() {
         
         .font-serif { font-family: 'Playfair Display', serif; }
         .font-poppins { font-family: 'Poppins', sans-serif; }
-
         @keyframes gentle-float {
           0% { transform: translateY(0px); }
           100% { transform: translateY(-12px); }
+        }
+        
+        @keyframes shimmer {
+          100% { transform: translateX(200%); }
         }
 
         /* Custom Scrollbar */

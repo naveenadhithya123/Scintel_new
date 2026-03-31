@@ -142,7 +142,7 @@ const EventDetails = () => {
           </p>
           <button
             onClick={() => navigate(-1)}
-            className="rounded-2xl bg-[#023347] px-8 py-3 text-[11px] font-bold uppercase tracking-[0.18em] text-white transition-all duration-300 hover:bg-[#D4AF37]"
+            className="landing-btn-primary landing-btn-compact-mobile"
           >
             Go Back
           </button>
@@ -193,7 +193,7 @@ const EventDetails = () => {
     >
       <div className="absolute top-0 left-0 h-[420px] w-full bg-gradient-to-b from-[#D4AF37]/10 via-transparent to-transparent pointer-events-none" />
 
-      <main className="relative z-10 mx-auto max-w-[1500px] px-6 py-14 md:px-10 md:py-20">
+      <main className="relative z-10 mx-auto max-w-[1500px] px-5 py-12 md:px-10 md:py-20">
         <header className="mb-12 border-b border-[#023347]/5 pb-10">
           <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-4xl">
@@ -207,7 +207,7 @@ const EventDetails = () => {
                 </span>
                 <div className="h-px w-16 bg-[#D4AF37]/30" />
               </div>
-              <h1 className="text-4xl font-semibold leading-tight text-[#023347] md:text-6xl">
+              <h1 className="text-3xl font-semibold leading-tight text-[#023347] md:text-6xl">
                 {title}
               </h1>
               <p className="mt-5 max-w-3xl text-sm leading-7 text-[#023347]/70 md:text-base">
@@ -221,14 +221,14 @@ const EventDetails = () => {
                   href={brochureUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center justify-center rounded-2xl border border-[#023347]/10 bg-white px-6 py-3.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[#023347] transition-all duration-300 hover:border-[#D4AF37] hover:text-[#B8860B]"
+                  className="landing-btn-secondary"
                 >
                   View Brochure
                 </a>
               )}
               <button
                 onClick={() => navigate(-1)}
-                className="rounded-2xl bg-[#023347] px-7 py-3.5 text-[10px] font-bold uppercase tracking-[0.2em] text-white transition-all duration-300 hover:bg-[#D4AF37]"
+                className="landing-btn-primary landing-btn-compact-mobile"
               >
                 Back to Records
               </button>
@@ -251,7 +251,7 @@ const EventDetails = () => {
             ))}
           </div>
 
-          <section className="rounded-[2rem] border border-[#023347]/10 bg-white/70 p-8 shadow-xl shadow-[#023347]/[0.03]">
+          <section className="rounded-[2rem] border border-[#023347]/10 bg-white/70 p-6 shadow-xl shadow-[#023347]/[0.03] md:p-8">
             <div className="mb-4 flex items-center gap-4">
               <h2 className="text-[11px] font-bold uppercase tracking-[0.28em] text-[#023347]">
                 Description
@@ -264,7 +264,7 @@ const EventDetails = () => {
           </section>
 
           {hasSectionData(resourceName, resourceRole, resourceImage) && (
-            <section className="rounded-[2rem] border border-[#023347]/10 bg-white/70 p-8 shadow-xl shadow-[#023347]/[0.03]">
+            <section className="rounded-[2rem] border border-[#023347]/10 bg-white/70 p-6 shadow-xl shadow-[#023347]/[0.03] md:p-8">
               <div className="mb-5 flex items-center gap-4">
                 <h2 className="text-[11px] font-bold uppercase tracking-[0.28em] text-[#023347]">
                   Resource Person
@@ -294,7 +294,7 @@ const EventDetails = () => {
           )}
 
           {participants && (
-            <section className="rounded-[2rem] border border-[#023347]/10 bg-white/70 p-8 shadow-xl shadow-[#023347]/[0.03]">
+            <section className="rounded-[2rem] border border-[#023347]/10 bg-white/70 p-6 shadow-xl shadow-[#023347]/[0.03] md:p-8">
               <div className="mb-4 flex items-center gap-4">
                 <h2 className="text-[11px] font-bold uppercase tracking-[0.28em] text-[#023347]">
                   Participants
@@ -306,7 +306,7 @@ const EventDetails = () => {
           )}
 
           {photos.length > 0 && (
-            <section className="rounded-[2rem] border border-[#023347]/10 bg-white/70 p-8 shadow-xl shadow-[#023347]/[0.03]">
+            <section className="rounded-[2rem] border border-[#023347]/10 bg-white/70 p-6 shadow-xl shadow-[#023347]/[0.03] md:p-8">
               <div className="mb-5 flex items-center gap-4">
                 <h2 className="text-[11px] font-bold uppercase tracking-[0.28em] text-[#023347]">
                   Photos
@@ -324,7 +324,7 @@ const EventDetails = () => {
           )}
 
           {hasSectionData(winnerName, winnerNote, winnerImage) && (
-            <section className="rounded-[2rem] border border-[#023347]/10 bg-white/70 p-8 shadow-xl shadow-[#023347]/[0.03]">
+            <section className="rounded-[2rem] border border-[#023347]/10 bg-white/70 p-6 shadow-xl shadow-[#023347]/[0.03] md:p-8">
               <div className="mb-5 flex items-center gap-4">
                 <h2 className="text-[11px] font-bold uppercase tracking-[0.28em] text-[#023347]">
                   Winner

@@ -45,26 +45,26 @@ function ActivitiesDetail() {
       {/* --- AMBIENT DEPTH LAYER --- */}
       <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-[#D4AF37]/5 via-transparent to-transparent pointer-events-none" />
 
-      <main className="max-w-[1500px] mx-auto px-6 md:px-10 py-16 relative z-10 w-full">
+      <main className="relative z-10 mx-auto w-full max-w-[1500px] px-5 py-12 md:px-10 md:py-16">
         
         {/* --- PROFESSIONAL HEADER SECTION --- */}
         <header className="mb-16 flex flex-col md:flex-row items-start md:items-end justify-between gap-8 border-b border-[#023347]/5 pb-10">
           <div className="max-w-2xl">
             <div className="flex items-center gap-4 mb-4">
               <span className={`text-[10px] font-bold tracking-[0.5em] uppercase text-[#D4AF37] transition-all duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
-                Archive Selection
+                A Closer Look at This Batch
               </span>
-              <div className={`h-[1px] bg-[#D4AF37]/30 transition-all duration-[1.5s] ${isVisible ? 'w-12' : 'w-0'}`} />
+              
             </div>
             
-            <h1 className={`text-4xl md:text-6xl font-semibold font-poppins text-[#023347] tracking-tight transition-all duration-[1200ms] ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}>
+            <h1 className={`text-3xl md:text-6xl font-semibold font-poppins text-[#023347] tracking-tight transition-all duration-[1200ms] ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}>
               {batch} <span className="bg-gradient-to-r from-[#D4AF37] via-[#B8860B] to-[#D4AF37] bg-clip-text text-transparent">Records</span>
             </h1>
           </div>
 
           <button
             onClick={() => navigate(-1)}
-            className={`group flex items-center gap-3 bg-[#023347] text-white px-8 py-3.5 rounded-2xl text-[10px] font-bold tracking-[0.2em] uppercase transition-all duration-500 hover:bg-[#D4AF37] hover:shadow-xl hover:shadow-[#D4AF37]/20 active:scale-95 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+            className={`landing-btn-primary landing-btn-compact-mobile ${isVisible ? 'opacity-100' : 'opacity-0'}`}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -77,7 +77,15 @@ function ActivitiesDetail() {
         <div className="max-w-7xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
           {loading ? (
              [...Array(6)].map((_, i) => (
-              <div key={i} className="aspect-video bg-black/5 rounded-[2rem] animate-pulse" />
+              <div key={i} className="relative overflow-hidden rounded-[2rem] border border-[#023347]/10 bg-white/80 p-3">
+                <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.8s_infinite] bg-gradient-to-r from-transparent via-white/75 to-transparent" />
+                <div className="aspect-video rounded-[1.5rem] bg-[#023347]/8" />
+                <div className="space-y-3 px-4 pb-4 pt-5">
+                  <div className="h-3 w-16 rounded-full bg-[#D4AF37]/20" />
+                  <div className="h-5 w-3/4 rounded-full bg-[#023347]/10" />
+                  <div className="h-4 w-full rounded-full bg-[#023347]/8" />
+                </div>
+              </div>
             ))
           ) : (
             activities.map((item, index) => (
@@ -135,6 +143,10 @@ function ActivitiesDetail() {
         @keyframes gentle-float {
           0% { transform: translateY(0px); }
           100% { transform: translateY(-12px); }
+        }
+
+        @keyframes shimmer {
+          100% { transform: translateX(200%); }
         }
 
         ::-webkit-scrollbar { width: 8px; }

@@ -4,7 +4,9 @@ import { useNavigate } from "react-router-dom";
 export default function UpcomingEvents() {
   const navigate = useNavigate();
   const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [cardsPerPage, setCardsPerPage] = useState(6);
   const scrollRef = useRef(null);
   const sectionRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -12,6 +14,7 @@ export default function UpcomingEvents() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
+        setLoading(true);
         const response = await fetch("http://localhost:3000/api/announcements");
         const result = await response.json();
 
@@ -34,9 +37,24 @@ export default function UpcomingEvents() {
         }
       } catch (error) {
         console.error("Error fetching events:", error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchEvents();
+  }, []);
+
+  useEffect(() => {
+    const updateCardsPerPage = () => {
+      const nextCardsPerPage = window.innerWidth < 768 ? 2 : 4;
+      setCardsPerPage(nextCardsPerPage);
+      setActiveIndex(0);
+      scrollRef.current?.scrollTo({ left: 0, behavior: "auto" });
+    };
+
+    updateCardsPerPage();
+    window.addEventListener("resize", updateCardsPerPage);
+    return () => window.removeEventListener("resize", updateCardsPerPage);
   }, []);
 
   useEffect(() => {
@@ -48,7 +66,6 @@ export default function UpcomingEvents() {
     return () => { if (sectionRef.current) observer.unobserve(sectionRef.current); };
   }, []);
 
-  const cardsPerPage = 4;
   const pages = [];
   for (let i = 0; i < events.length; i += cardsPerPage) {
     pages.push(events.slice(i, i + cardsPerPage));
@@ -78,7 +95,7 @@ export default function UpcomingEvents() {
           <div className="overflow-visible">
             <div className="flex items-center gap-4 mb-4">
               <span className={`text-[10px] font-bold tracking-[0.5em] uppercase text-[#D4AF37] transition-all duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
-                Calendar of Excellence
+                Upcoming Opportunities to Engage
               </span>
             </div>
             <h2 className={`text-5xl md:text-6xl font-semibold text-[#023347] tracking-tight transition-all duration-[1200ms] delay-200 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
@@ -107,11 +124,33 @@ export default function UpcomingEvents() {
         <div 
           ref={scrollRef} 
           className="flex overflow-x-hidden snap-x snap-mandatory scroll-smooth no-scrollbar pt-10"
+          style={{ touchAction: "pan-y" }}
         >
-          {pages.length > 0 ? (
+          {loading ? (
+            <div className="flex-none w-full snap-center">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10 px-2 pb-12">
+                {Array.from({ length: cardsPerPage }).map((_, idx) => (
+                  <div key={idx} className="overflow-hidden rounded-[2rem] border-2 border-[#023347]/10 bg-white/70">
+                    <div className="relative h-full">
+                      <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.8s_infinite] bg-gradient-to-r from-transparent via-white/70 to-transparent" />
+                      <div className="h-[240px] bg-[#023347]/6" />
+                      <div className="space-y-4 p-8">
+                        <div className="h-6 w-3/4 rounded-full bg-[#023347]/10" />
+                        <div className="h-4 w-full rounded-full bg-[#023347]/8" />
+                        <div className="h-4 w-5/6 rounded-full bg-[#023347]/8" />
+                        <div className="pt-6">
+                          <div className="h-12 w-full rounded-2xl bg-[#023347]/10" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : pages.length > 0 ? (
             pages.map((pageCards, pageIndex) => (
               <div key={pageIndex} className="flex-none w-full snap-center">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 px-2 pb-12">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10 px-2 pb-12">
                   {pageCards.map((event, idx) => (
                     <article 
                       key={event.id || idx} 
@@ -181,6 +220,9 @@ export default function UpcomingEvents() {
         @keyframes gentle-float {
           0% { transform: translateY(0px); }
           100% { transform: translateY(-12px); }
+        }
+        @keyframes shimmer {
+          100% { transform: translateX(200%); }
         }
       `}</style>
     </div>

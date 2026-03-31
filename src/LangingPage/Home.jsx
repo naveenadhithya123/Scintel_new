@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import logo from '../assets/logo.jpeg';
 import clgimg from './kiot img.jpeg';
 
 const objectives = [
@@ -43,7 +44,7 @@ function Home() {
 
   return (
     <div id="home" className="min-h-screen overflow-x-hidden bg-[#FDFCFB] -mt-20 selection:bg-[#D4AF37]/20">
-      <div className="relative flex h-[100vh] w-full items-center justify-center overflow-hidden bg-[#023347]">
+      <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#023347]">
         <img
           src={clgimg}
           alt="Campus"
@@ -58,44 +59,45 @@ function Home() {
             loaded ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
           }`}
         >
-          <div className="mx-auto max-w-9xl rounded-[2.5rem] border border-white/15 bg-black/10 px-8 py-14 text-center shadow-[0_30px_80px_rgba(0,0,0,0.24)] md:px-14 md:py-20">
-            <div className="mb-6 flex items-center justify-center gap-4">
-              <span className="font-sans text-[10px] font-semibold uppercase tracking-[0.6em] text-white/85">
+          <div className="mx-auto w-full max-w-9xl rounded-[2rem] border border-white/15 bg-black/10 px-5 py-12 text-center shadow-[0_30px_80px_rgba(0,0,0,0.24)] sm:px-8 md:rounded-[2.5rem] md:px-14 md:py-20">
+            <div className="mb-6 flex flex-wrap items-center justify-center gap-3 md:gap-4">
+              
+              <span className="font-sans text-[9px] font-semibold uppercase tracking-[0.45em] text-white/85 md:text-[10px] md:tracking-[0.6em]">
                 Established 2009
               </span>
             </div>
 
-            <h1 className="text-4xl font-semibold leading-tight  text-white drop-shadow-lg md:text-6xl lg:text-8xl">
+            <h1 className="text-3xl font-semibold leading-tight text-white drop-shadow-lg sm:text-4xl md:text-6xl lg:text-8xl">
               Knowledge Institute of
               <br className="hidden md:block" />Technology
             </h1>
 
-            <p className="mt-6 font-sans text-lg font-semibold uppercase tracking-[0.5em] text-[#D4AF37] md:text-2xl">
+            <p className="mt-6 font-sans text-base font-semibold uppercase tracking-[0.28em] text-[#D4AF37] sm:text-lg md:text-2xl md:tracking-[0.5em]">
               Beyond Knowledge
             </p>
 
             <div className="mx-auto mt-5 h-[2px] w-36 bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent" />
 
-            <p className="mt-6 text-3xl font-medium uppercase tracking-[0.45em] text-[#D4AF37] md:text-base">
+            <p className="mt-6 text-xs font-medium uppercase tracking-[0.18em] text-[#D4AF37] sm:text-sm md:text-base md:tracking-[0.45em]">
               Department of Computer Science and Engineering
             </p>
           </div>
         </div>
       </div>
 
-      <section className="relative z-30 mx-auto -mt-24 max-w-[1500px] px-6 pb-40">
+      <section className="relative z-30 mx-auto -mt-16 max-w-[1500px] px-4 pb-24 sm:px-6 md:-mt-24 md:pb-40">
         <div
-          className={`rounded-[2rem] border-2 border-black/5 bg-white p-10 shadow-[0_50px_100px_-20px_rgba(2,51,71,0.12)] transition-all duration-[1.2s] md:p-20 ${
+          className={`rounded-[2rem] border-2 border-black/5 bg-white p-6 shadow-[0_50px_100px_-20px_rgba(2,51,71,0.12)] transition-all duration-[1.2s] sm:p-8 md:p-20 ${
             loaded ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'
           }`}
         >
           <div className="mb-20">
             <div className="mb-6 flex items-center gap-4">
               <span className="font-sans text-[10px] font-black uppercase tracking-[0.5em] text-[#D4AF37]">
-                Institutional Pillars
+               The Pillars of Progress
               </span>
             </div>
-            <h2 className="font-sans text-4xl font-semibold tracking-tight text-[#023347] md:text-5xl">
+            <h2 className="font-sans text-3xl font-semibold tracking-tight text-[#023347] md:text-5xl">
               Our <span className="text-[#B8860B]">Objectives</span>
             </h2>
           </div>
@@ -104,7 +106,7 @@ function Home() {
             {objectives.map((obj, i) => (
               <div
                 key={obj.title}
-                className="group rounded-[2rem] border-2 border-[#023347]/10 bg-[#FDFCFB]/50 p-10 transition-all duration-700 hover:-translate-y-3 hover:border-[#D4AF37]/50 hover:bg-white hover:shadow-2xl hover:shadow-[#D4AF37]/10"
+                className="group rounded-[2rem] border-2 border-[#023347]/10 bg-[#FDFCFB]/50 p-6 transition-all duration-700 hover:-translate-y-3 hover:border-[#D4AF37]/50 hover:bg-white hover:shadow-2xl hover:shadow-[#D4AF37]/10 sm:p-8 md:p-10"
                 style={{ animation: `gentle-float ${5 + i}s ease-in-out infinite alternate` }}
               >
                 <div className="mb-10 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#023347]/5 text-[#023347] shadow-sm transition-all duration-500 group-hover:bg-[#023347] group-hover:text-white">
@@ -127,7 +129,6 @@ function Home() {
           @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
           .font-sans { font-family: "Poppins", sans-serif; }
-
           @keyframes gentle-float {
             0% { transform: translateY(0px); }
             100% { transform: translateY(-12px); }

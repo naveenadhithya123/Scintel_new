@@ -248,7 +248,7 @@ export default function AddBatch() {
                 className="ab-input"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Scintel 2023"
+                placeholder="SCINTEL 2023"
               />
             </div>
             <div>

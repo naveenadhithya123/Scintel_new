@@ -95,9 +95,9 @@ export default function Verification() {
     <div className="relative min-h-screen bg-[#FDFCFB] text-[#023347] font-sans selection:bg-[#D4AF37]/20 overflow-x-hidden">
       
       {/* --- NOTIFICATION TOASTS --- */}
-      <div className="fixed top-10 right-10 z-[110] flex flex-col gap-4">
+      <div className="fixed left-4 right-4 top-4 z-[110] flex flex-col gap-4 md:left-auto md:right-10 md:top-10">
         {status === "success" && (
-          <div className="relative flex items-center bg-white border border-black/5 shadow-2xl rounded-xl overflow-hidden min-w-[320px] animate-slide-in">
+          <div className="relative flex w-full items-center overflow-hidden rounded-xl border border-black/5 bg-white shadow-2xl animate-slide-in md:min-w-[320px]">
             <div className="w-1.5 h-16 bg-[#D4AF37]" />
             <div className="px-6 py-4 text-left">
               <p className="text-[10px] font-bold tracking-[0.3em] text-[#D4AF37] uppercase">Identity Confirmed</p>
@@ -106,7 +106,7 @@ export default function Verification() {
           </div>
         )}
         {status === "error" && (
-          <div className="relative flex items-center bg-white border border-black/5 shadow-2xl rounded-xl overflow-hidden min-w-[320px] animate-slide-in">
+          <div className="relative flex w-full items-center overflow-hidden rounded-xl border border-black/5 bg-white shadow-2xl animate-slide-in md:min-w-[320px]">
             <div className="w-1.5 h-16 bg-[#8E2424]" />
             <div className="px-6 py-4 text-left">
               <p className="text-[10px] font-bold tracking-[0.3em] text-[#8E2424] uppercase">System Interruption</p>
@@ -119,24 +119,24 @@ export default function Verification() {
       {/* --- AMBIENT LIGHTING --- */}
       <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-[#D4AF37]/5 via-transparent to-transparent pointer-events-none" />
 
-      <main className="max-w-[1500px] mx-auto px-6 md:px-12 py-16 relative z-10">
+      <main className="relative z-10 mx-auto max-w-[1500px] px-5 py-12 md:px-12 md:py-16">
         
         {/* --- HEADER --- */}
         <header className="mb-16 border-b border-[#023347]/5 pb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
           <div className="flex flex-col items-start text-left">
             <span className="text-[10px] font-bold tracking-[0.5em] uppercase text-[#D4AF37] mb-4">Security Protocol</span>
-            <h1 className={`font-serif text-5xl font-semibold leading-tight transition-all duration-[1200ms] ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
+            <h1 className={`font-serif text-3xl font-semibold leading-tight transition-all duration-[1200ms] sm:text-4xl md:text-5xl ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
               Identity <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-[#B8860B]">Verification</span>
             </h1>
           </div>
-          <button onClick={() => navigate(-1)} className="group flex items-center gap-3 bg-white border border-[#023347]/10 text-[#023347] px-8 py-3.5 rounded-2xl text-[10px] font-bold tracking-[0.2em] uppercase transition-all hover:bg-gray-50 active:scale-95 shadow-sm">
+          <button onClick={() => navigate(-1)} className="landing-btn-secondary landing-btn-compact-mobile">
             <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 transition-transform group-hover:-translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M19 12H5M5 12l7 7M5 12l7-7"/></svg>
             Return to List
           </button>
         </header>
 
         {/* --- FORM MODULE (Corporate Glass) --- */}
-        <div className={`relative bg-white/[0.02] backdrop-blur-[4px] border border-black/5 rounded-[2rem] p-10 md:p-16 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+        <div className={`relative bg-white/[0.02] backdrop-blur-[4px] border border-black/5 rounded-[2rem] p-6 md:p-16 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
           <div className="absolute left-0 top-12 w-1 h-24 bg-[#023347]" />
           
           <form onSubmit={handleVerifyRequest} className="space-y-10">
@@ -167,7 +167,7 @@ export default function Verification() {
               <button
                 type="submit"
                 disabled={loading}
-                className="bg-[#023347] text-white px-16 py-4 rounded-2xl text-[11px] font-bold tracking-[0.2em] uppercase transition-all duration-500 hover:bg-[#D4AF37] hover:shadow-2xl hover:shadow-[#D4AF37]/20 active:scale-95 flex items-center gap-4 disabled:opacity-50"
+                className="landing-btn-primary disabled:opacity-50"
               >
                 {loading ? "Authenticating..." : "Request Access"}
               </button>
@@ -180,7 +180,7 @@ export default function Verification() {
       {showOTP && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
           <div className="absolute inset-0 bg-[#023347]/40 backdrop-blur-md animate-fade-in" onClick={() => setShowOTP(false)} />
-          <div className="relative w-full max-w-md bg-white rounded-[2.5rem] p-12 shadow-2xl border border-white/20 animate-slide-up">
+          <div className="relative w-full max-w-md rounded-[2rem] border border-white/20 bg-white p-6 shadow-2xl animate-slide-up md:rounded-[2.5rem] md:p-12">
             <div className="absolute left-0 top-0 w-2 h-full bg-[#023347]" />
             <div className="text-center mb-10">
               <span className="text-[10px] font-bold tracking-[0.4em] uppercase text-[#D4AF37]">Access Gate</span>
@@ -198,8 +198,8 @@ export default function Verification() {
               ))}
             </div>
             <div className="space-y-4">
-              <button onClick={handleSubmitOTP} className="w-full bg-[#023347] text-white py-4 rounded-xl text-[11px] font-bold tracking-widest uppercase hover:bg-[#D4AF37] transition-all">Confirm</button>
-              <button onClick={() => setShowOTP(false)} className="w-full bg-transparent text-[#023347]/40 py-2 text-[10px] font-bold tracking-widest uppercase hover:text-[#023347] transition-all">Cancel</button>
+              <button onClick={handleSubmitOTP} className="landing-btn-primary w-full">Confirm</button>
+              <button onClick={() => setShowOTP(false)} className="landing-btn-secondary w-full">Cancel</button>
             </div>
           </div>
         </div>

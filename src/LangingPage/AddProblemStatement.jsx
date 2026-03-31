@@ -61,10 +61,10 @@ export default function AddProblemStatement() {
     <div className="relative min-h-screen bg-[#FDFCFB] text-[#023347] font-sans selection:bg-[#D4AF37]/20 overflow-x-hidden">
       
       {/* --- PRESTIGE FEEDBACK TABS (TOASTS) --- */}
-      <div className="fixed top-10 right-10 z-[100] flex flex-col gap-4">
+      <div className="fixed left-4 right-4 top-4 z-[100] flex flex-col gap-4 md:left-auto md:right-10 md:top-10">
         {/* Success Tab */}
         {status === "success" && (
-          <div className="relative flex items-center bg-white border border-black/5 shadow-2xl rounded-xl overflow-hidden min-w-[320px] animate-slide-in-right">
+          <div className="relative flex w-full items-center overflow-hidden rounded-xl border border-black/5 bg-white shadow-2xl animate-slide-in-right md:min-w-[320px]">
             <div className="w-1.5 h-16 bg-[#D4AF37]" />
             <div className="px-6 py-4">
               <p className="text-[10px] font-bold tracking-[0.3em] text-[#D4AF37] uppercase">Archival Complete</p>
@@ -75,7 +75,7 @@ export default function AddProblemStatement() {
 
         {/* Failure Tab */}
         {status === "error" && (
-          <div className="relative flex items-center bg-white border border-black/5 shadow-2xl rounded-xl overflow-hidden min-w-[320px] animate-slide-in-right">
+          <div className="relative flex w-full items-center overflow-hidden rounded-xl border border-black/5 bg-white shadow-2xl animate-slide-in-right md:min-w-[320px]">
             <div className="w-1.5 h-16 bg-[#8E2424]" />
             <div className="px-6 py-4">
               <p className="text-[10px] font-bold tracking-[0.3em] text-[#8E2424] uppercase">System Interruption</p>
@@ -88,20 +88,20 @@ export default function AddProblemStatement() {
       {/* --- PAGE CONTENT --- */}
       <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-[#D4AF37]/5 via-transparent to-transparent pointer-events-none" />
 
-      <main className="max-w-[1500px] mx-auto px-6 md:px-12 py-16 relative z-10">
+      <main className="relative z-10 mx-auto max-w-[1500px] px-5 py-12 md:px-12 md:py-16">
         <header className="mb-16 border-b border-[#023347]/5 pb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
           <div className="flex flex-col items-start text-left">
             <span className="text-[10px] font-bold tracking-[0.5em] uppercase text-[#D4AF37] mb-4">Submission Portal</span>
-            <h1 className={`font-serif text-5xl font-semibold leading-tight transition-all duration-[1200ms] ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
+            <h1 className={`font-serif text-3xl font-semibold leading-tight transition-all duration-[1200ms] sm:text-4xl md:text-5xl ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
               New Problem <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-[#B8860B]">Statement</span>
             </h1>
           </div>
-          <button onClick={() => navigate("/")} className="group flex items-center gap-3 bg-white border border-[#023347]/10 text-[#023347] px-8 py-3.5 rounded-2xl text-[10px] font-bold tracking-[0.2em] uppercase transition-all hover:bg-gray-50 active:scale-95 shadow-sm">
+          <button onClick={() => navigate("/")} className="landing-btn-secondary">
             Discard Draft
           </button>
         </header>
 
-        <div className={`relative bg-white/[0.02] backdrop-blur-[4px] border border-black/5 rounded-[2rem] p-10 md:p-16 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+        <div className={`relative bg-white/[0.02] backdrop-blur-[4px] border border-black/5 rounded-[2rem] p-6 md:p-16 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
           <div className="absolute left-0 top-12 w-1.5 h-24 bg-[#023347] rounded-r-full" />
           
           <div className="space-y-12">
@@ -137,7 +137,7 @@ export default function AddProblemStatement() {
             <div className="flex justify-end pt-6">
               <button 
                 onClick={handleSubmit} 
-                className="bg-[#023347] text-white px-20 py-5 rounded-2xl text-[11px] font-bold tracking-[0.2em] uppercase transition-all duration-500 hover:bg-[#D4AF37] hover:shadow-2xl hover:shadow-[#D4AF37]/20 active:scale-95"
+                className="landing-btn-primary"
               >
                 Submit Statement
               </button>

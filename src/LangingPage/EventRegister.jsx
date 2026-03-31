@@ -68,7 +68,7 @@ function EventRegister() {
         <p className="text-[#023347]/60 max-w-md mb-8">{error}</p>
         <button 
           onClick={() => navigate("/")} 
-          className="bg-[#023347] text-white px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-[#D4AF37] transition-all active:scale-95"
+          className="landing-btn-primary"
         >
           Return to Events
         </button>
@@ -91,13 +91,13 @@ function EventRegister() {
     <div className="relative min-h-screen bg-[#FDFCFB] text-[#023347] font-sans selection:bg-[#D4AF37]/20 overflow-x-hidden">
       <div className="absolute top-0 left-0 w-full h-[300px] md:h-[500px] bg-gradient-to-b from-[#D4AF37]/10 to-transparent pointer-events-none" />
 
-      <main className="max-w-[1400px] mx-auto px-5 md:px-12 py-8 md:py-12 relative z-10">
+      <main className="relative z-10 mx-auto max-w-[1400px] px-4 py-8 md:px-12 md:py-12">
         
         {/* Header */}
         <header className="mb-8 md:mb-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-[#023347]/5 pb-8 md:pb-10">
           <div className="text-left">
             <span className="text-[9px] md:text-[10px] font-bold tracking-[0.4em] md:tracking-[0.5em] uppercase text-[#D4AF37] mb-2 md:mb-3 block">
-              {type === "event" ? "Official Symposium" : "Campus Life"}
+              {type === "event" ? "Take Your Place in the Event" : "Enter, Engage, Experience"}
             </span>
             <h1 className={`text-3xl md:text-6xl font-semibold transition-all duration-1000 ${isVisible ? "opacity-100" : "opacity-0 translate-y-8"}`}>
               Register <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-[#B8860B]">Portal</span>
@@ -105,7 +105,7 @@ function EventRegister() {
           </div>
           <button 
             onClick={() => navigate(-1)} 
-            className="group flex items-center gap-2 bg-white border border-[#023347]/10 px-5 py-2.5 md:px-6 md:py-3 rounded-xl text-[9px] md:text-[10px] font-bold tracking-widest uppercase hover:shadow-lg transition-all active:scale-95"
+            className="landing-btn-secondary"
           >
             <ChevronLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
             Back to Deck
@@ -116,7 +116,7 @@ function EventRegister() {
         <div className={`flex flex-col lg:flex-row bg-white/60 backdrop-blur-xl border border-black/5 rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl transition-all duration-[1200ms] ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20"}`}>
           
           {/* Image Section */}
-          <div className="w-full lg:w-[450px] xl:w-[550px] aspect-video lg:aspect-auto bg-[#023347]/5 relative overflow-hidden group">
+          <div className="relative w-full aspect-video overflow-hidden bg-[#023347]/5 group lg:w-[450px] lg:aspect-auto xl:w-[550px]">
             {event?.brochure_url ? (
               <img src={event.brochure_url} alt={event.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
             ) : (
@@ -169,7 +169,7 @@ function EventRegister() {
                     href={event.event_link} 
                     target="_blank" 
                     rel="noreferrer" 
-                    className="flex-1 flex items-center justify-center gap-2 bg-[#023347] text-white py-4 md:py-5 rounded-xl md:rounded-2xl text-[10px] md:text-[11px] font-bold tracking-[0.2em] uppercase hover:bg-[#D4AF37] transition-all shadow-xl active:scale-95"
+                    className="landing-btn-primary flex-1"
                   >
                     Secure Registration <ExternalLink size={14} />
                   </a>
@@ -179,8 +179,8 @@ function EventRegister() {
                     href={event.brochure_url} 
                     target="_blank" 
                     rel="noreferrer" 
-                    className={`flex-1 text-center py-4 md:py-5 rounded-xl md:rounded-2xl text-[10px] md:text-[11px] font-bold tracking-[0.2em] uppercase transition-all border ${
-                      !event?.event_link ? "bg-[#023347] text-white" : "bg-white border-[#023347]/10 text-[#023347] hover:border-[#D4AF37]"
+                    className={`flex-1 ${!event?.event_link ? "landing-btn-primary" : "landing-btn-secondary"} ${
+                      !event?.event_link ? "w-full" : "w-full"
                     } active:scale-95`}
                   >
                     Download Brochure

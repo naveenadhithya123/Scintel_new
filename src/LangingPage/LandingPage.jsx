@@ -21,6 +21,7 @@ import ProblemDetails from "./ProblemDetails";
 import VerificationMentor from "./VerificationMentor";
 import ScrollToTop from "./ScrollToTop";
 import kiotlogo from "./kiot-logo.png";
+import scintelLogo from "../assets/logo.jpeg";
 import ExecutiveMember from "./ExecutiveMembers";
 import Activities from "./Events";
 import SuggesstionVerification from "./SuggesstionVerification";
@@ -46,12 +47,10 @@ function Navbar() {
           {/* LOGO */}
           <div className="flex items-center gap-3">
             <img src={kiotlogo} alt="KIOT Logo" className="w-10 h-10 object-contain" />
-            <div className="w-10 h-10 bg-[#023347] rounded-lg flex items-center justify-center shadow-md">
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
+            <div className="w-10 h-10 bg-[#023347] rounded-lg flex items-center justify-center shadow-md overflow-hidden">
+              <img src={scintelLogo} alt="SCINTEL Logo" className="w-full h-full object-cover" />
             </div>
-            <span className="font-extrabold text-xl tracking-tight text-black">Scintel</span>
+            <span className="font-extrabold text-xl tracking-tight text-black">SCINTEL</span>
           </div>
 
           {/* DESKTOP NAV */}

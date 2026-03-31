@@ -160,7 +160,7 @@ export default function SuggesstionVerification() {
 
       <main className="max-w-[1500px] mx-auto px-5 md:px-12 py-10 md:py-16 relative z-10">
         <header className="mb-10 md:mb-16 border-b border-[#023347]/5 pb-8 md:pb-10">
-          <span className="text-[9px] md:text-[10px] font-bold tracking-[0.4em] md:tracking-[0.5em] uppercase text-[#D4AF37] mb-3 md:mb-4 block">Security Protocol</span>
+          <span className="text-[9px] md:text-[10px] font-bold tracking-[0.4em] md:tracking-[0.5em] uppercase text-[#D4AF37] mb-3 md:mb-4 block">Verify Your Identity, Secure Your Suggestion</span>
           <h1 className="font-serif text-3xl md:text-5xl font-semibold leading-tight">Identity <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] via-[#B8860B] to-[#D4AF37]">Verification</span></h1>
         </header>
 
@@ -196,7 +196,7 @@ export default function SuggesstionVerification() {
             </div>
 
             <div className="pt-6 md:pt-10 flex justify-center md:justify-end">
-              <button type="submit" disabled={loading} className="w-full md:w-auto bg-[#023347] text-white px-12 md:px-16 py-4 rounded-xl md:rounded-2xl text-[10px] md:text-[11px] font-bold tracking-[0.2em] uppercase transition-all hover:bg-[#D4AF37] active:scale-95 disabled:opacity-50 shadow-xl shadow-[#023347]/10 hover:shadow-[#D4AF37]/20">
+              <button type="submit" disabled={loading} className="landing-btn-primary w-full md:w-auto">
                 {loading ? "Authenticating..." : "Request OTP"}
               </button>
             </div>
@@ -209,11 +209,11 @@ export default function SuggesstionVerification() {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6">
           <div className="absolute inset-0 bg-[#023347]/40 backdrop-blur-md" />
           <div className="relative w-full max-w-md bg-white rounded-[2rem] md:rounded-[2.5rem] p-8 md:p-12 shadow-2xl border border-white/20 overflow-hidden">
-            <div className="absolute left-0 top-0 w-2 h-full bg-[#023347]" />
+            
             
             <div className="text-center mb-8 md:mb-10">
               <h2 className="text-2xl md:text-3xl text-[#023347]">Enter OTP</h2>
-              <p className="text-[10px] md:text-xs text-gray-400 mt-2 font-sans italic break-all">Protocol sent to {formData.email}</p>
+              <p className="text-[10px] md:text-xs text-gray-400 mt-2 font-sans italic break-all">Verification code sent via email.</p>
             </div>
 
             <div className="flex justify-between gap-2 md:gap-3 mb-8">
@@ -231,10 +231,10 @@ export default function SuggesstionVerification() {
             </div>
 
             <div className="space-y-3">
-              <button onClick={handleSubmitOTP} disabled={loading} className="w-full bg-[#023347] text-white py-4 rounded-xl text-[10px] md:text-[11px] font-bold tracking-widest uppercase hover:bg-[#D4AF37] transition-all shadow-lg">
+              <button onClick={handleSubmitOTP} disabled={loading} className="landing-btn-primary w-full">
                 {loading ? "Verifying..." : "Confirm & Submit"}
               </button>
-              <button onClick={() => setShowOTP(false)} className="w-full py-2 text-[#023347]/40 text-[9px] md:text-[10px] font-bold tracking-widest uppercase hover:text-[#023347]">Cancel</button>
+              <button onClick={() => setShowOTP(false)} className="landing-btn-secondary w-full">Cancel</button>
             </div>
           </div>
         </div>
