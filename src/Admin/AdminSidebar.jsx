@@ -144,7 +144,7 @@ export default function AdminSidebar({ children }) {
       >
         <div className="p-6 flex justify-between items-center">
           <h1 className="text-xl md:text-2xl font-bold">Admin Portal</h1>
-          <button className="lg:hidden" onClick={() => setIsMenuOpen(false)}>
+          <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95 lg:hidden" onClick={() => setIsMenuOpen(false)}>
             <CloseIcon />
           </button>
         </div>
@@ -170,10 +170,10 @@ export default function AdminSidebar({ children }) {
         </nav>
 
         <div className="mt-auto p-4">
-          <button
+          <button className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-700 hover:border-red-600/50 hover:shadow-lg active:scale-95 transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md"
             type="button"
             onClick={handleLogout}
-            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+           
           >
             Logout
           </button>
@@ -183,7 +183,7 @@ export default function AdminSidebar({ children }) {
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="lg:hidden bg-white border-b border-gray-200 p-4 flex items-center justify-between">
-          <button onClick={() => setIsMenuOpen(true)} className="text-[#023347]">
+          <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95" onClick={() => setIsMenuOpen(true)} className="text-[#023347]">
             <MenuIcon />
           </button>
           <h1 className="text-lg font-bold text-[#023347]">Admin Portal</h1>

@@ -45,7 +45,7 @@ function ProblemToast({ message, onClose }) {
         </svg>
       </span>
       {message}
-      <button className="pb-toast-close" onClick={onClose}>×</button>
+      <button className="pb-toast-close transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md active:scale-95" onClick={onClose}>×</button>
     </div>
   );
 }
@@ -315,7 +315,7 @@ const ProblemAdmin = () => {
           <div className="flex flex-wrap justify-end gap-4 pb-10 flex-shrink-0">
 
             {/* Back */}
-            <button
+            <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
               onClick={() => setSelectedProblem(null)}
               disabled={!!actionLoading}
               className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -324,7 +324,7 @@ const ProblemAdmin = () => {
             </button>
 
             {type === 'problem' && (
-              <button
+              <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
                 onClick={() => handleAction(`current-problems/${id}`, 'DELETE', 'Problem removed successfully.')}
                 disabled={!!actionLoading}
                 className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -337,7 +337,7 @@ const ProblemAdmin = () => {
 
             {type === 'request' && (
               <>
-                <button
+                <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
                   onClick={() => handleAction(`problem-requests/${id}`, 'DELETE', 'Request denied.')}
                   disabled={!!actionLoading}
                   className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -346,7 +346,7 @@ const ProblemAdmin = () => {
                   {actionLoading === `problem-requests/${id}` && <span className="pb-spinner" />}
                   {actionLoading === `problem-requests/${id}` ? 'Denying...' : 'Deny'}
                 </button>
-                <button
+                <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
                   onClick={() => handleAction(`problem-requests/accept/${id}`, 'POST', 'Added to list successfully.')}
                   disabled={!!actionLoading}
                   className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -360,7 +360,7 @@ const ProblemAdmin = () => {
 
             {type === 'lock' && (
               <>
-                <button
+                <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
                   onClick={() => handleAction(`problem-solver-requests/deny/${id}`, 'DELETE', 'Solver declined.')}
                   disabled={!!actionLoading}
                   className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -369,7 +369,7 @@ const ProblemAdmin = () => {
                   {actionLoading === `problem-solver-requests/deny/${id}` && <span className="pb-spinner" />}
                   {actionLoading === `problem-solver-requests/deny/${id}` ? 'Denying...' : 'Deny Solver'}
                 </button>
-                <button
+                <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
                   onClick={() => handleAction(`problem-solver-requests/accept/${id}`, 'POST', 'Solver approved successfully.')}
                   disabled={!!actionLoading}
                   className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -391,7 +391,7 @@ const ProblemAdmin = () => {
           <h2 className="text-xl md:text-2xl font-bold text-[#023347] mb-4">Admin Dashboard</h2>
           <div className="flex space-x-4 md:space-x-8 border-b border-gray-200 overflow-x-auto no-scrollbar">
             {tabs.map((tab) => (
-              <button
+              <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={`pb-2 text-xs md:text-sm font-semibold transition-colors relative whitespace-nowrap ${activeTab === tab ? 'text-[#023347]' : 'text-gray-500 hover:text-gray-700'}`}
@@ -429,7 +429,7 @@ const ProblemAdmin = () => {
                           </span>
                         </td>
                         <td className="px-6 py-5 text-center">
-                          <button onClick={() => handleViewDetail(row.problem_id, 'problem')} className="bg-[#023347] text-white px-6 py-2 rounded-lg text-sm transition-colors duration-200 hover:bg-[#2A8E9E]">View Details</button>
+                          <button onClick={() => handleViewDetail(row.problem_id, 'problem')} className="bg-[#023347] text-white px-6 py-2 rounded-lg text-sm transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md hover:bg-[#2A8E9E] active:scale-95">View Details</button>
                         </td>
                       </tr>
                     ))}
@@ -438,7 +438,7 @@ const ProblemAdmin = () => {
                         <td className="px-6 py-5 text-[#023347] font-bold text-center">{row.title}</td>
                         <td className="px-6 py-5 text-center text-gray-600 text-sm">{row.name}</td>
                         <td className="px-6 py-5 text-center">
-                          <button onClick={() => handleViewDetail(row.problem_creation_request_id, 'request')} className="bg-[#023347] text-white px-6 py-2 rounded-lg text-sm transition-colors duration-200 hover:bg-[#2A8E9E]">Review Request</button>
+                          <button onClick={() => handleViewDetail(row.problem_creation_request_id, 'request')} className="bg-[#023347] text-white px-6 py-2 rounded-lg text-sm transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md hover:bg-[#2A8E9E] active:scale-95">Review Request</button>
                         </td>
                       </tr>
                     ))}
@@ -447,7 +447,7 @@ const ProblemAdmin = () => {
                         <td className="px-6 py-5 text-[#023347] font-bold text-center">{row.title}</td>
                         <td className="px-6 py-5 text-center text-gray-600 text-sm">{row.name}</td>
                         <td className="px-6 py-5 text-center">
-                          <button onClick={() => handleViewDetail(row.problem_solver_request_id, 'lock')} className="bg-[#023347] text-white px-6 py-2 rounded-lg text-sm transition-colors duration-200 hover:bg-[#2A8E9E]">Review Solver</button>
+                          <button onClick={() => handleViewDetail(row.problem_solver_request_id, 'lock')} className="bg-[#023347] text-white px-6 py-2 rounded-lg text-sm transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md hover:bg-[#2A8E9E] active:scale-95">Review Solver</button>
                         </td>
                       </tr>
                     ))}

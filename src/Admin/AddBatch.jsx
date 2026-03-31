@@ -268,7 +268,7 @@ export default function AddBatch() {
         {/* Member Section Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
           <span style={{ fontSize: 15, fontWeight: 600, color: "#111827" }}>Members</span>
-          <button
+          <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
             onClick={() => setShowAddModal(true)}
             className="ab-btn-add-member"
           >
@@ -303,7 +303,7 @@ export default function AddBatch() {
                     <td>{m.role}</td>
                     <td>{m.year}</td>
                     <td>
-                      <button
+                      <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
                         onClick={() => setRemoveIndex(i)}
                         style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}
                       >
@@ -319,15 +319,15 @@ export default function AddBatch() {
 
         {/* Footer Buttons */}
         <div className="ab-btn-row">
-          <button
-            className="ab-btn-cancel"
+          <button className="ab-btn-cancel transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md active:scale-95"
+           
             onClick={() => navigate(-1)}
             disabled={loading}
           >
             Cancel
           </button>
-          <button
-            className="ab-btn-save"
+          <button className="ab-btn-save transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md active:scale-95"
+           
             onClick={handleSave}
             disabled={loading}
           >
@@ -385,8 +385,8 @@ export default function AddBatch() {
               </div>
             </div>
             <div className="ab-modal-btns">
-              <button onClick={() => setShowAddModal(false)} className="ab-btn-cancel">Cancel</button>
-              <button onClick={handleAddMember} className="ab-btn-save">Add to List</button>
+              <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95" onClick={() => setShowAddModal(false)} className="ab-btn-cancel">Cancel</button>
+              <button className="ab-btn-save transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md active:scale-95" onClick={handleAddMember}>Add to List</button>
             </div>
           </div>
         </div>
@@ -398,13 +398,13 @@ export default function AddBatch() {
           <div className="ab-modal" style={{ maxWidth: 380, textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
             <h3>Remove Member?</h3>
             <p style={{ color: "#6b7280", fontSize: 13, marginBottom: 24 }}>This will remove them from the list below.</p>
-            <button
+            <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
               onClick={handleRemove}
               style={{ ...btnPrimary, background: "#ef4444", width: "100%", marginBottom: 10 }}
             >
               Remove
             </button>
-            <button onClick={() => setRemoveIndex(null)} style={{ ...btnPrimary, background: "#fff", color: "#374151", border: "1px solid #d1d5db", width: "100%" }}>Cancel</button>
+            <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95" onClick={() => setRemoveIndex(null)} className="ab-btn-cancel" style={{ width: "100%" }}>Cancel</button>
           </div>
         </div>
       )}

@@ -209,17 +209,17 @@ function GlToast({ message, onClose }) {
         </svg>
       </span>
       {message}
-      <button className="gl-toast-close" onClick={onClose}>×</button>
+      <button className="gl-toast-close transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md active:scale-95" onClick={onClose}>×</button>
     </div>
   );
 }
 
 function LoadingButton({ loading, onClick, className, style, children, loadingLabel, disabled }) {
   return (
-    <button
+    <button className={`transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95 ${`${className}`}
       onClick={onClick}
       disabled={loading || disabled}
-      className={className}
+      transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md active:scale-95`}
       style={{ opacity: loading ? 0.8 : 1, cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, ...style }}
     >
       {loading && <span className="gl-spinner" />}
@@ -237,7 +237,7 @@ function DeleteModal({ glory, onCancel, onConfirm, loading }) {
         <p style={{ color: "#6b7280", fontSize: "14px", marginBottom: "6px" }}>You are about to delete <span style={{ fontWeight: 700, color: "#023347" }}>"{glory.title}"</span>.</p>
         <p style={{ color: "#ef4444", fontSize: "13px", fontWeight: 600, marginBottom: "28px" }}>⚠️ This content will be deleted permanently.</p>
         <div style={{ display: "flex", gap: "12px", justifyContent: "center" }}>
-          <button onClick={onCancel} disabled={loading} className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:bg-[#2A8E9E] transition-all">Cancel</button>
+          <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95 h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:bg-[#2A8E9E]" onClick={onCancel} disabled={loading}>Cancel</button>
           <LoadingButton loading={loading} onClick={onConfirm} className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:bg-red-700 transition-all">Confirm Delete</LoadingButton>
         </div>
       </div>
@@ -325,7 +325,7 @@ function GloryForm({ heading, initialTitle, initialDescription, initialImage, on
       />
       {fieldError && !description.trim() && <p style={{ color: "#ef4444", fontSize: 12, marginBottom: 24, fontWeight: 600 }}>⚠ Description is required</p>}
       <div className="gl-form-btns">
-        <button onClick={onCancel} disabled={loading} className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:bg-red-700 transition-all">Cancel</button>
+        <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95 h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:bg-red-700" onClick={onCancel} disabled={loading}>Cancel</button>
         <LoadingButton loading={loading} loadingLabel="Saving..." onClick={handleSubmit} className="h-11 px-10 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:bg-[#2A8E9E] transition-all">{saveLabel}</LoadingButton>
       </div>
     </main>
@@ -417,7 +417,7 @@ export default function GloriesAdmin() {
           <h1 style={{ fontSize: "22px", fontWeight: 700 }}>Glories</h1>
           
           {/* Simplified button using the new .gl-add-btn class */}
-          <button onClick={() => setView("add")} className="gl-add-btn">
+          <button onClick={() => setView("add")} className="gl-add-btn transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md active:scale-95">
             + Add Glory
           </button>
         </div>
@@ -432,8 +432,8 @@ export default function GloriesAdmin() {
                 <h3 style={{ margin: "0 0 8px 0", fontSize: "18px", fontWeight: 700, color: "#023347" }}>{g.title}</h3>
                 <p style={{ fontSize: "13px", color: "#6b7280", lineHeight: "1.5", marginBottom: "20px", flex: 1 }}>{g.description}</p>
                 <div className="gl-card-btns">
-                  <button onClick={() => { setEditTarget(g); setView("edit"); }} className="flex-1 h-10 bg-[#023347] text-white rounded-xl text-xs font-bold transition-all hover:bg-[#2A8E9E]">Edit</button>
-                  <button onClick={() => setDeleteTarget(g)} className="flex-1 h-10 bg-[#023347] text-white rounded-xl text-xs font-bold transition-all hover:bg-red-600">Delete</button>
+                  <button onClick={() => { setEditTarget(g); setView("edit"); }} className="flex-1 h-10 bg-[#023347] text-white rounded-xl text-xs font-bold transition-all hover:bg-[#2A8E9E] duration-200 transform hover:-translate-y-1 hover:shadow-md active:scale-95">Edit</button>
+                  <button onClick={() => setDeleteTarget(g)} className="flex-1 h-10 bg-[#023347] text-white rounded-xl text-xs font-bold transition-all hover:bg-red-600 duration-200 transform hover:-translate-y-1 hover:shadow-md active:scale-95">Delete</button>
                 </div>
               </div>
             </div>

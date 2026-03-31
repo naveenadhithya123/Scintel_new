@@ -22,7 +22,7 @@ function Toast({ toasts, removeToast }) {
             <p style={{ margin: 0, fontWeight: 700, fontSize: 14, color: '#023347' }}>{t.title}</p>
             <p style={{ margin: '4px 0 0', fontSize: 13, color: '#64748b', lineHeight: 1.4 }}>{t.message}</p>
           </div>
-          <button onClick={() => removeToast(t.id)}
+          <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95" onClick={() => removeToast(t.id)}
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: 18, lineHeight: 1, padding: 0 }}>×</button>
         </div>
       ))}
@@ -74,20 +74,16 @@ function DeleteModal({ open, yearLabel, onConfirm, onCancel }) {
         <p style={{ fontSize: 12, color: '#ef4444', marginBottom: 24, fontWeight: 600 }}>
           ⚠ This action cannot be undone.
         </p>
-        <button onClick={onConfirm} style={{
-          width: '100%', padding: '12px 0', borderRadius: 10,
-          backgroundColor: '#ef4444', color: '#fff',
-          border: 'none', fontWeight: 600, fontSize: 15, cursor: 'pointer', marginBottom: 10,
-        }}>
-          Yes, Delete Permanently
-        </button>
-        <button onClick={onCancel} style={{
-          width: '100%', padding: '11px 0', borderRadius: 10,
-          backgroundColor: '#fff', color: '#374151',
-          border: '1.5px solid #e2e8f0', fontWeight: 500, fontSize: 14, cursor: 'pointer',
-        }}>
-          Cancel
-        </button>
+        <div className="flex gap-4 mt-2">
+          {/* Fixed Cancel Button Classes */}
+          <button className="flex-1 py-3 bg-[#023347] text-white rounded-xl font-bold border-0 cursor-pointer transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95 hover:bg-red-700" onClick={onCancel}>
+            Cancel
+          </button>
+          {/* Fixed Delete Button Classes */}
+          <button className="flex-1 py-3 bg-red-600 text-white rounded-xl font-bold border-0 cursor-pointer transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95 hover:bg-red-700" onClick={onConfirm}>
+            Delete
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -160,9 +156,10 @@ export default function ActivitiesAdmin() {
           <header className="mb-8 flex-shrink-0">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl md:text-3xl font-bold text-[#023347]">Activities</h2>
-              <button
+              {/* Fixed Add Batch Button: Merged the two className attributes into one */}
+              <button 
                 onClick={() => navigate('/admin/activities/add-new-year')}
-                className="bg-[#023347] text-white px-8 py-2.5 rounded-lg font-medium text-sm hover:bg-[#012535] transition-all shadow-md active:scale-95"
+                className="bg-[#023347] text-white px-8 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95 hover:bg-[#2A8E9E]"
               >
                 + Add Batch
               </button>
@@ -170,7 +167,7 @@ export default function ActivitiesAdmin() {
             <div className="border-b border-gray-200"></div>
           </header>
 
-          {/* Table Card — style matched to ProblemAdmin */}
+          {/* Table Card */}
           <div className="mx-2 md:mx-4 bg-white rounded-2xl shadow-sm border border-[#2A8E9E]/20 overflow-hidden mb-12">
             <div className="overflow-auto flex-1 no-scrollbar">
               <table className="w-full text-left border-collapse min-w-[700px]">
@@ -203,15 +200,17 @@ export default function ActivitiesAdmin() {
                         <td className="px-6 py-5 text-center text-gray-600 text-sm">{row.count}</td>
                         <td className="px-6 py-5 text-center">
                           <div className="flex justify-center gap-4">
-                            <button
+                            {/* Fixed Edit Button: Merged the two className attributes into one */}
+                            <button 
                               onClick={() => navigate(`/admin/activities/${row.year}`)}
-                              className="bg-[#023347] text-white px-6 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 hover:bg-[#2A8E9E]"
+                              className="bg-[#023347] text-white px-6 py-2 rounded-lg text-sm font-semibold transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95 hover:bg-[#2A8E9E]"
                             >
                               Edit
                             </button>
-                            <button
+                            {/* Fixed Delete Button: Merged the two className attributes into one */}
+                            <button 
                               onClick={() => setDeleteTarget({ year: row.year })}
-                              className="bg-[#023347] text-white px-6 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 hover:bg-red-700"
+                              className="bg-[#023347] text-white px-6 py-2 rounded-lg text-sm font-semibold transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95 hover:bg-red-700"
                             >
                               Delete
                             </button>

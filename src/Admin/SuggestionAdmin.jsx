@@ -25,7 +25,7 @@ const Toast = ({ toasts, removeToast }) => (
           <p style={{ margin: 0, fontWeight: 700, fontSize: "14px", color: "#023347" }}>{t.title}</p>
           <p style={{ margin: "4px 0 0", fontSize: "13px", color: "#64748b", lineHeight: "1.4" }}>{t.message}</p>
         </div>
-        <button
+        <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
           onClick={() => removeToast(t.id)}
           style={{ background: "none", border: "none", cursor: "pointer", color: "#94a3b8", fontSize: "16px", lineHeight: 1, padding: 0 }}
         >×</button>
@@ -209,7 +209,7 @@ export default function SuggestionAdmin() {
     <div className="animate-fadeIn">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
         <h1 style={{ color: "#023347", fontSize: "24px", fontWeight: 800 }}>Suggestion Description</h1>
-        <button
+        <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
           onClick={() => setView(prevView === "history" ? "history" : "list")}
           style={{ ...btnBase }}
           onMouseEnter={e => e.currentTarget.style.backgroundColor = "#2A8E9E"}
@@ -239,7 +239,7 @@ export default function SuggestionAdmin() {
 
         {prevView !== "history" && (
           <div style={{ display: "flex", justifyContent: "flex-end", gap: "16px", borderTop: "1px solid #eee", paddingTop: "24px" }}>
-            <button
+            <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
               onClick={() => setShowRejectModal(true)}
               style={{ ...btnDelete }}
               onMouseEnter={e => e.currentTarget.style.backgroundColor = "#dc2626"}
@@ -249,7 +249,7 @@ export default function SuggestionAdmin() {
             </button>
 
             {dashboardTab === "unacknowledged" && (
-              <button
+              <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
                 onClick={handleAcknowledge}
                 disabled={actionLoading}
                 style={{ ...btnBase, opacity: actionLoading ? 0.7 : 1, cursor: actionLoading ? "not-allowed" : "pointer" }}
@@ -260,7 +260,7 @@ export default function SuggestionAdmin() {
               </button>
             )}
 
-            <button
+            <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
               onClick={handleResolve}
               disabled={actionLoading}
               style={{ ...btnBase, opacity: actionLoading ? 0.7 : 1, cursor: actionLoading ? "not-allowed" : "pointer" }}
@@ -288,7 +288,7 @@ export default function SuggestionAdmin() {
           style={{ width: "100%", padding: "15px", borderRadius: "12px", border: "1.5px solid #e2e8ec", backgroundColor: "#F8FAFC", outline: "none", fontSize: "14px", resize: "none", boxSizing: "border-box" }}
         />
         <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "24px" }}>
-          <button
+          <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
             onClick={() => setShowRejectModal(false)}
             style={{ ...btnBase }}
             onMouseEnter={e => e.currentTarget.style.backgroundColor = "#dc2626"}
@@ -296,7 +296,7 @@ export default function SuggestionAdmin() {
           >
             Cancel
           </button>
-          <button
+          <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
             onClick={handleRejectSubmit}
             disabled={actionLoading}
             style={{ ...btnBase, opacity: actionLoading ? 0.7 : 1, cursor: actionLoading ? "not-allowed" : "pointer" }}
@@ -347,7 +347,7 @@ export default function SuggestionAdmin() {
                   onFocus={e => e.currentTarget.style.borderColor = "#2A8E9E"}
                   onBlur={e => e.currentTarget.style.borderColor = "#e2e8ec"}
                 />
-                <button
+                <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
                   onClick={() => setView(view === "list" ? "history" : "list")}
                   style={{ ...btnBase, whiteSpace: "nowrap" }}
                   onMouseEnter={e => e.currentTarget.style.backgroundColor = "#2A8E9E"}
@@ -416,7 +416,7 @@ export default function SuggestionAdmin() {
                           <td style={{ padding: "16px", textAlign: "center", color: "#64748b" }}>{item.name}</td>
                           <td style={{ padding: "16px", textAlign: "center", color: "#64748b" }}>{item.year}</td>
                           <td style={{ padding: "16px", textAlign: "center" }}>
-                            <button
+                            <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
                               onClick={() => handleViewDetail(item.suggestion_id || item.record_id, view)}
                               style={{ padding: "8px 20px", backgroundColor: "#023347", color: "white", borderRadius: "8px", border: "none", cursor: "pointer", fontSize: "13px", fontWeight: 600, transition: "background-color 0.2s" }}
                               onMouseEnter={e => e.currentTarget.style.backgroundColor = "#2A8E9E"}
@@ -444,7 +444,7 @@ export default function SuggestionAdmin() {
 }
 
 const TabBtn = ({ active, label, onClick }) => (
-  <button
+  <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
     onClick={onClick}
     style={{
       paddingBottom: "10px", fontSize: "14px",
@@ -452,8 +452,7 @@ const TabBtn = ({ active, label, onClick }) => (
       color: active ? "#023347" : "#6b7280",
       background: "none", border: "none",
       borderBottom: active ? "2px solid #023347" : "2px solid transparent",
-      marginBottom: "-2px", cursor: "pointer",
-    }}
+      marginBottom: "-2px", cursor: "pointer"}}
   >
     {label}
   </button>

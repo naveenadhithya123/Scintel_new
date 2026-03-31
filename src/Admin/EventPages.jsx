@@ -70,10 +70,9 @@ function SuccessToast({ message, onClose }) {
         </svg>
       </span>
       {message}
-      <button onClick={onClose} style={{
+      <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95" onClick={onClose} style={{
         background: 'none', border: 'none', color: '#9bd3e0',
-        cursor: 'pointer', fontSize: 20, lineHeight: 1, marginLeft: 6, padding: 0,
-      }}>×</button>
+        cursor: 'pointer', fontSize: 20, lineHeight: 1, marginLeft: 6, padding: 0}}>×</button>
     </div>
   );
 }
@@ -98,7 +97,7 @@ function BtnSpinner() {
 function PrimaryBtn({ onClick, loading, label, loadingLabel }) {
   const [hovered, setHovered] = useState(false);
   return (
-    <button type="button" onClick={onClick} disabled={loading}
+    <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95" type="button" onClick={onClick} disabled={loading}
       onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
       style={{
         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
@@ -107,7 +106,6 @@ function PrimaryBtn({ onClick, loading, label, loadingLabel }) {
         color: '#fff', fontWeight: 600, fontSize: 14,
         cursor: loading ? 'not-allowed' : 'pointer',
         boxShadow: hovered && !loading ? '0 6px 16px rgba(0,0,0,0.18)' : '0 2px 6px rgba(0,0,0,0.12)',
-        transform: hovered && !loading ? 'translateY(-2px)' : 'translateY(0)',
         transition: 'all 0.2s ease', minWidth: 150,
       }}>
       {loading && <BtnSpinner />}
@@ -122,17 +120,16 @@ function PrimaryBtn({ onClick, loading, label, loadingLabel }) {
 function CancelBtn({ onClick, disabled }) {
   const [hovered, setHovered] = useState(false);
   return (
-    <button type="button" onClick={onClick} disabled={disabled}
+    <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95" type="button" onClick={onClick} disabled={disabled}
       onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
       style={{
         display: 'flex', alignItems: 'center', gap: 8,
         height: 44, padding: '0 24px', borderRadius: 12, border: 'none',
-        backgroundColor: hovered ? '#388E9C' : '#083A4B',
+        backgroundColor: hovered ? '#dc2626' : '#083A4B',
         color: '#fff', fontWeight: 700, fontSize: 12,
         cursor: disabled ? 'not-allowed' : 'pointer',
         opacity: disabled ? 0.6 : 1,
         boxShadow: hovered && !disabled ? '0 6px 16px rgba(0,0,0,0.18)' : '0 2px 6px rgba(0,0,0,0.12)',
-        transform: hovered && !disabled ? 'translateY(-2px)' : 'translateY(0)',
         transition: 'all 0.2s ease',
       }}>
       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
@@ -370,7 +367,7 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
       <label style={labelStyle}>Brochure (File/Image)</label>
       <input type="file" style={base} onChange={e => updateForm('brochure', e.target.files[0])} />
       {form.brochure && (
-        <button
+        <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
           type="button"
           onClick={() => updateForm('brochure', null)}
           style={{
@@ -394,7 +391,7 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
       <h3 style={sectionTitle}>Resource Person</h3>
       <DropZone value={form.resourceImage} onChange={v => updateForm('resourceImage', v)} />
       {form.resourceImage && (
-        <button
+        <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
           type="button"
           onClick={() => updateForm('resourceImage', null)}
           style={{
@@ -439,7 +436,7 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
             <DropZone value={img} onChange={v => updateImageSlot(idx, v)} />
             <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
               {img && (
-                <button
+                <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
                   type="button"
                   onClick={() => clearImageSlot(idx)}
                   style={{
@@ -457,7 +454,7 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
                 </button>
               )}
               {form.eventImages.length > 1 && (
-                <button
+                <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
                   type="button"
                   onClick={() => removeImageSlot(idx)}
                   style={{
@@ -477,7 +474,7 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
             </div>
           </div>
         ))}
-        <button type="button" onClick={addImageSlot}
+        <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95" type="button" onClick={addImageSlot}
           style={{ height: 130, border: '1.5px dashed #ccc', borderRadius: 8, cursor: 'pointer', background: 'none' }}>
           + Add Image Slot
         </button>
@@ -487,7 +484,7 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
       <h3 style={sectionTitle}>Winner Section</h3>
       <DropZone value={form.winnerImage} onChange={v => updateForm('winnerImage', v)} />
       {form.winnerImage && (
-        <button
+        <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
           type="button"
           onClick={() => updateForm('winnerImage', null)}
           style={{
@@ -521,7 +518,7 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
               Testimonial {idx + 1}
             </span>
             {form.testimonials.length > 1 && (
-              <button
+              <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
                 type="button"
                 onClick={() => removeTestimonial(idx)}
                 style={{ border: 'none', background: 'none', color: '#dc2626', cursor: 'pointer', fontSize: 12, fontWeight: 700 }}
@@ -539,7 +536,7 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
             onChange={e => updateTestimonial(idx, 'feedback', e.target.value)} />
         </div>
       ))}
-      <button
+      <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
         type="button"
         onClick={addTestimonial}
         style={{ padding: '10px 18px', borderRadius: 8, border: '1px dashed #9bd3e0', background: '#f8fdff', color: '#083A4B', fontWeight: 700, cursor: 'pointer' }}

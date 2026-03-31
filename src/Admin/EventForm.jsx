@@ -67,7 +67,7 @@ function Toast({ toasts, removeToast }) {
             <p style={{ margin: 0, fontWeight: 700, fontSize: 14, color: '#023347' }}>{t.title}</p>
             <p style={{ margin: '4px 0 0', fontSize: 13, color: '#64748b', lineHeight: 1.4 }}>{t.message}</p>
           </div>
-          <button onClick={() => removeToast(t.id)}
+          <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95" onClick={() => removeToast(t.id)}
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: 18, lineHeight: 1, padding: 0 }}>×</button>
         </div>
       ))}
@@ -106,7 +106,7 @@ function BtnSpinner() {
 function PrimaryBtn({ onClick, loading, label, loadingLabel }) {
   const [hovered, setHovered] = useState(false);
   return (
-    <button type="button" onClick={onClick} disabled={loading}
+    <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95" type="button" onClick={onClick} disabled={loading}
       onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
       style={{
         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
@@ -115,7 +115,6 @@ function PrimaryBtn({ onClick, loading, label, loadingLabel }) {
         color: '#fff', fontWeight: 600, fontSize: 14,
         cursor: loading ? 'not-allowed' : 'pointer',
         boxShadow: hovered && !loading ? '0 6px 16px rgba(0,0,0,0.18)' : '0 2px 6px rgba(0,0,0,0.12)',
-        transform: hovered && !loading ? 'translateY(-2px)' : 'translateY(0)',
         transition: 'all 0.2s ease', minWidth: 150,
       }}>
       {loading && <BtnSpinner />}
@@ -130,17 +129,16 @@ function PrimaryBtn({ onClick, loading, label, loadingLabel }) {
 function CancelBtn({ onClick, disabled }) {
   const [hovered, setHovered] = useState(false);
   return (
-    <button type="button" onClick={onClick} disabled={disabled}
+    <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95" type="button" onClick={onClick} disabled={disabled}
       onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
       style={{
         display: 'flex', alignItems: 'center', gap: 8,
         height: 44, padding: '0 24px', borderRadius: 12, border: 'none',
-        backgroundColor: hovered ? '#388E9C' : '#083A4B',
+        backgroundColor: hovered ? '#dc2626' : '#083A4B',
         color: '#fff', fontWeight: 700, fontSize: 12,
         cursor: disabled ? 'not-allowed' : 'pointer',
         opacity: disabled ? 0.6 : 1,
         boxShadow: hovered && !disabled ? '0 6px 16px rgba(0,0,0,0.18)' : '0 2px 6px rgba(0,0,0,0.12)',
-        transform: hovered && !disabled ? 'translateY(-2px)' : 'translateY(0)',
         transition: 'all 0.2s ease',
       }}>
       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
@@ -298,11 +296,10 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
   const sectionTitle = { fontSize: 16, fontWeight: 700, color: '#111827', margin: '25px 0 15px', borderBottom: '1px solid #f1f5f9', paddingBottom: '5px' };
 
   const clearBtn = (onClick) => (
-    <button type="button" onClick={onClick} style={{
+    <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95" type="button" onClick={onClick} style={{
       width: '100%', marginTop: -4, marginBottom: 14, padding: '10px 14px',
       borderRadius: 8, border: '1px solid #fed7aa', background: '#fff7ed',
-      color: '#c2410c', fontWeight: 700, cursor: 'pointer',
-    }}>Clear</button>
+      color: '#c2410c', fontWeight: 700, cursor: 'pointer'}}>Clear</button>
   );
 
   return (
@@ -358,19 +355,19 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
             <DropZone value={img} onChange={v => updateImageSlot(idx, v)} />
             <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
               {img && (
-                <button type="button" onClick={() => clearImageSlot(idx)} style={{ flex: 1, padding: '10px 14px', borderRadius: 8, border: '1px solid #fed7aa', background: '#fff7ed', color: '#c2410c', fontWeight: 700, cursor: 'pointer' }}>
+                <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95" type="button" onClick={() => clearImageSlot(idx)} style={{ flex: 1, padding: '10px 14px', borderRadius: 8, border: '1px solid #fed7aa', background: '#fff7ed', color: '#c2410c', fontWeight: 700, cursor: 'pointer' }}>
                   Clear Image
                 </button>
               )}
               {form.eventImages.length > 1 && (
-                <button type="button" onClick={() => removeImageSlot(idx)} style={{ flex: 1, padding: '10px 14px', borderRadius: 8, border: '1px solid #fecaca', background: '#fff5f5', color: '#dc2626', fontWeight: 700, cursor: 'pointer' }}>
+                <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95" type="button" onClick={() => removeImageSlot(idx)} style={{ flex: 1, padding: '10px 14px', borderRadius: 8, border: '1px solid #fecaca', background: '#fff5f5', color: '#dc2626', fontWeight: 700, cursor: 'pointer' }}>
                   Delete Slot
                 </button>
               )}
             </div>
           </div>
         ))}
-        <button type="button" onClick={addImageSlot} style={{ height: 130, border: '1.5px dashed #ccc', borderRadius: 8, cursor: 'pointer', background: 'none' }}>+ Add Image Slot</button>
+        <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95" type="button" onClick={addImageSlot} style={{ height: 130, border: '1.5px dashed #ccc', borderRadius: 8, cursor: 'pointer', background: 'none' }}>+ Add Image Slot</button>
       </div>
 
       <h3 style={sectionTitle}>Winner Section</h3>
@@ -386,7 +383,7 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
             <span style={{ fontSize: 12, fontWeight: 700, color: '#083A4B' }}>Testimonial {idx + 1}</span>
             {form.testimonials.length > 1 && (
-              <button type="button" onClick={() => removeTestimonial(idx)} style={{ border: 'none', background: 'none', color: '#dc2626', cursor: 'pointer', fontSize: 12, fontWeight: 700 }}>Remove</button>
+              <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95" type="button" onClick={() => removeTestimonial(idx)} style={{ border: 'none', background: 'none', color: '#dc2626', cursor: 'pointer', fontSize: 12, fontWeight: 700 }}>Remove</button>
             )}
           </div>
           <input placeholder="Name" style={base} value={t.name} onChange={e => updateTestimonial(idx, 'name', e.target.value)} />
@@ -394,7 +391,7 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
           <textarea placeholder="Feedback" style={{ ...base, height: 60 }} value={t.feedback} onChange={e => updateTestimonial(idx, 'feedback', e.target.value)} />
         </div>
       ))}
-      <button type="button" onClick={addTestimonial} style={{ padding: '10px 18px', borderRadius: 8, border: '1px dashed #9bd3e0', background: '#f8fdff', color: '#083A4B', fontWeight: 700, cursor: 'pointer' }}>
+      <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95" type="button" onClick={addTestimonial} style={{ padding: '10px 18px', borderRadius: 8, border: '1px dashed #9bd3e0', background: '#f8fdff', color: '#083A4B', fontWeight: 700, cursor: 'pointer' }}>
         + Add Testimonial
       </button>
 

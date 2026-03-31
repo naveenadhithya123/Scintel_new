@@ -200,14 +200,14 @@ export default function AddMember() {
         </div>
 
         <div className="am-btn-row">
-          <button
+          <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
             type="button"
             onClick={() => navigate(-1)}
             style={{ ...btnStyle, background: "#f3f4f6", color: "#374151", border: "1px solid #d1d5db" }}
           >
             Cancel
           </button>
-          <button
+          <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
             type="button"
             disabled={isSubmitting}
             onClick={handleAdd}

@@ -129,10 +129,10 @@ export default function AdminLogin() {
                 </div>
               ) : null}
 
-              <button
+              <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95 mt-8 inline-flex w-full items-center justify-center rounded-2xl bg-[#023347] px-5 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white transition hover:bg-[#2A8E9E] disabled:cursor-not-allowed disabled:opacity-70"
                 type="submit"
                 disabled={submitting}
-                className="mt-8 inline-flex w-full items-center justify-center rounded-2xl bg-[#023347] px-5 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white transition hover:bg-[#2A8E9E] disabled:cursor-not-allowed disabled:opacity-70"
+               
               >
                 {submitting ? "Signing In..." : "Sign In"}
               </button>

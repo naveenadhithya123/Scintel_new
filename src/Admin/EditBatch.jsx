@@ -195,7 +195,7 @@ export default function EditBatch() {
         {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "28px" }}>
           <h2 style={{ fontSize: "22px", fontWeight: 700, color: "#083A4B", margin: 0 }}>Edit Batch</h2>
-          <button
+          <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
             onClick={() => setShowAddModal(true)}
             className="h-11 px-6 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5"
           >
@@ -287,7 +287,7 @@ export default function EditBatch() {
                       </select>
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <button
+                      <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
                         onClick={() => handleRemoveMember(index)}
                         className="h-9 px-5 bg-[#023347] text-white rounded-xl text-xs font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5"
                       >
@@ -307,16 +307,16 @@ export default function EditBatch() {
 
         {/* Footer Buttons */}
         <div style={{ marginTop: "28px", display: "flex", justifyContent: "flex-end", gap: "12px" }}>
-          <button
+          <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
             onClick={() => navigate(-1)}
             className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5"
           >
             Cancel
           </button>
-          <button
+          <button className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5 duration-200 hover:-translate-y-1 hover:shadow-md active:scale-95"
             onClick={handleSaveAll}
             disabled={loading}
-            className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5"
+           
           >
             {loading ? "Saving..." : "Update Everything"}
           </button>
@@ -383,15 +383,15 @@ export default function EditBatch() {
               </div>
             </div>
             <div style={{ display: "flex", justifyContent: "flex-end", gap: 12 }}>
-              <button
+              <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
                 onClick={() => { setShowAddModal(false); setMemberForm({ name: "", reg: "", role: "", year: "" }); }}
                 className="h-11 px-6 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5"
               >
                 Cancel
               </button>
-              <button
+              <button className="h-11 px-6 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5 duration-200 hover:-translate-y-1 hover:shadow-md active:scale-95"
                 onClick={handleAddMemberSubmit}
-                className="h-11 px-6 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5"
+               
               >
                 Add to List
               </button>

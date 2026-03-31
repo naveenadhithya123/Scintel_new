@@ -58,7 +58,7 @@ function MemberToast({ message, onClose }) {
         </svg>
       </span>
       {message}
-      <button className="am-toast-close" onClick={onClose}>×</button>
+      <button className="am-toast-close transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md active:scale-95" onClick={onClose}>×</button>
     </div>
   );
 }
@@ -190,15 +190,15 @@ export default function AdminMembers() {
           <h1 style={{ fontSize: "22px", fontWeight: 700, color: "#1f2937", margin: 0 }}>Association Members</h1>
           <div className="am-header-btns" style={{ display: "flex", gap: "12px" }}>
             {/* Remove Batch — Delete style */}
-            <button
+            <button className="h-11 px-6 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none duration-200 hover:-translate-y-1 hover:shadow-md active:scale-95"
               onClick={handleDeleteBatch}
               disabled={!selectedBatch || deleting}
-              className="h-11 px-6 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+             
             >
               {deleting ? "Removing..." : "Remove Batch"}
             </button>
             {/* Edit — Edit style */}
-            <button
+            <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
               onClick={() => batchDetails && navigate("/admin/edit-batch", { state: { batch: batchDetails } })}
               disabled={!batchDetails}
               className="h-11 px-6 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
@@ -206,7 +206,7 @@ export default function AdminMembers() {
               Edit Batch
             </button>
             {/* Add Batch — Edit style */}
-            <button
+            <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
               onClick={() => navigate("/admin/add-batch")}
               className="h-11 px-6 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5"
             >
