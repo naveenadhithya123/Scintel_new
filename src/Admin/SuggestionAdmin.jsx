@@ -3,6 +3,53 @@ import AdminSidebar from "./AdminSidebar";
 
 const API_BASE = "http://localhost:3000/api";
 
+// ── Toast Component ──────────────────────────────────────────────────────────
+const Toast = ({ toasts, removeToast }) => (
+  <div style={{ position: "fixed", top: "24px", right: "24px", zIndex: 9999, display: "flex", flexDirection: "column", gap: "10px" }}>
+    {toasts.map(t => (
+      <div
+        key={t.id}
+        style={{
+          display: "flex", alignItems: "flex-start", gap: "12px",
+          backgroundColor: "#fff", borderRadius: "14px",
+          padding: "16px 20px", minWidth: "320px", maxWidth: "420px",
+          boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+          borderLeft: `4px solid ${t.type === "success" ? "#22c55e" : t.type === "error" ? "#ef4444" : "#f59e0b"}`,
+          animation: "slideIn 0.3s ease",
+        }}
+      >
+        <span style={{ fontSize: "20px", lineHeight: 1 }}>
+          {t.type === "success" ? "✅" : t.type === "error" ? "❌" : "⚠️"}
+        </span>
+        <div style={{ flex: 1 }}>
+          <p style={{ margin: 0, fontWeight: 700, fontSize: "14px", color: "#023347" }}>{t.title}</p>
+          <p style={{ margin: "4px 0 0", fontSize: "13px", color: "#64748b", lineHeight: "1.4" }}>{t.message}</p>
+        </div>
+        <button
+          onClick={() => removeToast(t.id)}
+          style={{ background: "none", border: "none", cursor: "pointer", color: "#94a3b8", fontSize: "16px", lineHeight: 1, padding: 0 }}
+        >×</button>
+      </div>
+    ))}
+  </div>
+);
+
+// ── useToast hook ────────────────────────────────────────────────────────────
+const useToast = () => {
+  const [toasts, setToasts] = useState([]);
+
+  const showToast = (type, title, message, duration = 4000) => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, type, title, message }]);
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), duration);
+  };
+
+  const removeToast = (id) => setToasts(prev => prev.filter(t => t.id !== id));
+
+  return { toasts, removeToast, showToast };
+};
+
+// ── Main Component ───────────────────────────────────────────────────────────
 export default function SuggestionAdmin() {
   const [view, setView] = useState("list");
   const [dashboardTab, setDashboardTab] = useState("unacknowledged");
@@ -12,7 +59,7 @@ export default function SuggestionAdmin() {
   const [suggestionList, setSuggestionList] = useState([]);
   const [historyList, setHistoryList] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
-  
+
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -20,12 +67,11 @@ export default function SuggestionAdmin() {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectionMessage, setRejectionMessage] = useState("");
 
+  const { toasts, removeToast, showToast } = useToast();
+
   useEffect(() => {
-    if (view === "list") {
-      fetchDashboardSuggestions();
-    } else if (view === "history") {
-      fetchHistorySuggestions();
-    }
+    if (view === "list") fetchDashboardSuggestions();
+    else if (view === "history") fetchHistorySuggestions();
   }, [view, dashboardTab, historyTab]);
 
   const fetchDashboardSuggestions = async () => {
@@ -39,6 +85,7 @@ export default function SuggestionAdmin() {
       setSuggestionList(result.data || []);
     } catch (error) {
       console.error("Error fetching suggestions:", error);
+      showToast("error", "Fetch Failed", "Unable to load suggestions. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -55,6 +102,7 @@ export default function SuggestionAdmin() {
       setHistoryList(result.data || []);
     } catch (error) {
       console.error("Error fetching history:", error);
+      showToast("error", "Fetch Failed", "Unable to load suggestion history. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -63,7 +111,7 @@ export default function SuggestionAdmin() {
   const handleViewDetail = async (id, source) => {
     setLoading(true);
     try {
-      const endpoint = (source === "history")
+      const endpoint = source === "history"
         ? `/admin/suggestion-records/${id}`
         : `/admin/suggestions/${id}`;
       const response = await fetch(`${API_BASE}${endpoint}`);
@@ -72,7 +120,7 @@ export default function SuggestionAdmin() {
       setPrevView(source);
       setView("detail");
     } catch {
-      alert("Error fetching details");
+      showToast("error", "Error", "Unable to fetch suggestion details. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -85,12 +133,14 @@ export default function SuggestionAdmin() {
         method: "PATCH",
       });
       if (response.ok) {
-        alert("Suggestion Acknowledged and Email Sent!");
+        showToast("success", "Suggestion Acknowledged", `The suggestion "${selectedItem.title}" has been acknowledged and a confirmation email has been sent to ${selectedItem.email}.`);
         setView("list");
         setDashboardTab("acknowledged");
+      } else {
+        showToast("error", "Acknowledge Failed", "Something went wrong while acknowledging. Please try again.");
       }
     } catch {
-      alert("Failed to acknowledge");
+      showToast("error", "Acknowledge Failed", "Network error. Please check your connection and try again.");
     } finally {
       setActionLoading(false);
     }
@@ -103,19 +153,24 @@ export default function SuggestionAdmin() {
         method: "POST",
       });
       if (response.ok) {
-        alert("Suggestion marked as Resolved!");
+        showToast("success", "Marked as Resolved", `The suggestion "${selectedItem.title}" has been successfully marked as resolved and moved to history.`);
         setView("history");
         setHistoryTab("resolved");
+      } else {
+        showToast("error", "Resolve Failed", "Something went wrong while resolving. Please try again.");
       }
     } catch {
-      alert("Failed to resolve");
+      showToast("error", "Resolve Failed", "Network error. Please check your connection and try again.");
     } finally {
       setActionLoading(false);
     }
   };
 
   const handleRejectSubmit = async () => {
-    if (!rejectionMessage.trim()) return alert("Please enter a reason");
+    if (!rejectionMessage.trim()) {
+      showToast("warning", "Message Required", "Please enter a rejection reason before sending.");
+      return;
+    }
     setActionLoading(true);
     try {
       const response = await fetch(`${API_BASE}/admin/suggestions/delete-send-mail`, {
@@ -123,42 +178,32 @@ export default function SuggestionAdmin() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           suggestion_id: selectedItem.suggestion_id,
-          mail_content: rejectionMessage
+          mail_content: rejectionMessage,
         }),
       });
       if (response.ok) {
-        alert("Rejection email sent and record moved to history.");
+        showToast("success", "Suggestion Rejected", `A rejection email has been sent to ${selectedItem.email} and the record has been moved to history.`);
         setShowRejectModal(false);
         setRejectionMessage("");
         setView("history");
         setHistoryTab("rejected");
+      } else {
+        showToast("error", "Rejection Failed", "Something went wrong while sending the rejection email. Please try again.");
       }
     } catch {
-      alert("Error processing rejection");
+      showToast("error", "Rejection Failed", "Network error. Please check your connection and try again.");
     } finally {
       setActionLoading(false);
     }
   };
 
-  // Base style for all dark buttons
   const btnBase = {
-    height: "44px",
-    padding: "0 28px",
-    backgroundColor: "#023347",
-    color: "#ffffff",
-    borderRadius: "10px",
-    border: "none",
-    cursor: "pointer",
-    fontSize: "14px",
-    fontWeight: 600,
-    transition: "background-color 0.2s",
+    height: "44px", padding: "0 28px", backgroundColor: "#023347",
+    color: "#ffffff", borderRadius: "10px", border: "none", cursor: "pointer",
+    fontSize: "14px", fontWeight: 600, transition: "background-color 0.2s",
   };
 
-  // Base style for the Delete/red-hover button (default dark, red on hover)
-  const btnDelete = {
-    ...btnBase,
-    backgroundColor: "#023347",
-  };
+  const btnDelete = { ...btnBase, backgroundColor: "#023347" };
 
   const renderDetailCard = () => (
     <div className="animate-fadeIn">
@@ -193,10 +238,7 @@ export default function SuggestionAdmin() {
         </div>
 
         {prevView !== "history" && (
-          // ── Changed: justifyContent "center" → "flex-end" so buttons sit at right ──
           <div style={{ display: "flex", justifyContent: "flex-end", gap: "16px", borderTop: "1px solid #eee", paddingTop: "24px" }}>
-
-            {/* Delete Record — dark by default, turns RED on hover */}
             <button
               onClick={() => setShowRejectModal(true)}
               style={{ ...btnDelete }}
@@ -246,7 +288,6 @@ export default function SuggestionAdmin() {
           style={{ width: "100%", padding: "15px", borderRadius: "12px", border: "1.5px solid #e2e8ec", backgroundColor: "#F8FAFC", outline: "none", fontSize: "14px", resize: "none", boxSizing: "border-box" }}
         />
         <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "24px" }}>
-          {/* Cancel — dark by default, turns RED on hover */}
           <button
             onClick={() => setShowRejectModal(false)}
             style={{ ...btnBase }}
@@ -255,15 +296,15 @@ export default function SuggestionAdmin() {
           >
             Cancel
           </button>
-         <button
-  onClick={handleRejectSubmit}
-  disabled={actionLoading}
-  style={{ ...btnBase, opacity: actionLoading ? 0.7 : 1, cursor: actionLoading ? "not-allowed" : "pointer" }}
-  onMouseEnter={e => { if (!actionLoading) e.currentTarget.style.backgroundColor = "#2A8E9E"; }}
-  onMouseLeave={e => { if (!actionLoading) e.currentTarget.style.backgroundColor = "#023347"; }}
->
-  {actionLoading ? "Sending..." : "Send"}
-</button>
+          <button
+            onClick={handleRejectSubmit}
+            disabled={actionLoading}
+            style={{ ...btnBase, opacity: actionLoading ? 0.7 : 1, cursor: actionLoading ? "not-allowed" : "pointer" }}
+            onMouseEnter={e => { if (!actionLoading) e.currentTarget.style.backgroundColor = "#2A8E9E"; }}
+            onMouseLeave={e => { if (!actionLoading) e.currentTarget.style.backgroundColor = "#023347"; }}
+          >
+            {actionLoading ? "Sending..." : "Send"}
+          </button>
         </div>
       </div>
     </div>
@@ -276,7 +317,14 @@ export default function SuggestionAdmin() {
         * { font-family: 'Poppins', sans-serif !important; }
         .sg-table-scroll::-webkit-scrollbar { width: 6px; }
         .sg-table-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        @keyframes slideIn {
+          from { opacity: 0; transform: translateX(40px); }
+          to   { opacity: 1; transform: translateX(0); }
+        }
       `}</style>
+
+      {/* ── Toast Notifications ── */}
+      <Toast toasts={toasts} removeToast={removeToast} />
 
       {showRejectModal && renderRejectModal()}
       <AdminSidebar />
@@ -285,30 +333,30 @@ export default function SuggestionAdmin() {
         {view === "list" || view === "history" ? (
           <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
 
-           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexShrink: 0 }}>
-  <h1 style={{ color: "#023347", fontSize: "24px", fontWeight: 800 }}>
-    {view === "list" ? "Suggestions Dashboard" : "Suggestion Records"}
-  </h1>
-  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-    <input
-      type="text"
-      placeholder="Search..."
-      value={searchTerm}
-      onChange={(e) => setSearchTerm(e.target.value)}
-      style={{ padding: "10px 16px", borderRadius: "12px", border: "1.5px solid #e2e8ec", outline: "none", width: "220px", height: "44px", boxSizing: "border-box", transition: "border-color 0.2s" }}
-onFocus={e => e.currentTarget.style.borderColor = "#2A8E9E"}
-onBlur={e => e.currentTarget.style.borderColor = "#e2e8ec"}
-    />
-    <button
-      onClick={() => setView(view === "list" ? "history" : "list")}
-      style={{ ...btnBase, whiteSpace: "nowrap" }}
-      onMouseEnter={e => e.currentTarget.style.backgroundColor = "#2A8E9E"}
-      onMouseLeave={e => e.currentTarget.style.backgroundColor = "#023347"}
-    >
-      {view === "list" ? "View History" : "← Dashboard"}
-    </button>
-  </div>
-</div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexShrink: 0 }}>
+              <h1 style={{ color: "#023347", fontSize: "24px", fontWeight: 800 }}>
+                {view === "list" ? "Suggestions Dashboard" : "Suggestion Records"}
+              </h1>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  style={{ padding: "10px 16px", borderRadius: "12px", border: "1.5px solid #e2e8ec", outline: "none", width: "220px", height: "44px", boxSizing: "border-box", transition: "border-color 0.2s" }}
+                  onFocus={e => e.currentTarget.style.borderColor = "#2A8E9E"}
+                  onBlur={e => e.currentTarget.style.borderColor = "#e2e8ec"}
+                />
+                <button
+                  onClick={() => setView(view === "list" ? "history" : "list")}
+                  style={{ ...btnBase, whiteSpace: "nowrap" }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = "#2A8E9E"}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = "#023347"}
+                >
+                  {view === "list" ? "View History" : "← Dashboard"}
+                </button>
+              </div>
+            </div>
 
             {/* Tabs */}
             <div style={{ display: "flex", gap: "28px", borderBottom: "2px solid #eee", marginBottom: "20px", flexShrink: 0 }}>
@@ -358,26 +406,26 @@ onBlur={e => e.currentTarget.style.borderColor = "#e2e8ec"}
                     ) : (view === "list" ? suggestionList : historyList)
                       .filter(item => item.title.toLowerCase().includes(searchTerm.toLowerCase()))
                       .map((item) => (
-                       <tr
-  key={item.suggestion_id || item.record_id}
-  style={{ borderBottom: "1px solid #f1f5f9", transition: "background-color 0.2s" }}
-  onMouseEnter={e => e.currentTarget.style.backgroundColor = "#f4fafb"}
-  onMouseLeave={e => e.currentTarget.style.backgroundColor = "transparent"}
->
-  <td style={{ padding: "16px", textAlign: "center", fontWeight: 700, color: "#023347" }}>{item.title}</td>
-  <td style={{ padding: "16px", textAlign: "center", color: "#64748b" }}>{item.name}</td>
-  <td style={{ padding: "16px", textAlign: "center", color: "#64748b" }}>{item.year}</td>
-  <td style={{ padding: "16px", textAlign: "center" }}>
-    <button
-      onClick={() => handleViewDetail(item.suggestion_id || item.record_id, view)}
-      style={{ padding: "8px 20px", backgroundColor: "#023347", color: "white", borderRadius: "8px", border: "none", cursor: "pointer", fontSize: "13px", fontWeight: 600, transition: "background-color 0.2s" }}
-      onMouseEnter={e => e.currentTarget.style.backgroundColor = "#2A8E9E"}
-      onMouseLeave={e => e.currentTarget.style.backgroundColor = "#023347"}
-    >
-      View
-    </button>
-  </td>
-</tr>
+                        <tr
+                          key={item.suggestion_id || item.record_id}
+                          style={{ borderBottom: "1px solid #f1f5f9", transition: "background-color 0.2s" }}
+                          onMouseEnter={e => e.currentTarget.style.backgroundColor = "#f4fafb"}
+                          onMouseLeave={e => e.currentTarget.style.backgroundColor = "transparent"}
+                        >
+                          <td style={{ padding: "16px", textAlign: "center", fontWeight: 700, color: "#023347" }}>{item.title}</td>
+                          <td style={{ padding: "16px", textAlign: "center", color: "#64748b" }}>{item.name}</td>
+                          <td style={{ padding: "16px", textAlign: "center", color: "#64748b" }}>{item.year}</td>
+                          <td style={{ padding: "16px", textAlign: "center" }}>
+                            <button
+                              onClick={() => handleViewDetail(item.suggestion_id || item.record_id, view)}
+                              style={{ padding: "8px 20px", backgroundColor: "#023347", color: "white", borderRadius: "8px", border: "none", cursor: "pointer", fontSize: "13px", fontWeight: 600, transition: "background-color 0.2s" }}
+                              onMouseEnter={e => e.currentTarget.style.backgroundColor = "#2A8E9E"}
+                              onMouseLeave={e => e.currentTarget.style.backgroundColor = "#023347"}
+                            >
+                              View
+                            </button>
+                          </td>
+                        </tr>
                       ))}
                   </tbody>
                 </table>
@@ -399,15 +447,12 @@ const TabBtn = ({ active, label, onClick }) => (
   <button
     onClick={onClick}
     style={{
-      paddingBottom: "10px",
-      fontSize: "14px",
+      paddingBottom: "10px", fontSize: "14px",
       fontWeight: active ? 700 : 500,
       color: active ? "#023347" : "#6b7280",
-      background: "none",
-      border: "none",
+      background: "none", border: "none",
       borderBottom: active ? "2px solid #023347" : "2px solid transparent",
-      marginBottom: "-2px",
-      cursor: "pointer",
+      marginBottom: "-2px", cursor: "pointer",
     }}
   >
     {label}
