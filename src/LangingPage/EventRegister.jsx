@@ -34,7 +34,7 @@ function EventRegister() {
       try {
         setLoading(true);
         setError(null);
-        const response = await fetch(`http://localhost:3000/api/admin/announcement/${id}/${type}`);
+        const response = await fetch(`http://localhost:3000/api/announcement/${id}/${type}`);
         
         if (!response.ok) {
           throw new Error(`Server responded with status ${response.status}`);

@@ -1,5 +1,46 @@
 import sequelize from "../config/database.js";
 
+const getTableColumns = async (tableName) => {
+  const [rows] = await sequelize.query(
+    `
+      SELECT column_name
+      FROM information_schema.columns
+      WHERE table_schema = 'public' AND table_name = :tableName
+    `,
+    {
+      replacements: { tableName }
+    }
+  );
+
+  return new Set(rows.map((row) => row.column_name));
+};
+
+const insertIntoTable = async (tableName, values) => {
+  const supportedColumns = await getTableColumns(tableName);
+  const entries = Object.entries(values).filter(
+    ([column, value]) => supportedColumns.has(column) && value !== undefined
+  );
+
+  if (!entries.length) {
+    throw new Error(`No matching columns found for ${tableName}`);
+  }
+
+  const columns = entries.map(([column]) => column);
+  const replacements = Object.fromEntries(entries.map(([column, value]) => [column, value]));
+  const placeholders = columns.map((column) => `:${column}`);
+
+  const [data] = await sequelize.query(
+    `
+      INSERT INTO ${tableName} (${columns.join(", ")})
+      VALUES (${placeholders.join(", ")})
+      RETURNING *
+    `,
+    { replacements }
+  );
+
+  return data[0];
+};
+
 export const addEvent = async (req, res) => {
   try {
     const {
@@ -31,47 +72,20 @@ export const addEvent = async (req, res) => {
     let data;
 
     if (event_type === "celebration") {
-      [data] = await sequelize.query(
-        `INSERT INTO upcoming_celebrations
-        (
-          event_title,
-          short_description,
-          event_description,
-          brochure_url,
-          start_date,
-          end_date,
-          faculty_contact,
-          student_contact
-        )
-        VALUES
-        (
-          :title,
-          :short_desc,
-          :desc,
-          :url,
-          :start,
-          :end,
-          :faculty,
-          :student
-        )
-        RETURNING *`,
-        {
-          replacements: {
-            title,
-            short_desc: short_description || null,
-            desc: description || null,
-            url: fileUrl,
-            start: start_date || null,
-            end: end_date || null,
-            faculty: faculty_contact || null,
-            student: student_contact || null
-          }
-        }
-      );
+      data = await insertIntoTable("upcoming_celebrations", {
+        event_title: title,
+        short_description: short_description || null,
+        event_description: description || null,
+        brochure_url: fileUrl,
+        start_date: start_date || null,
+        end_date: end_date || null,
+        faculty_contact: faculty_contact || null,
+        student_contact: student_contact || null
+      });
 
       return res.status(201).json({
         message: "Celebration added successfully",
-        data: data[0]
+        data
       });
     }
 
@@ -81,63 +95,28 @@ export const addEvent = async (req, res) => {
       });
     }
 
-    [data] = await sequelize.query(
-      `INSERT INTO upcoming_events 
-      (
-        event_title, 
-        event_short_description, 
-        event_description, 
-        brochure_url, 
-        start_date, 
-        end_date, 
-        faculty_contact, 
-        student_contact, 
-        event_type, 
-        event_link,
-        registration_start_date,
-        registration_end_date
-      )
-      VALUES 
-      (
-        :title,
-        :short_desc,
-        :desc,
-        :url,
-        :start,
-        :end,
-        :faculty,
-        :student,
-        :type,
-        :link,
-        :reg_start,
-        :reg_end
-      )
-      RETURNING *`,
-      {
-        replacements: {
-          title,
-          short_desc: short_description || null,
-          desc: description || null,
-          url: fileUrl,
-          start: start_date || null,
-          end: end_date || null,
-          faculty: faculty_contact || null,
-          student: student_contact || null,
-          type: event_type,
-          link: event_link || null,
-          reg_start: registration_start_date || null,
-          reg_end: registration_end_date || null
-        }
-      }
-    );
+    data = await insertIntoTable("upcoming_events", {
+      event_title: title,
+      event_short_description: short_description || null,
+      event_description: description || null,
+      brochure_url: fileUrl,
+      start_date: start_date || null,
+      end_date: end_date || null,
+      faculty_contact: faculty_contact || null,
+      student_contact: student_contact || null,
+      event_type,
+      event_link: event_link || null,
+      registration_start_date: registration_start_date || null,
+      registration_end_date: registration_end_date || null
+    });
 
     res.status(201).json({
       message: "Event added successfully",
-      data: data[0]
+      data
     });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    console.error("Add event error:", error);
+    res.status(500).json({ message: error.message || "Server error" });
   }
 };

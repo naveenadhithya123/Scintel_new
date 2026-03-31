@@ -380,8 +380,8 @@ const AnnouncementAdmin = () => {
     const url = formData.id
       ? `http://localhost:3000/api/admin/announcementEdit/${formData.id}/${typeValue}`
       : typeValue === 'event'
-        ? `http://localhost:3000/api/add-event`
-        : `http://localhost:3000/api/add-celebration`;
+        ? `http://localhost:3000/api/admin/add-event`
+        : `http://localhost:3000/api/admin/add-celebration`;
 
     try {
       setIsSubmitting(true);

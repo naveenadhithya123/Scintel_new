@@ -12,13 +12,19 @@ export default function AddProblemStatement() {
 
   useEffect(() => {
     setIsVisible(true);
-    if (!userDetails) navigate("/verification");
+    if (!userDetails) navigate("/ProblemStatementVerification");
   }, [userDetails, navigate]);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async () => {
-    const payload = { ...userDetails, ...form };
+    const payload = {
+      ...userDetails,
+      title: form.title,
+      category: form.category,
+      short_description: form.shortDescription,
+      detailed_description: form.detailedDescription,
+    };
     try {
       const response = await fetch("http://localhost:3000/api/problem-creation-request", {
         method: "POST",

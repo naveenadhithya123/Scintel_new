@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import AdminSidebar from './AdminSidebar';
 
 /* ── DropZone Component ── */
-function DropZone({ value, onChange, isThumbnail }) {
+function DropZone({ value, onChange }) {
   const ref = useRef();
   const handleFile = (file) => { if (file) onChange(file); };
   const previewUrl = value instanceof File ? URL.createObjectURL(value) : value;
@@ -19,11 +19,6 @@ function DropZone({ value, onChange, isThumbnail }) {
         position: 'relative', fontSize: 13, color: '#64748b', marginBottom: '10px'
       }}
     >
-      {isThumbnail && (
-        <div style={{ position: 'absolute', top: 5, left: 5, background: '#083A4B', color: '#fff', fontSize: '10px', padding: '2px 6px', borderRadius: '4px', zIndex: 2 }}>
-          Thumbnail (Card Image)
-        </div>
-      )}
       {hasImage ? (
         <img src={previewUrl} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       ) : (
@@ -40,14 +35,64 @@ const StyledBackButton = ({ onClick }) => (
   </button>
 );
 
+const emptyTestimonial = () => ({ name: '', className: '', feedback: '' });
+
+const parseTestimonials = (namesValue, classesValue, feedbacksValue) => {
+  const parseValue = (value) => {
+    if (!value || value === 'Not Applicable') return [];
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [value];
+    }
+  };
+
+  const names = parseValue(namesValue);
+  const classes = parseValue(classesValue);
+  const feedbacks = parseValue(feedbacksValue);
+  const total = Math.max(names.length, classes.length, feedbacks.length, 1);
+
+  return Array.from({ length: total }, (_, index) => ({
+    name: names[index] || '',
+    className: classes[index] || '',
+    feedback: feedbacks[index] || '',
+  })).filter((item) => item.name || item.className || item.feedback);
+};
+
+const normalizeTestimonials = (testimonials = []) => {
+  const cleaned = testimonials
+    .map((item) => ({
+      name: item.name?.trim() || '',
+      className: item.className?.trim() || '',
+      feedback: item.feedback?.trim() || '',
+    }))
+    .filter((item) => item.name || item.className || item.feedback);
+
+  return cleaned.length > 0 ? cleaned : [];
+};
+
 /* ── Core Form Component ── */
 function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTopField }) {
   const [form, setForm] = useState({
     title: '', description: '', start_date: '', end_date: '',
     brochure: null, resourceImage: null, resourceName: '', resourceDescription: '',
     participants: '', eventImages: [null], winnerImage: null, winnerName: '', 
-    winnerFeedback: '', testimonials: [{ name: '', className: '', feedback: '' }]
+    winnerFeedback: '', testimonials: [emptyTestimonial()]
   });
+
+  useEffect(() => {
+    if (initialData && Object.keys(initialData).length > 0) {
+      setForm((prev) => ({
+        ...prev,
+        ...initialData,
+        testimonials:
+          initialData.testimonials && initialData.testimonials.length > 0
+            ? initialData.testimonials
+            : [emptyTestimonial()],
+      }));
+    }
+  }, [initialData]);
 
   useEffect(() => {
     if (initialData && Object.keys(initialData).length > 0) {
@@ -66,6 +111,11 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
     const newTesti = [...form.testimonials];
     newTesti[index][field] = val;
     updateForm('testimonials', newTesti);
+  };
+  const addTestimonial = () => updateForm('testimonials', [...form.testimonials, emptyTestimonial()]);
+  const removeTestimonial = (index) => {
+    const newTesti = form.testimonials.filter((_, idx) => idx !== index);
+    updateForm('testimonials', newTesti.length > 0 ? newTesti : [emptyTestimonial()]);
   };
 
   const inputStyle = { width: '100%', padding: '10px', border: '1px solid #d1d5db', borderRadius: 6, fontSize: 13, marginBottom: 14 };
@@ -103,13 +153,19 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
       <textarea placeholder="Description" style={{...inputStyle, height: 60}} value={form.resourceDescription} onChange={e => updateForm('resourceDescription', e.target.value)} />
 
       <h3 style={sectionTitle}>Participants</h3>
-      <label style={labelStyle}>Number of Participants *</label>
-      <input type="number" style={inputStyle} value={form.participants} onChange={e => updateForm('participants', e.target.value)} />
+      <label style={labelStyle}>Participants *</label>
+      <input
+        type="text"
+        style={inputStyle}
+        value={form.participants}
+        onChange={e => updateForm('participants', e.target.value)}
+        placeholder="Example: 2nd year CSE students / 150 Students"
+      />
 
-      <h3 style={sectionTitle}>Event Images (First one is the Thumbnail)</h3>
+      <h3 style={sectionTitle}>Event Images</h3>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
         {form.eventImages.map((img, idx) => (
-            <DropZone key={idx} value={img} isThumbnail={idx === 0} onChange={v => updateImageSlot(idx, v)} />
+            <DropZone key={idx} value={img} onChange={v => updateImageSlot(idx, v)} />
         ))}
         <button type="button" onClick={addImageSlot} style={{ height: 130, border: '1.5px dashed #ccc', borderRadius: 8, cursor: 'pointer', background: 'none' }}>+ Add Image Slot</button>
       </div>
@@ -122,11 +178,30 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
       <h3 style={sectionTitle}>Testimonials</h3>
       {form.testimonials.map((t, idx) => (
         <div key={idx} style={{ marginBottom: 20, padding: 15, background: '#f8fafc', borderRadius: 8 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: '#083A4B' }}>Testimonial {idx + 1}</span>
+            {form.testimonials.length > 1 && (
+              <button
+                type="button"
+                onClick={() => removeTestimonial(idx)}
+                style={{ border: 'none', background: 'transparent', color: '#dc2626', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
+              >
+                Remove
+              </button>
+            )}
+          </div>
           <input placeholder="Name" style={inputStyle} value={t.name} onChange={e => updateTestimonial(idx, 'name', e.target.value)} />
           <input placeholder="Class" style={inputStyle} value={t.className} onChange={e => updateTestimonial(idx, 'className', e.target.value)} />
           <textarea placeholder="Feedback" style={{...inputStyle, height: 60}} value={t.feedback} onChange={e => updateTestimonial(idx, 'feedback', e.target.value)} />
         </div>
       ))}
+      <button
+        type="button"
+        onClick={addTestimonial}
+        style={{ padding: '10px 18px', borderRadius: 8, border: '1px dashed #9bd3e0', background: '#f8fdff', color: '#083A4B', fontWeight: 700, cursor: 'pointer' }}
+      >
+        + Add Testimonial
+      </button>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 40 }}>
         <button type="button" onClick={onCancel} style={{ padding: '10px 25px', borderRadius: 6, border: '1px solid #ccc' }}>Cancel</button>
@@ -136,6 +211,34 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
       </div>
     </div>
   );
+}
+
+function validateActivityForm(formState, { requireBrochure = false } = {}) {
+  if (!formState.title?.trim() || !formState.description?.trim() || !formState.start_date || !formState.participants) {
+    return 'Please fill in the required activity details before submitting.';
+  }
+
+  const testimonials = normalizeTestimonials(formState.testimonials);
+  const hasPartialTestimonial = (formState.testimonials || []).some((testimonial) => {
+    const values = [testimonial?.name?.trim(), testimonial?.className?.trim(), testimonial?.feedback?.trim()];
+    return values.some(Boolean) && values.some((value) => !value);
+  });
+  if (hasPartialTestimonial) {
+    return 'Please complete or clear partially filled testimonial entries.';
+  }
+
+  const hasBrochure = formState.brochure instanceof File || Boolean(formState.brochure);
+  if (requireBrochure && !hasBrochure) {
+    return 'Please upload a brochure for this activity.';
+  }
+
+  const hasEventImage = Array.isArray(formState.eventImages) && formState.eventImages.some(Boolean);
+  if (!hasEventImage) {
+    return 'Please add at least one event image.';
+  }
+
+  formState.testimonials = testimonials.length > 0 ? testimonials : [emptyTestimonial()];
+  return null;
 }
 
 /* ── EDIT EVENT PAGE ── */
@@ -171,11 +274,11 @@ export function EditEvent() {
             winnerFeedback: clean(data.winner_description),
             winnerImage: clean(data.winner_image),
             eventImages: imgArray.length > 0 ? imgArray : [null],
-            testimonials: [{ 
-                name: clean(data.testimonials_name), 
-                className: clean(data.testimonials_class), 
-                feedback: clean(data.testimonials_feedback) 
-            }]
+            testimonials: parseTestimonials(
+              clean(data.testimonials_name),
+              clean(data.testimonials_class),
+              clean(data.testimonials_feedback)
+            )
           });
         }
       } catch (err) { console.error(err); } finally { setLoading(false); }
@@ -184,6 +287,12 @@ export function EditEvent() {
   }, [id]);
 
   const handleUpdate = async (formState) => {
+    const validationError = validateActivityForm(formState);
+    if (validationError) {
+      alert(validationError);
+      return;
+    }
+
     const formData = new FormData();
     
     // 1. Maintain all form fields
@@ -197,9 +306,10 @@ export function EditEvent() {
     formData.append('resource_person_description', formState.resourceDescription);
     formData.append('winner_name', formState.winnerName);
     formData.append('winner_description', formState.winnerFeedback);
-    formData.append('testimonials_name', formState.testimonials[0].name);
-    formData.append('testimonials_class', formState.testimonials[0].className);
-    formData.append('testimonials_feedback', formState.testimonials[0].feedback);
+    const testimonials = normalizeTestimonials(formState.testimonials);
+    formData.append('testimonials_name', JSON.stringify(testimonials.map((item) => item.name)));
+    formData.append('testimonials_class', JSON.stringify(testimonials.map((item) => item.className)));
+    formData.append('testimonials_feedback', JSON.stringify(testimonials.map((item) => item.feedback)));
 
     // 2. THE FIX: Image Ordering Logic
     // This tells the backend EXACTLY which image (old or new) goes in which position
@@ -264,6 +374,12 @@ export function AddEvent() {
   const navigate = useNavigate();
 
   const handleAdd = async (formState) => {
+    const validationError = validateActivityForm(formState, { requireBrochure: true });
+    if (validationError) {
+      alert(validationError);
+      return;
+    }
+
     const formData = new FormData();
     formData.append('batch', year);
     formData.append('title', formState.title);
@@ -275,9 +391,10 @@ export function AddEvent() {
     formData.append('resource_person_description', formState.resourceDescription);
     formData.append('winner_name', formState.winnerName);
     formData.append('winner_description', formState.winnerFeedback);
-    formData.append('testimonials_name', formState.testimonials[0].name);
-    formData.append('testimonials_class', formState.testimonials[0].className);
-    formData.append('testimonials_feedback', formState.testimonials[0].feedback);
+    const testimonials = normalizeTestimonials(formState.testimonials);
+    formData.append('testimonials_name', JSON.stringify(testimonials.map((item) => item.name)));
+    formData.append('testimonials_class', JSON.stringify(testimonials.map((item) => item.className)));
+    formData.append('testimonials_feedback', JSON.stringify(testimonials.map((item) => item.feedback)));
 
     if (formState.brochure) formData.append('brochure', formState.brochure);
     if (formState.resourceImage) formData.append('resource_person_image', formState.resourceImage);
@@ -286,13 +403,19 @@ export function AddEvent() {
 
     try {
       const response = await fetch(`http://localhost:3000/api/admin/activity`, { method: 'POST', body: formData });
-      if (response.ok) { alert("Added!"); navigate(`/admin/activities/${year}`); }
+      if (response.ok) {
+        alert("Added!");
+        navigate(`/admin/activities/${year}`);
+      } else {
+        const errData = await response.json();
+        alert(`Error: ${errData.message || 'Failed to add activity.'}`);
+      }
     } catch (err) { alert("Failed to add."); }
   };
 
   return (
     <AdminSidebar>
-      <div style={{ flex: 1, padding: '32px', backgroundColor: '#f4f7f9' }}>
+      <div style={{ flex: 1, padding: '32px', backgroundColor: '#f4f7f9', overflowY: 'auto', height: '100vh' }}>
          <h2 style={{ color: '#083A4B', marginBottom: 20 }}>Add Event to {year}</h2>
          <EventForm mode="add" onSubmit={handleAdd} onCancel={() => navigate(-1)} />
       </div>
@@ -318,6 +441,12 @@ export function AddNewYear() {
   );
 
   const handleAddYear = async (formState) => {
+    const validationError = validateActivityForm(formState, { requireBrochure: true });
+    if (validationError) {
+      alert(validationError);
+      return;
+    }
+
     const formData = new FormData();
     formData.append('batch', batch);
     formData.append('title', formState.title);
@@ -329,9 +458,10 @@ export function AddNewYear() {
     formData.append('resource_person_description', formState.resourceDescription);
     formData.append('winner_name', formState.winnerName);
     formData.append('winner_description', formState.winnerFeedback);
-    formData.append('testimonials_name', formState.testimonials[0].name);
-    formData.append('testimonials_class', formState.testimonials[0].className);
-    formData.append('testimonials_feedback', formState.testimonials[0].feedback);
+    const testimonials = normalizeTestimonials(formState.testimonials);
+    formData.append('testimonials_name', JSON.stringify(testimonials.map((item) => item.name)));
+    formData.append('testimonials_class', JSON.stringify(testimonials.map((item) => item.className)));
+    formData.append('testimonials_feedback', JSON.stringify(testimonials.map((item) => item.feedback)));
 
     if (formState.brochure) formData.append('brochure', formState.brochure);
     if (formState.resourceImage) formData.append('resource_person_image', formState.resourceImage);
@@ -340,13 +470,19 @@ export function AddNewYear() {
 
     try {
       const response = await fetch(`http://localhost:3000/api/admin/activity`, { method: 'POST', body: formData });
-      if (response.ok) { alert("New Year Added!"); navigate(`/admin/activities/${batch}`); }
+      if (response.ok) {
+        alert("New Year Added!");
+        navigate(`/admin/activities/${batch}`);
+      } else {
+        const errData = await response.json();
+        alert(`Error: ${errData.message || 'Failed to create batch.'}`);
+      }
     } catch (err) { console.error(err); }
   };
 
   return (
     <AdminSidebar>
-      <div style={{ flex: 1, padding: '32px', backgroundColor: '#f4f7f9' }}>
+      <div style={{ flex: 1, padding: '32px', backgroundColor: '#f4f7f9', overflowY: 'auto', height: '100vh' }}>
         <h2 style={{ color: '#083A4B', marginBottom: 20 }}>Create New Academic Year</h2>
         <EventForm mode="add" extraTopField={YearHeader} onSubmit={handleAddYear} onCancel={() => navigate(-1)} />
       </div>

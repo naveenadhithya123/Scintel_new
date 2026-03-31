@@ -134,7 +134,7 @@ function ProblemStatements() {
                     onClick={() => navigate(`/problem-details/${item.problem_id}`)}
                     className="w-full md:w-auto bg-[#023347] text-white px-8 py-3.5 rounded-2xl text-[10px] font-bold tracking-[0.2em] uppercase transition-all duration-500 hover:bg-[#D4AF37] hover:shadow-2xl hover:shadow-[#D4AF37]/20 active:scale-95"
                   >
-                    Analyze Details
+                    View Details
                   </button>
                 </div>
               </div>

@@ -15,7 +15,7 @@ const Activity = sequelize.define(
     },
 
     brochure_url: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: false
     },
 
@@ -44,7 +44,7 @@ const Activity = sequelize.define(
     },
 
     resource_person_image_url: {
-      type: DataTypes.STRING
+      type: DataTypes.TEXT
     },
 
     resource_person_name: {
@@ -56,12 +56,12 @@ const Activity = sequelize.define(
     },
 
     event_image_url: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: false
     },
 
     winner_image: {
-      type: DataTypes.STRING
+      type: DataTypes.TEXT
     },
 
     winner_name: {
@@ -73,12 +73,12 @@ const Activity = sequelize.define(
     },
 
     testimonials_name: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: false
     },
 
     testimonials_class: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: false
     },
 

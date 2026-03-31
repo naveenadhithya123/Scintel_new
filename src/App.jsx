@@ -1,10 +1,8 @@
 import React from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 
 import LandingPage from './LangingPage/LandingPage'
 import Announcement from './Admin/Announcement'
-import Admin from './Admin/Admin'
-import AdminSidebar from './Admin/AdminSidebar'
 import AdminMembers from './Admin/AdminMembers'
 import AddBatch from './Admin/AddBatch'
 import EditBatch from './Admin/EditBatch'
@@ -16,39 +14,34 @@ import GloriesAdmin from './Admin/GloriesAdmin'
 import SuggestionAdmin from './Admin/SuggestionAdmin'
 import EventsGrid from "./Admin/EventsGrid";
 import { AddEvent, EditEvent, AddNewYear } from "./Admin/EventPages";
+import AdminPortalRoute from './Admin/AdminPortalRoute';
 
 function App() {
   return (
     <Routes>
+      <Route path="/admin" element={<AdminPortalRoute />}>
+        <Route index element={<Announcement />} />
+        <Route path="members" element={<AdminMembers />} />
+        <Route path="add-batch" element={<AddBatch />} />
+        <Route path="edit-batch" element={<EditBatch />} />
+        <Route path="add-member" element={<AddMember />} />
+        <Route path="edit-member" element={<EditMember />} />
+        <Route path="problems" element={<ProblemAdmin />} />
+        <Route path="activities" element={<ActivitiesAdmin />} />
+        <Route path="activities/:year" element={<EventsGrid />} />
+        <Route path="activities/:year/add-event" element={<AddEvent />} />
+        <Route path="activities/:year/edit-event/:id" element={<EditEvent />} />
+        <Route path="activities/add-new-year" element={<AddNewYear />} />
+        <Route path="glories" element={<GloriesAdmin />} />
+        <Route path="suggestion" element={<SuggestionAdmin />} />
+      </Route>
+
+      <Route path="/add-batch" element={<Navigate to="/admin/add-batch" replace />} />
+      <Route path="/edit-batch" element={<Navigate to="/admin/edit-batch" replace />} />
+      <Route path="/add-member" element={<Navigate to="/admin/add-member" replace />} />
+      <Route path="/edit-member" element={<Navigate to="/admin/edit-member" replace />} />
 
       <Route path="/*" element={<LandingPage />} />
-
-      <Route path="/admin/*" element={<Admin />} />
-
-      <Route path="/admin/members" element={<AdminMembers />} />
-
-      <Route path="/add-batch" element={<AddBatch />} />
-
-      <Route path="/admin/edit-batch" element={<EditBatch />} />
-
-      <Route path="/add-member" element={<AddMember />} />
-
-      <Route path="/edit-member" element={<EditMember />} />
-
-      <Route path="/admin/problems" element={<ProblemAdmin />} />
-
-      <Route path="/admin/activities" element={<ActivitiesAdmin />} />
-    <Route path="/admin/activities/:year" element={<EventsGrid />} />
-
-<Route path="/admin/activities/:year/add-event" element={<AddEvent />} />
-
-<Route path="/admin/activities/:year/edit-event/:id" element={<EditEvent />} />
-
-      <Route path="/admin/glories" element={<GloriesAdmin />} />
-
-      <Route path="/admin/suggestion" element={<SuggestionAdmin />} />
-
-      <Route path="/admin/activities/add-new-year" element={<AddNewYear />} />
     </Routes>
   )
 }

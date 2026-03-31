@@ -1,5 +1,43 @@
 import sequelize from "../config/database.js";
 
+const getTableColumns = async (tableName) => {
+    const [rows] = await sequelize.query(
+        `
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_schema = 'public' AND table_name = :tableName
+        `,
+        {
+            replacements: { tableName }
+        }
+    );
+
+    return new Set(rows.map((row) => row.column_name));
+};
+
+const insertIntoTable = async (tableName, values) => {
+    const supportedColumns = await getTableColumns(tableName);
+    const entries = Object.entries(values).filter(
+        ([column, value]) => supportedColumns.has(column) && value !== undefined
+    );
+
+    if (!entries.length) {
+        throw new Error(`No matching columns found for ${tableName}`);
+    }
+
+    const columns = entries.map(([column]) => column);
+    const placeholders = columns.map((column) => `:${column}`);
+    const replacements = Object.fromEntries(entries);
+
+    await sequelize.query(
+        `
+            INSERT INTO ${tableName} (${columns.join(", ")})
+            VALUES (${placeholders.join(", ")})
+        `,
+        { replacements }
+    );
+};
+
 
 // ================= REQUIRED FIELDS (DB NOT NULL CONSTRAINT) =================
 //
@@ -48,6 +86,8 @@ export const addActivity = async (req, res) => {
             participants,
             resource_person_name,
             resource_person_description,
+            winner_name,
+            winner_description,
             testimonials_name,
             testimonials_class,
             testimonials_feedback
@@ -96,61 +136,24 @@ export const addActivity = async (req, res) => {
             });
         }
 
-        const query = `
-            INSERT INTO activities (
-                batch,
-                brochure_url,
-                title,
-                description,
-                start_date,
-                end_date,
-                participants,
-                resource_person_image_url,
-                resource_person_name,
-                resource_person_description,
-                event_image_url,
-                winner_image,
-                testimonials_name,
-                testimonials_class,
-                testimonials_feedback
-            )
-            VALUES (
-                :batch,
-                :brochure_url,
-                :title,
-                :description,
-                :start_date,
-                :end_date,
-                :participants,
-                :resource_person_image_url,
-                :resource_person_name,
-                :resource_person_description,
-                :event_image_url,
-                :winner_image,
-                :testimonials_name,
-                :testimonials_class,
-                :testimonials_feedback
-            )
-        `;
-
-        await sequelize.query(query, {
-            replacements: {
-                batch,
-                brochure_url,
-                title,
-                description,
-                start_date,
-                end_date: end_date || null,
-                participants,
-                resource_person_image_url,
-                resource_person_name: resource_person_name || null,
-                resource_person_description: resource_person_description || null,
-                event_image_url,
-                winner_image,
-                testimonials_name,
-                testimonials_class,
-                testimonials_feedback
-            }
+        await insertIntoTable("activities", {
+            batch,
+            brochure_url,
+            title,
+            description,
+            start_date,
+            end_date: end_date || null,
+            participants,
+            resource_person_image_url,
+            resource_person_name: resource_person_name || null,
+            resource_person_description: resource_person_description || null,
+            event_image_url,
+            winner_image,
+            winner_name: winner_name || null,
+            winner_description: winner_description || null,
+            testimonials_name,
+            testimonials_class,
+            testimonials_feedback
         });
 
         return res.status(201).json({

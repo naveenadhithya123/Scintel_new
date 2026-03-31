@@ -10,7 +10,7 @@ export default function ActivitiesAdmin() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3000/api/activities');
+      const response = await fetch('http://localhost:3000/api/admin/activities/batches');
       const data = await response.json();
       const result = data.data || data; 
       const mappedData = result.map((item, index) => ({
@@ -33,7 +33,7 @@ export default function ActivitiesAdmin() {
   const handleDelete = async (year) => {
     if (!window.confirm(`Are you sure you want to delete all activities for ${year}?`)) return;
     try {
-      const response = await fetch(`http://localhost:3000/api/activities/${year}`, {
+      const response = await fetch(`http://localhost:3000/api/admin/activities/batch/${encodeURIComponent(year)}`, {
         method: "DELETE",
       });
       if (response.ok) {
@@ -62,7 +62,7 @@ export default function ActivitiesAdmin() {
                 onClick={() => navigate('/admin/activities/add-new-year')}
                 className="bg-[#023347] text-white px-8 py-2.5 rounded-lg font-medium text-sm hover:bg-[#012535] transition-all shadow-md active:scale-95"
               >
-                + Add Year
+                + Add Batch
               </button>
             </div>
             <div className="border-b border-gray-200"></div>

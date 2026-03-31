@@ -9,6 +9,7 @@ import Suggestion from "./Suggestion.js";
 import ProblemCreationRequest from "./ProblemCreationRequest.js";
 import ProblemSolverRequest from "./ProblemSolverRequest.js";
 import CurrentProblem from "./CurrentProblem.js";
+import CurrentProblemTeamMember from "./CurrentProblemTeamMember.js";
 
 
 // Relationships
@@ -46,6 +47,22 @@ ProblemSolverRequest.belongsTo(CurrentProblem, {
   foreignKey: "problem_id"
 });
 
+CurrentProblem.hasMany(CurrentProblemTeamMember, {
+  foreignKey: "problem_id"
+});
+
+CurrentProblemTeamMember.belongsTo(CurrentProblem, {
+  foreignKey: "problem_id"
+});
+
+User.hasMany(CurrentProblemTeamMember, {
+  foreignKey: "user_id"
+});
+
+CurrentProblemTeamMember.belongsTo(User, {
+  foreignKey: "user_id"
+});
+
 export {
   User,
   Activity,
@@ -57,5 +74,6 @@ export {
   Suggestion,
   ProblemCreationRequest,
   ProblemSolverRequest,
-  CurrentProblem
+  CurrentProblem,
+  CurrentProblemTeamMember
 };
