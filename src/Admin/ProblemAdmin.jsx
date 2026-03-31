@@ -1,6 +1,55 @@
 import React, { useState, useEffect } from "react";
 import AdminSidebar from "./AdminSidebar";
 
+const TOAST_CSS = `
+  @keyframes pb-toast-in {
+    from { opacity: 0; transform: translateY(-16px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .pb-toast {
+    position: fixed; top: 28px; right: 32px; z-index: 9999;
+    display: flex; align-items: center; gap: 12px;
+    background: #023347; color: #fff;
+    padding: 14px 22px; border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(2,51,71,0.25);
+    font-size: 14px; font-weight: 600;
+    animation: pb-toast-in 0.3s ease forwards;
+  }
+  .pb-toast-icon {
+    width: 26px; height: 26px; border-radius: 50%; background: #2A8E9E;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .pb-toast-close {
+    background: none; border: none; color: #9bd3e0;
+    cursor: pointer; font-size: 20px; line-height: 1; margin-left: 6px; padding: 0;
+  }
+  @keyframes pb-spin { to { transform: rotate(360deg); } }
+  .pb-spinner {
+    display: inline-block; width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,0.35);
+    border-top-color: #fff; border-radius: 50%;
+    animation: pb-spin 0.7s linear infinite; flex-shrink: 0;
+  }
+`;
+
+function ProblemToast({ message, onClose }) {
+  useEffect(() => {
+    const t = setTimeout(onClose, 3000);
+    return () => clearTimeout(t);
+  }, [onClose]);
+  return (
+    <div className="pb-toast">
+      <span className="pb-toast-icon">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      </span>
+      {message}
+      <button className="pb-toast-close" onClick={onClose}>×</button>
+    </div>
+  );
+}
+
 const normalizeTeamMembers = (teamMembers) => {
   if (!teamMembers) return [];
 
@@ -43,6 +92,10 @@ const ProblemAdmin = () => {
   const [activeTab, setActiveTab] = useState('Problems List');
   const [selectedProblem, setSelectedProblem] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(null); // tracks which endpoint is loading
+  const [toast, setToast] = useState(null);
+
+  const showToast = (msg) => setToast(msg);
 
   const [problemData, setProblemData] = useState([]);
   const [requestData, setRequestData] = useState([]);
@@ -53,6 +106,16 @@ const ProblemAdmin = () => {
   useEffect(() => {
     refreshData();
   }, [activeTab]);
+
+  useEffect(() => {
+    const handleResetView = (e) => {
+      if (e.detail === '/admin/problems') {
+        setSelectedProblem(null);
+      }
+    };
+    window.addEventListener('reset-view', handleResetView);
+    return () => window.removeEventListener('reset-view', handleResetView);
+  }, []);
 
   const refreshData = () => {
     if (activeTab === 'Problems List') fetchProblems();
@@ -98,26 +161,25 @@ const ProblemAdmin = () => {
       const res = await fetch(url);
       const result = await res.json();
       setSelectedProblem({ ...result.data, viewType: type });
-    } catch (err) { alert("Error fetching details"); } finally { setLoading(false); }
+    } catch (err) { showToast("Error fetching details. Please try again."); } finally { setLoading(false); }
   };
 
   const handleAction = async (endpoint, method, successMsg) => {
-    if (!window.confirm("Are you sure you want to proceed with this action?")) return;
     try {
-      setLoading(true);
+      setActionLoading(endpoint);
       const res = await fetch(`http://localhost:3000/api/admin/${endpoint}`, { method });
       const result = await readResponsePayload(res);
       if (res.ok) {
-        alert(successMsg);
+        showToast(successMsg);
         setSelectedProblem(null);
         refreshData();
       } else {
-        alert(result.message || "Action failed");
+        showToast(result.message || "Action failed. Please try again.");
       }
     } catch (err) {
-      alert("Server error occurred");
+      showToast("Server error occurred. Please try again.");
     } finally {
-      setLoading(false);
+      setActionLoading(null);
     }
   };
 
@@ -252,58 +314,69 @@ const ProblemAdmin = () => {
           {/* ── ONLY THESE BUTTONS CHANGED ── */}
           <div className="flex flex-wrap justify-end gap-4 pb-10 flex-shrink-0">
 
-            {/* Back — Edit style: hover teal */}
+            {/* Back */}
             <button
               onClick={() => setSelectedProblem(null)}
-              className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5"
+              disabled={!!actionLoading}
+              className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Back
             </button>
 
             {type === 'problem' && (
-              /* Remove Problem — Delete style: hover red */
               <button
-                onClick={() => handleRemoveProblem(id)}
-                className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5"
+                onClick={() => handleAction(`current-problems/${id}`, 'DELETE', 'Problem removed successfully.')}
+                disabled={!!actionLoading}
+                className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ display: 'flex', alignItems: 'center', gap: 8 }}
               >
-                Remove Problem
+                {actionLoading === `current-problems/${id}` && <span className="pb-spinner" />}
+                {actionLoading === `current-problems/${id}` ? 'Removing...' : 'Remove Problem'}
               </button>
             )}
 
             {type === 'request' && (
               <>
-                {/* Deny — Delete style */}
                 <button
-                  onClick={() => handleAction(`problem-requests/${id}`, 'DELETE', 'Denied.')}
-                  className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5"
+                  onClick={() => handleAction(`problem-requests/${id}`, 'DELETE', 'Request denied.')}
+                  disabled={!!actionLoading}
+                  className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ display: 'flex', alignItems: 'center', gap: 8 }}
                 >
-                  Deny
+                  {actionLoading === `problem-requests/${id}` && <span className="pb-spinner" />}
+                  {actionLoading === `problem-requests/${id}` ? 'Denying...' : 'Deny'}
                 </button>
-                {/* Add to List — Edit style */}
                 <button
-                  onClick={() => handleAction(`problem-requests/accept/${id}`, 'POST', 'Added to list.')}
-                  className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5"
+                  onClick={() => handleAction(`problem-requests/accept/${id}`, 'POST', 'Added to list successfully.')}
+                  disabled={!!actionLoading}
+                  className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ display: 'flex', alignItems: 'center', gap: 8 }}
                 >
-                  Add to List
+                  {actionLoading === `problem-requests/accept/${id}` && <span className="pb-spinner" />}
+                  {actionLoading === `problem-requests/accept/${id}` ? 'Adding...' : 'Add to List'}
                 </button>
               </>
             )}
 
             {type === 'lock' && (
               <>
-                {/* Deny Solver — Delete style */}
                 <button
                   onClick={() => handleAction(`problem-solver-requests/deny/${id}`, 'DELETE', 'Solver declined.')}
-                  className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5"
+                  disabled={!!actionLoading}
+                  className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ display: 'flex', alignItems: 'center', gap: 8 }}
                 >
-                  Deny Solver
+                  {actionLoading === `problem-solver-requests/deny/${id}` && <span className="pb-spinner" />}
+                  {actionLoading === `problem-solver-requests/deny/${id}` ? 'Denying...' : 'Deny Solver'}
                 </button>
-                {/* Approve Solver — Edit style */}
                 <button
-                  onClick={() => handleAction(`problem-solver-requests/accept/${id}`, 'POST', 'Solver approved.')}
-                  className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5"
+                  onClick={() => handleAction(`problem-solver-requests/accept/${id}`, 'POST', 'Solver approved successfully.')}
+                  disabled={!!actionLoading}
+                  className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ display: 'flex', alignItems: 'center', gap: 8 }}
                 >
-                  Approve Solver
+                  {actionLoading === `problem-solver-requests/accept/${id}` && <span className="pb-spinner" />}
+                  {actionLoading === `problem-solver-requests/accept/${id}` ? 'Approving...' : 'Approve Solver'}
                 </button>
               </>
             )}
@@ -391,6 +464,8 @@ const ProblemAdmin = () => {
   return (
     <div className="h-screen overflow-hidden">
       <AdminSidebar>
+        <style>{TOAST_CSS}</style>
+        {toast && <ProblemToast message={toast} onClose={() => setToast(null)} />}
         {renderContent()}
       </AdminSidebar>
     </div>

@@ -10,6 +10,24 @@ const STYLES = `
   .gl-form-btns { display: flex; justify-content: flex-end; gap: 12px; }
   .gl-card-btns { display: flex; gap: 10px; }
 
+  /* Styled input/textarea — matches Announcement page */
+  .gl-input {
+    width: 100%;
+    padding: 11px;
+    border-radius: 10px;
+    border: 1.5px solid #d1d5db;
+    margin-bottom: 20px;
+    box-sizing: border-box;
+    outline: none;
+    font-size: 14px;
+    background: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .gl-input:focus {
+    border-color: #2A8E9E;
+    box-shadow: 0 0 0 3px rgba(42, 142, 158, 0.18);
+  }
+
   /* New Styling for the Add Glory Button */
   .gl-add-btn {
     background-color: #023347;
@@ -135,6 +153,10 @@ const STYLES = `
   }
 
   @keyframes gl-spin { to { transform: rotate(360deg); } }
+  @keyframes gl-toast-in {
+    from { opacity: 0; transform: translateY(-16px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
   .gl-spinner {
     width: 16px;
     height: 16px;
@@ -146,6 +168,24 @@ const STYLES = `
     vertical-align: middle;
     margin-right: 8px;
   }
+  .gl-toast {
+    position: fixed; top: 28px; right: 32px; z-index: 9999;
+    display: flex; align-items: center; gap: 12px;
+    background: #023347; color: #fff;
+    padding: 14px 22px; border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(2,51,71,0.25);
+    font-size: 14px; font-weight: 600;
+    animation: gl-toast-in 0.3s ease forwards;
+  }
+  .gl-toast-icon {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: #2A8E9E;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .gl-toast-close {
+    background: none; border: none; color: #9bd3e0;
+    cursor: pointer; font-size: 20px; line-height: 1; margin-left: 6px; padding: 0;
+  }
 
   @media (max-width: 768px) { .gl-grid { grid-template-columns: repeat(2, 1fr) !important; } }
   @media (max-width: 480px) {
@@ -156,16 +196,34 @@ const STYLES = `
   }
 `;
 
-function LoadingButton({ loading, onClick, className, style, children, disabled }) {
+function GlToast({ message, onClose }) {
+  useEffect(() => {
+    const t = setTimeout(onClose, 3000);
+    return () => clearTimeout(t);
+  }, [onClose]);
+  return (
+    <div className="gl-toast">
+      <span className="gl-toast-icon">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      </span>
+      {message}
+      <button className="gl-toast-close" onClick={onClose}>×</button>
+    </div>
+  );
+}
+
+function LoadingButton({ loading, onClick, className, style, children, loadingLabel, disabled }) {
   return (
     <button
       onClick={onClick}
       disabled={loading || disabled}
       className={className}
-      style={{ opacity: loading ? 0.8 : 1, cursor: loading ? "not-allowed" : "pointer", ...style }}
+      style={{ opacity: loading ? 0.8 : 1, cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, ...style }}
     >
       {loading && <span className="gl-spinner" />}
-      {loading ? "Please wait..." : children}
+      {loading ? (loadingLabel || "Please wait...") : children}
     </button>
   );
 }
@@ -193,6 +251,8 @@ function GloryForm({ heading, initialTitle, initialDescription, initialImage, on
   const [preview, setPreview] = useState(initialImage || null);
   const [imageFile, setImageFile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [fieldError, setFieldError] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef();
 
   const handleFile = (file) => {
@@ -202,11 +262,20 @@ function GloryForm({ heading, initialTitle, initialDescription, initialImage, on
     }
   };
 
+  const handleDragOver = (e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); };
+  const handleDragLeave = (e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); };
+  const handleDrop = (e) => {
+    e.preventDefault(); e.stopPropagation(); setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    handleFile(file);
+  };
+
   const handleSubmit = async () => {
     if (!title.trim() || !description.trim()) {
-      alert("Please fill in both Title and Description");
+      setFieldError(true);
       return;
     }
+    setFieldError(false);
     setLoading(true);
     try { await onSave({ title, description, imageFile }); } finally { setLoading(false); }
   };
@@ -215,17 +284,49 @@ function GloryForm({ heading, initialTitle, initialDescription, initialImage, on
     <main className="gl-form-main">
       <h1 style={{ color: "#023347", fontSize: "22px", fontWeight: 700, marginBottom: "28px" }}>{heading}</h1>
       <label style={{ marginBottom: "10px", display: "block", fontWeight: 600 }}>Thumbnail Picture</label>
-      <div className="img-upload-container" onClick={() => fileInputRef.current.click()} style={{ minHeight: preview ? "auto" : "190px", alignItems: preview ? "flex-start" : "center" }}>
-        {preview ? (<><img src={preview} alt="preview" /><div className="img-overlay">Click to Change Image</div></>) : (<div style={{ textAlign: "center", color: "#6b7280" }}><p style={{ fontSize: "30px", margin: 0 }}>+</p><p style={{ fontSize: "14px" }}>Upload Image</p></div>)}
+      <div
+        className="img-upload-container"
+        onClick={() => fileInputRef.current.click()}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        style={{
+          minHeight: preview ? "auto" : "190px",
+          alignItems: preview ? "flex-start" : "center",
+          ...(isDragging ? { borderColor: "#2A8E9E", borderStyle: "solid", background: "rgba(42,142,158,0.08)" } : {})
+        }}
+      >
+        {preview
+          ? (<><img src={preview} alt="preview" /><div className="img-overlay">{isDragging ? "Drop to replace" : "Click to Change Image"}</div></>)
+          : (<div style={{ textAlign: "center", color: isDragging ? "#2A8E9E" : "#6b7280", pointerEvents: "none" }}>
+              <p style={{ fontSize: "30px", margin: 0 }}>{isDragging ? "📥" : "+"}</p>
+              <p style={{ fontSize: "14px" }}>{isDragging ? "Drop image here" : "Click or drag & drop image"}</p>
+            </div>)
+        }
       </div>
       <input ref={fileInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => handleFile(e.target.files[0])} />
       <label style={{ display: "block", marginBottom: 6, fontWeight: 600 }}>Title</label>
-      <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Enter glory title..." style={{ width: "100%", padding: "11px", borderRadius: "10px", border: "1.5px solid #2A8E9E", marginBottom: "20px", boxSizing: "border-box", outline: "none" }} />
+      <input
+        value={title}
+        onChange={(e) => { setTitle(e.target.value); if (fieldError) setFieldError(false); }}
+        placeholder="Enter glory title..."
+        className="gl-input"
+        style={fieldError && !title.trim() ? { borderColor: "#ef4444", background: "#fff5f5" } : {}}
+      />
+      {fieldError && !title.trim() && <p style={{ color: "#ef4444", fontSize: 12, marginTop: -14, marginBottom: 14, fontWeight: 600 }}>⚠ Title is required</p>}
       <label style={{ display: "block", marginBottom: 6, fontWeight: 600 }}>Description</label>
-      <textarea rows={6} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Write a short description..." style={{ width: "100%", padding: "11px", borderRadius: "10px", border: "1.5px solid #2A8E9E", marginBottom: "30px", boxSizing: "border-box", outline: "none", resize: "vertical" }} />
+      <textarea
+        rows={6}
+        value={description}
+        onChange={(e) => { setDescription(e.target.value); if (fieldError) setFieldError(false); }}
+        placeholder="Write a short description..."
+        className="gl-input"
+        style={{ resize: "vertical", marginBottom: fieldError && !description.trim() ? 6 : "30px", ...(fieldError && !description.trim() ? { borderColor: "#ef4444", background: "#fff5f5" } : {}) }}
+      />
+      {fieldError && !description.trim() && <p style={{ color: "#ef4444", fontSize: 12, marginBottom: 24, fontWeight: 600 }}>⚠ Description is required</p>}
       <div className="gl-form-btns">
         <button onClick={onCancel} disabled={loading} className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:bg-red-700 transition-all">Cancel</button>
-        <LoadingButton loading={loading} onClick={handleSubmit} className="h-11 px-10 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:bg-[#2A8E9E] transition-all">{saveLabel}</LoadingButton>
+        <LoadingButton loading={loading} loadingLabel="Saving..." onClick={handleSubmit} className="h-11 px-10 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:bg-[#2A8E9E] transition-all">{saveLabel}</LoadingButton>
       </div>
     </main>
   );
@@ -237,8 +338,18 @@ export default function GloriesAdmin() {
   const [editTarget, setEditTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [toast, setToast] = useState(null);
 
-  useEffect(() => { loadData(); }, []);
+  const showToast = (msg) => { setToast(msg); };
+
+  useEffect(() => {
+    loadData();
+    const handleResetView = (e) => {
+      if (e.detail === '/admin/glories') setView('list');
+    };
+    window.addEventListener('reset-view', handleResetView);
+    return () => window.removeEventListener('reset-view', handleResetView);
+  }, []);
 
   const loadData = async () => {
     try {
@@ -254,7 +365,7 @@ export default function GloriesAdmin() {
     formData.append("description", description);
     if (imageFile) formData.append("image", imageFile);
     const res = await fetch(API_BASE_URL, { method: "POST", body: formData });
-    if (res.ok) { setView("list"); loadData(); }
+    if (res.ok) { showToast("Glory added successfully!"); setView("list"); loadData(); }
   };
 
   const handleSaveEdit = async ({ title, description, imageFile }) => {
@@ -264,14 +375,14 @@ export default function GloriesAdmin() {
     if (editTarget?.image_url) formData.append("existing_image_url", editTarget.image_url);
     if (imageFile) formData.append("image", imageFile);
     const res = await fetch(`${API_BASE_URL}/${editTarget.glorie_id}`, { method: "PUT", body: formData });
-    if (res.ok) { setEditTarget(null); setView("list"); loadData(); }
+    if (res.ok) { showToast("Glory updated successfully!"); setEditTarget(null); setView("list"); loadData(); }
   };
 
   const handleConfirmDelete = async () => {
     setDeleteLoading(true);
     try {
       const res = await fetch(`${API_BASE_URL}/${deleteTarget.glorie_id}`, { method: "DELETE" });
-      if (res.ok) { setDeleteTarget(null); loadData(); }
+      if (res.ok) { showToast("Glory deleted."); setDeleteTarget(null); loadData(); }
     } catch (err) { console.error(err); }
     finally { setDeleteLoading(false); }
   };
@@ -279,6 +390,7 @@ export default function GloriesAdmin() {
   if (view === "add") return (
     <AdminSidebar>
       <style>{STYLES}</style>
+      {toast && <GlToast message={toast} onClose={() => setToast(null)} />}
       <GloryForm heading="Add Glory" onCancel={() => setView("list")} onSave={handleSaveAdd} saveLabel="Add" />
     </AdminSidebar>
   );
@@ -286,6 +398,7 @@ export default function GloriesAdmin() {
   if (view === "edit") return (
     <AdminSidebar>
       <style>{STYLES}</style>
+      {toast && <GlToast message={toast} onClose={() => setToast(null)} />}
       <GloryForm heading="Edit Glory" initialTitle={editTarget.title} initialDescription={editTarget.description} initialImage={editTarget.image_url} onCancel={() => setView("list")} onSave={handleSaveEdit} saveLabel="Save" />
     </AdminSidebar>
   );
@@ -293,6 +406,7 @@ export default function GloriesAdmin() {
   return (
     <AdminSidebar>
       <style>{STYLES}</style>
+      {toast && <GlToast message={toast} onClose={() => setToast(null)} />}
 
       {deleteTarget && (
         <DeleteModal glory={deleteTarget} loading={deleteLoading} onCancel={() => !deleteLoading && setDeleteTarget(null)} onConfirm={handleConfirmDelete} />

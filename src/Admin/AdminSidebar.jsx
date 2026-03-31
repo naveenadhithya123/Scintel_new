@@ -89,6 +89,11 @@ export default function AdminSidebar({ children }) {
 
   const handleNavigation = (path) => {
     setIsMenuOpen(false);
+    // If already on this page, dispatch a reset-view event so the page
+    // can reset its internal state (e.g. go back to list from add/edit).
+    if (location.pathname === path) {
+      window.dispatchEvent(new CustomEvent('reset-view', { detail: path }));
+    }
     navigate(path);
   };
 

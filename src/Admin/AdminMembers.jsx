@@ -21,6 +21,48 @@ const sortMembersByRole = (members = []) =>
     return (a.name || "").localeCompare(b.name || "");
   });
 
+const TOAST_CSS = `
+  @keyframes am-toast-in {
+    from { opacity: 0; transform: translateY(-16px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .am-toast {
+    position: fixed; top: 28px; right: 32px; z-index: 9999;
+    display: flex; align-items: center; gap: 12px;
+    background: #023347; color: #fff;
+    padding: 14px 22px; border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(2,51,71,0.25);
+    font-size: 14px; font-weight: 600;
+    animation: am-toast-in 0.3s ease forwards;
+  }
+  .am-toast-icon {
+    width: 26px; height: 26px; border-radius: 50%; background: #2A8E9E;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .am-toast-close {
+    background: none; border: none; color: #9bd3e0;
+    cursor: pointer; font-size: 20px; line-height: 1; margin-left: 6px; padding: 0;
+  }
+`;
+
+function MemberToast({ message, onClose }) {
+  useEffect(() => {
+    const t = setTimeout(onClose, 3000);
+    return () => clearTimeout(t);
+  }, [onClose]);
+  return (
+    <div className="am-toast">
+      <span className="am-toast-icon">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      </span>
+      {message}
+      <button className="am-toast-close" onClick={onClose}>×</button>
+    </div>
+  );
+}
+
 export default function AdminMembers() {
   const navigate = useNavigate();
   const [batches, setBatches] = useState([]);
@@ -28,6 +70,9 @@ export default function AdminMembers() {
   const [batchDetails, setBatchDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (msg) => setToast(msg);
 
   const selectedBatch = useMemo(
     () => batches.find((batch) => String(batch.batch_id) === String(selectedBatchId)) || null,
@@ -80,29 +125,21 @@ export default function AdminMembers() {
   };
 
   const handleDeleteBatch = async () => {
-    if (!selectedBatch || deleting) {
-      return;
-    }
-
-    if (!window.confirm(`Remove batch ${selectedBatch.batch_year}?`)) {
-      return;
-    }
+    if (!selectedBatch || deleting) return;
+    if (!window.confirm(`Remove batch ${selectedBatch.batch_year}?`)) return;
 
     setDeleting(true);
     try {
       const res = await fetch(`${API_BASE}/admin/association-batch/${selectedBatch.batch_id}`, {
         method: "DELETE",
       });
-
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to remove batch");
-      }
-
+      if (!res.ok) throw new Error(data.message || "Failed to remove batch");
+      showToast("Batch removed successfully.");
       await fetchBatches();
     } catch (error) {
       console.error("Error deleting batch:", error);
-      alert(error.message);
+      showToast(error.message || "Failed to remove batch.");
     } finally {
       setDeleting(false);
     }
@@ -123,6 +160,8 @@ export default function AdminMembers() {
 
   return (
     <AdminSidebar>
+      <style>{TOAST_CSS}</style>
+      {toast && <MemberToast message={toast} onClose={() => setToast(null)} />}
       <style>{`
         .am-scrollbar::-webkit-scrollbar { width: 6px; }
         .am-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }

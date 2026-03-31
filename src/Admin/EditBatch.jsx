@@ -32,6 +32,7 @@ export default function EditBatch() {
   const [members, setMembers] = useState([]);
   const [originalMembers, setOriginalMembers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   // ── Modal State ──
   const [showAddModal, setShowAddModal] = useState(false);
@@ -182,6 +183,11 @@ export default function EditBatch() {
         .eb-input { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1.5px solid #e2e8ec; background: #fff; font-size: 14px; color: #023347; outline: none; box-sizing: border-box; }
         .eb-input:focus { border-color: #2A8E9E; box-shadow: 0 0 0 3px rgba(42,142,158,0.1); }
         .eb-label { display: block; font-weight: 600; font-size: 14px; color: #023347; margin-bottom: 6px; }
+        .eb-img-drop { width: 320px; height: 180px; border-radius: 10px; overflow: hidden; position: relative; cursor: pointer; border: 2px dashed transparent; transition: border-color 0.2s, background 0.2s; flex-shrink: 0; }
+        .eb-img-drop.dragging { border-color: #2A8E9E; background: rgba(42,142,158,0.07); }
+        .eb-img-drop img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .eb-img-drop-overlay { position: absolute; inset: 0; background: rgba(2,51,71,0.55); display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 600; opacity: 0; transition: opacity 0.2s; pointer-events: none; gap: 6px; }
+        .eb-img-drop:hover .eb-img-drop-overlay { opacity: 1; }
       `}</style>
 
       <div style={{ flex: 1, overflowY: "auto", padding: "36px 40px" }}>
@@ -199,24 +205,30 @@ export default function EditBatch() {
 
         {/* Batch Info */}
         <div style={{ display: "flex", gap: "28px", alignItems: "flex-start", marginBottom: "32px", flexWrap: "wrap" }}>
-          <div style={{ width: "320px", flexShrink: 0 }}>
-            <div style={{ width: "100%", height: "180px", background: "#0d2233", borderRadius: "10px", overflow: "hidden" }}>
-              <img
-                src={previewUrl || "https://placehold.jp/320x180.png"}
-                alt="Preview"
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              />
+          <div
+            className={`eb-img-drop${isDragging ? " dragging" : ""}`}
+            onClick={() => fileInputRef.current.click()}
+            onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); }}
+            onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); }}
+            onDrop={(e) => {
+              e.preventDefault(); e.stopPropagation(); setIsDragging(false);
+              const file = e.dataTransfer.files[0];
+              if (file && file.type.startsWith("image/")) { setNewImageFile(file); setPreviewUrl(URL.createObjectURL(file)); }
+            }}
+          >
+            {previewUrl
+              ? <img src={previewUrl} alt="Preview" />
+              : <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", color: isDragging ? "#2A8E9E" : "#9ca3af", background: isDragging ? "rgba(42,142,158,0.07)" : "#0d2233" }}>
+                  <span style={{ fontSize: 13, marginTop: 6 }}>{isDragging ? "Drop image here" : "Click or drag & drop"}</span>
+                </div>
+            }
+            <div className="eb-img-drop-overlay">
+              <span>{isDragging ? "Drop to replace" : "Click or drag to change"}</span>
             </div>
-            <input type="file" ref={fileInputRef} hidden onChange={(e) => {
+            <input type="file" ref={fileInputRef} hidden accept="image/*" onChange={(e) => {
               const file = e.target.files[0];
               if (file) { setNewImageFile(file); setPreviewUrl(URL.createObjectURL(file)); }
             }} />
-            <button
-              onClick={() => fileInputRef.current.click()}
-              style={{ marginTop: "10px", width: "100%", padding: "9px", cursor: "pointer", background: "#f8f9fa", border: "1px solid #ccc", borderRadius: "8px", fontSize: "14px", fontWeight: 500 }}
-            >
-              Change Batch Image
-            </button>
           </div>
 
           <div style={{ flex: 1, minWidth: "300px" }}>

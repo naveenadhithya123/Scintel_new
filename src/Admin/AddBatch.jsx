@@ -22,13 +22,14 @@ export default function AddBatch() {
   const fileRef = useRef();
 
   // ── State for API Data ──
-  const [batchYear, setBatchYear] = useState(""); // Needed for the backend 'batch_year' primary/foreign key
+  const [batchYear, setBatchYear] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [imageFile, setImageFile] = useState(null); // Actual file for upload
-  const [previewUrl, setPreviewUrl] = useState(null); // For UI preview
+  const [imageFile, setImageFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   // ── Member Modal State ──
   const [showAddModal, setShowAddModal] = useState(false);
@@ -37,12 +38,16 @@ export default function AddBatch() {
 
   /* ── Image handling ── */
   const handleImage = (file) => {
-    if (!file) return;
+    if (!file || !file.type.startsWith("image/")) return;
     setImageFile(file);
     const reader = new FileReader();
     reader.onload = (e) => setPreviewUrl(e.target.result);
     reader.readAsDataURL(file);
   };
+
+  const handleDragOver  = (e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); };
+  const handleDragLeave = (e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); };
+  const handleDrop      = (e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); handleImage(e.dataTransfer.files[0]); };
 
   /* ── Add member to local list ── */
   const handleAddMember = () => {
@@ -145,8 +150,10 @@ export default function AddBatch() {
         .ab-upload-box { 
           width: 420px; min-width: 420px; height: 220px; border: 2px dashed #d1d5db; 
           border-radius: 12px; display: flex; align-items: center; justify-content: center; 
-          color: #6b7280; font-size: 14px; flex-shrink: 0; cursor: pointer; overflow: hidden; position: relative; 
+          color: #6b7280; font-size: 14px; flex-shrink: 0; cursor: pointer; overflow: hidden; position: relative;
+          transition: border-color 0.2s, background 0.2s;
         }
+        .ab-upload-box.dragging { border-color: #2A8E9E; border-style: solid; background: rgba(42,142,158,0.07); color: #2A8E9E; }
         .ab-upload-box img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
         .ab-fields { flex: 1; display: flex; flex-direction: column; gap: 16px; }
         .ab-table-wrap { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; }
@@ -200,13 +207,18 @@ export default function AddBatch() {
         <div className="ab-top-form">
           {/* Upload Box */}
           <div
-            className="ab-upload-box"
+            className={`ab-upload-box${isDragging ? " dragging" : ""}`}
             onClick={() => fileRef.current.click()}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
           >
             {previewUrl ? (
               <img src={previewUrl} alt="Preview" />
             ) : (
-              <span>Click to upload batch image</span>
+              <div style={{ textAlign: "center", pointerEvents: "none" }}>
+                <span>{isDragging ? "Drop image here" : "Click or drag & drop image"}</span>
+              </div>
             )}
             <input
               ref={fileRef}
