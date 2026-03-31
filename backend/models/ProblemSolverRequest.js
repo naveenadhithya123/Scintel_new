@@ -2,7 +2,6 @@ import { DataTypes } from "sequelize";
 import sequelize from "../config/database.js";
 
 const ProblemSolverRequest = sequelize.define("ProblemSolverRequest", {
-
   problem_solver_request_id: {
     type: DataTypes.INTEGER,
     primaryKey: true
@@ -14,13 +13,11 @@ const ProblemSolverRequest = sequelize.define("ProblemSolverRequest", {
   phone_number: DataTypes.STRING,
   year: DataTypes.STRING,
   section: DataTypes.STRING,
-
-  // ✅ New column added
-  mentor: DataTypes.STRING
-
+  mentor: DataTypes.STRING,
+  team_members: DataTypes.JSONB
 }, {
   tableName: "problem_solver_requests",
   timestamps: false
 });
 
-export default ProblemSolverRequest;  
+export default ProblemSolverRequest;

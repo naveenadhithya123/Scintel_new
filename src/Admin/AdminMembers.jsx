@@ -147,7 +147,7 @@ export default function AdminMembers() {
             </button>
             {/* Add Batch — Edit style */}
             <button
-              onClick={() => navigate("/add-batch")}
+              onClick={() => navigate("/admin/add-batch")}
               className="h-11 px-6 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5"
             >
               Add Batch

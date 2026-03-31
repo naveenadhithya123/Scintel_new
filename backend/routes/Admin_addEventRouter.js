@@ -1,11 +1,13 @@
 import express from "express";
 import upload from "../middleware/upload.js";
 import { addEvent } from "../controllers/Admin_addEventController.js";
+import verifyAdminToken from "../middleware/verifyAdminToken.js";
 
 const router = express.Router();
 
 router.post(
-  "/add-event",
+  "/admin/add-event",
+  verifyAdminToken,
   upload.single("file"),
   addEvent
 );

@@ -12,7 +12,7 @@ export default function UpcomingEvents() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/admin/announcements");
+        const response = await fetch("http://localhost:3000/api/announcements");
         const result = await response.json();
 
         if (result.success && Array.isArray(result.data)) {

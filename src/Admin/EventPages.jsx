@@ -224,6 +224,11 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
     const t = [...form.testimonials]; t[index][field] = val;
     updateForm('testimonials', t);
   };
+  const addTestimonial = () => updateForm('testimonials', [...form.testimonials, emptyTestimonial()]);
+  const removeTestimonial = (index) => {
+    const newTesti = form.testimonials.filter((_, idx) => idx !== index);
+    updateForm('testimonials', newTesti.length > 0 ? newTesti : [emptyTestimonial()]);
+  };
 
   /* validation */
   const validate = () => {
@@ -363,6 +368,13 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
             onChange={e => updateTestimonial(idx, 'feedback', e.target.value)} />
         </div>
       ))}
+      <button
+        type="button"
+        onClick={addTestimonial}
+        style={{ padding: '10px 18px', borderRadius: 8, border: '1px dashed #9bd3e0', background: '#f8fdff', color: '#083A4B', fontWeight: 700, cursor: 'pointer' }}
+      >
+        + Add Testimonial
+      </button>
 
       {/* Buttons */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 40 }}>

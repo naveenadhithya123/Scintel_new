@@ -15,7 +15,7 @@ function ActivitiesDetail() {
     const fetchBatchData = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:3000/api/activities/batch/${batch}`);
+        const response = await fetch(`http://localhost:3000/api/activities/batch/${encodeURIComponent(batch)}`);
         const data = await response.json();
         setActivities(data);
       } catch (error) {
@@ -94,7 +94,7 @@ function ActivitiesDetail() {
                 {/* Image Frame - Matched to Glories Aspect Ratio */}
                 <div className="relative aspect-video rounded-[1.5rem] overflow-hidden mb-5">
                   <img
-                    src={item.event_image_url || 'https://via.placeholder.com/600x400'}
+                    src={item.brochure_url || item.event_image_url?.split(',')[0]?.trim() || 'https://via.placeholder.com/600x400'}
                     alt={item.title}
                     className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-all duration-[1.5s] ease-out group-hover:scale-105"
                   />

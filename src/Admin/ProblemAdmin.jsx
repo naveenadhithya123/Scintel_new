@@ -1,6 +1,34 @@
 import React, { useState, useEffect } from "react";
 import AdminSidebar from "./AdminSidebar";
 
+const normalizeTeamMembers = (teamMembers) => {
+  if (!teamMembers) return [];
+
+  let parsed = teamMembers;
+
+  if (typeof parsed === "string") {
+    try {
+      parsed = JSON.parse(parsed);
+    } catch {
+      return [];
+    }
+  }
+
+  if (Array.isArray(parsed)) return parsed;
+
+  const candidates = [
+    parsed?.members,
+    parsed?.team_members,
+    parsed?.students,
+    parsed?.data,
+  ];
+
+  const matched = candidates.find(Array.isArray);
+  if (matched) return matched;
+
+  return [];
+};
+
 const ProblemAdmin = () => {
   const [activeTab, setActiveTab] = useState('Problems List');
   const [selectedProblem, setSelectedProblem] = useState(null);
@@ -127,6 +155,9 @@ const ProblemAdmin = () => {
               {selectedProblem.mentor && (
                 <div className="flex items-center"><span className="font-bold text-[#023347] min-w-[120px]">Mentor:</span><span className="text-gray-600">{selectedProblem.mentor}</span></div>
               )}
+              {selectedProblem.mentor_email && (
+                <div className="flex items-center"><span className="font-bold text-[#023347] min-w-[120px]">Mentor Email:</span><span className="text-gray-600">{selectedProblem.mentor_email}</span></div>
+              )}
             </div>
 
             <div>
@@ -135,6 +166,41 @@ const ProblemAdmin = () => {
                 {selectedProblem.detailed_description}
               </p>
             </div>
+
+            {type === 'lock' && (
+              <div className="mt-10 space-y-6">
+                <div>
+                  <h4 className="text-lg font-bold text-[#023347] mb-3">Lead Student</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm md:text-base">
+                    <div><span className="font-bold text-[#023347]">Name:</span> <span className="text-gray-600">{selectedProblem.name}</span></div>
+                    <div><span className="font-bold text-[#023347]">Email:</span> <span className="text-gray-600">{selectedProblem.email}</span></div>
+                    <div><span className="font-bold text-[#023347]">Phone:</span> <span className="text-gray-600">{selectedProblem.phone_number}</span></div>
+                    <div><span className="font-bold text-[#023347]">Class:</span> <span className="text-gray-600">Year {selectedProblem.year} - Sec {selectedProblem.section}</span></div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-lg font-bold text-[#023347] mb-3">Team Members</h4>
+                  {normalizeTeamMembers(selectedProblem.team_members).length > 0 ? (
+                    <div className="space-y-3">
+                      {normalizeTeamMembers(selectedProblem.team_members).map((member, index) => (
+                        <div key={`${member.email || "member"}-${index}`} className="rounded-xl border border-gray-100 p-4 bg-gray-50/80 text-sm">
+                          <div className="font-semibold text-[#023347] mb-2">Member {index + 2}</div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-gray-600">
+                            <div>Name: {member.name}</div>
+                            <div>Email: {member.email}</div>
+                            <div>Phone: {member.ph_no}</div>
+                            <div>Class: Year {member.year} - Sec {member.section}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500">No additional team members were included in this request.</p>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
           
           {/* ── ONLY THESE BUTTONS CHANGED ── */}

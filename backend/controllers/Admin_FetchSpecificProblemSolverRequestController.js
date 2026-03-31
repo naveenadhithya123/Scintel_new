@@ -1,6 +1,35 @@
 import sequelize from "../config/database.js";
 import { QueryTypes } from "sequelize";
 
+const normalizeSolverRequestPayload = (teamMembers) => {
+  if (!teamMembers) {
+    return { mentorEmail: null, members: [] };
+  }
+
+  const parsedTeamData =
+    typeof teamMembers === "string" ? JSON.parse(teamMembers) : teamMembers;
+
+  if (Array.isArray(parsedTeamData)) {
+    return { mentorEmail: null, members: parsedTeamData };
+  }
+
+  const candidateMembers = [
+    parsedTeamData?.members,
+    parsedTeamData?.team_members,
+    parsedTeamData?.students,
+    parsedTeamData?.data,
+  ].find(Array.isArray) || [];
+
+  return {
+    mentorEmail:
+      parsedTeamData?.mentor?.email ||
+      parsedTeamData?.mentor_email ||
+      parsedTeamData?.mentorMailId ||
+      null,
+    members: candidateMembers,
+  };
+};
+
 export const fetchSpecificProblemSolverRequest = async (req, res) => {
   try {
     const { id } = req.params;
@@ -21,6 +50,7 @@ export const fetchSpecificProblemSolverRequest = async (req, res) => {
         psr.year,
         psr.section,
         psr.mentor,
+        psr.team_members,
 
         -- Problem Details
         cp.title,
@@ -54,9 +84,15 @@ export const fetchSpecificProblemSolverRequest = async (req, res) => {
     // RESPONSE
     // ============================
 
+    const normalizedPayload = normalizeSolverRequestPayload(data.team_members);
+
     return res.status(200).json({
       message: "Problem solver request fetched successfully",
-      data,
+      data: {
+        ...data,
+        mentor_email: normalizedPayload.mentorEmail,
+        team_members: normalizedPayload.members,
+      },
     });
 
   } catch (error) {

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { clearAdminSession } from "../auth/adminAuth";
 
 /* =========================================
    SIDEBAR ICONS
@@ -91,6 +92,12 @@ export default function AdminSidebar({ children }) {
     navigate(path);
   };
 
+  const handleLogout = () => {
+    clearAdminSession();
+    setIsMenuOpen(false);
+    navigate("/admin", { replace: true });
+  };
+
   const isActive = (item) => {
     const path = location.pathname;
 
@@ -156,6 +163,16 @@ export default function AdminSidebar({ children }) {
             );
           })}
         </nav>
+
+        <div className="mt-auto p-4">
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+          >
+            Logout
+          </button>
+        </div>
       </aside>
 
       {/* Main content */}

@@ -1,49 +1,41 @@
 import sequelize from "../config/database.js";
-import { QueryTypes } from "sequelize";
 
 export const fetchSpecificMember = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const [member] = await sequelize.query(
+    const [result] = await sequelize.query(
       `
-      SELECT 
+      SELECT
         member_id,
         phone_number,
-        phone_number AS register_number,
         name,
+        batch_year,
         role,
-        year,
-        batch_year
+        year
       FROM association_members
       WHERE member_id = :id
       `,
       {
         replacements: { id },
-        type: QueryTypes.SELECT,
       }
     );
 
-    // ============================
-    // NOT FOUND
-    // ============================
-
-    if (!member) {
+    if (!result.length) {
       return res.status(404).json({
         message: "Member not found",
       });
     }
 
-    // ============================
-    // RESPONSE
-    // ============================
-
     return res.status(200).json({
-      data: member,
+      message: "Member fetched successfully",
+      data: {
+        ...result[0],
+        register_number: result[0].phone_number,
+      },
     });
-
   } catch (error) {
-    console.error("Fetch Member Error:", error);
+    console.error("Fetch Specific Member Error:", error);
 
     return res.status(500).json({
       message: "Internal Server Error",

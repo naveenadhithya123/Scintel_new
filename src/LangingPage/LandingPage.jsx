@@ -12,12 +12,12 @@ import Suggestions from "./Suggestions";
 import Contact from "./Contact";
 import ActPage from "./ActPage";
 import AddProblemStatement from "./AddProblemStatement";
-import CGPACalculator from "./CGPACalculator";
 import Events from "./Events";
 import EventDetails from "./EventDetails";
 import EventRegister from "./EventRegister";
 
 import ProblemStatementVerification from "./ProblemStatementVerification";
+import ProblemDetails from "./ProblemDetails";
 import VerificationMentor from "./VerificationMentor";
 import ScrollToTop from "./ScrollToTop";
 import kiotlogo from "./kiot-logo.png";
@@ -168,7 +168,7 @@ return (
 <Route path="/ProblemStatementVerification" element={<ProblemStatementVerification/>} />
 <Route path="/verification-mentor" element={<VerificationMentor />} />
 <Route path="/add-problem" element={<AddProblemStatement />} />
-<Route path="/problem-details/:id" element={<CGPACalculator />} />
+<Route path="/problem-details/:id" element={<ProblemDetails />} />
 <Route path="/SuggesstionVerification" element={<SuggesstionVerification />} />
 
 <Route path="/activities/batch/:batch" element={<Activities />} />

@@ -12,7 +12,12 @@ export const getSpecificCurrentProblem = async (req, res) => {
                 title,
                 category,
                 short_description,
-                detailed_description
+                detailed_description,
+                mentor,
+                CASE
+                    WHEN solver_user_id IS NULL THEN 'Open to Build'
+                    ELSE 'In Progress'
+                END AS status
             FROM current_problems
             WHERE problem_id = :problemId
         `, {

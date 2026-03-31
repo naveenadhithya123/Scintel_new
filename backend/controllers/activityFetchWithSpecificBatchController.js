@@ -11,6 +11,7 @@ export const getActivitiesBySpecificBatch = async (req, res) => {
                 activity_id,
                 title,
                 description,
+                brochure_url,
                 event_image_url
             FROM activities
             WHERE batch = :batch

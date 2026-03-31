@@ -15,11 +15,7 @@ export const addAssociationMember = async (req, res) => {
 
     const finalPhoneNumber = phone_number || register_number;
 
-    // ============================
-    // VALIDATION
-    // ============================
-
-    if (!finalPhoneNumber || !name || !role || !batch_year || !year) {
+    if (!finalPhoneNumber || !name || !role || !year || !batch_year) {
       return res.status(400).json({
         message: "Phone number, Name, Role, Year and Batch year are required",
       });
@@ -31,15 +27,13 @@ export const addAssociationMember = async (req, res) => {
       });
     }
 
-    // ============================
-    // INSERT QUERY
-    // ============================
-
-    await sequelize.query(
+    const [result] = await sequelize.query(
       `
       INSERT INTO association_members
       (phone_number, name, batch_year, role, year)
-      VALUES (:phone_number, :name, :batch_year, :role, :year)
+      VALUES
+      (:phone_number, :name, :batch_year, :role, :year)
+      RETURNING member_id, phone_number, name, batch_year, role, year
       `,
       {
         replacements: {
@@ -52,31 +46,15 @@ export const addAssociationMember = async (req, res) => {
       }
     );
 
-    // ============================
-    // RESPONSE
-    // ============================
-
     return res.status(201).json({
       message: "Member added successfully",
       data: {
-        phone_number: finalPhoneNumber,
-        register_number: finalPhoneNumber,
-        name,
-        role,
-        year,
-        batch_year,
+        ...result[0],
+        register_number: result[0].phone_number,
       },
     });
-
   } catch (error) {
     console.error("Add Member Error:", error);
-
-    // Handle duplicate phone_number
-    if (error.name === "SequelizeUniqueConstraintError") {
-      return res.status(400).json({
-        message: "Member with this phone number already exists",
-      });
-    }
 
     return res.status(500).json({
       message: "Internal Server Error",

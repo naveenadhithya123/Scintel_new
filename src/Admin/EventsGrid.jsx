@@ -179,17 +179,16 @@ export default function EventsGrid() {
   const fetchEvents = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:3000/api/admin/activities/${year}`);
+      const response = await fetch(`http://localhost:3000/api/admin/activities/${encodeURIComponent(year)}`);
       const result = await response.json();
       if (result.success && Array.isArray(result.data)) {
         const formattedEvents = result.data.map(item => {
-          const imageList = item.image ? item.image.split(',') : [];
-          const firstImage = imageList.length > 0 ? imageList[0].trim() : '';
           return {
             id: item.activity_id,
             title: item.title,
             description: item.description,
-            thumbnail: firstImage
+            // Changed to exclusively show brochure_url as the thumbnail
+            thumbnail: item.brochure_url || '' 
           };
         });
         setEvents(formattedEvents);

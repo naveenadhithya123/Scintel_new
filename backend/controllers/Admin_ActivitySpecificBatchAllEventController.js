@@ -16,6 +16,8 @@ export const getActivitiesByBatch = async (req, res) => {
         const query = `
             SELECT 
                 activity_id,
+                brochure_url,
+                event_image_url,
                 event_image_url AS image,
                 title,
                 description

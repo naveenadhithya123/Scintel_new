@@ -10,6 +10,7 @@ export const getActivityById = async (req, res) => {
             SELECT
                 activity_id,
                 batch,
+                brochure_url,
                 title,
                 description,
                 start_date,
