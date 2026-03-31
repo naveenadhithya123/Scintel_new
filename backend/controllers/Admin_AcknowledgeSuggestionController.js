@@ -1,5 +1,5 @@
 import Suggestion from "../models/Suggestion.js";
-import transporter from "../config/mailer.js";
+import transporter, { teamMailFrom } from "../config/mailer.js";
 
 export const acknowledgeSuggestion = async (req, res) => {
   try {
@@ -21,7 +21,7 @@ export const acknowledgeSuggestion = async (req, res) => {
     await suggestion.save();
 
     await transporter.sendMail({
-      from: '"Scintel Team" <lap100gbfree@gmail.com>',
+      from: teamMailFrom,
       to: suggestion.email,
       subject: "Your Suggestion Has Been Acknowledged",
       html: `

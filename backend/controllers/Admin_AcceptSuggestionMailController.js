@@ -1,4 +1,4 @@
-import transporter from "../config/mailer.js";
+import transporter, { teamMailFrom } from "../config/mailer.js";
 
 export const sendAcceptanceMail = async (req, res) => {
   try {
@@ -19,7 +19,7 @@ export const sendAcceptanceMail = async (req, res) => {
     // ============================
 
     await transporter.sendMail({
-      from: '"Scintel Team" <lap100gbfree@gmail.com>',
+      from: teamMailFrom,
       to: email,
       subject: "Your Suggestion Has Been Accepted",
       html: `

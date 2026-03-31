@@ -1,7 +1,7 @@
 import sequelize from "../config/database.js";
 import Suggestion from "../models/Suggestion.js";
 import SuggestionRecoard from "../models/suggestion_recoard.js";
-import transporter from "../config/mailer.js";
+import transporter, { teamMailFrom } from "../config/mailer.js";
 
 export const deleteSuggestionAndSendMail = async (req, res) => {
   const transaction = await sequelize.transaction();
@@ -31,7 +31,7 @@ export const deleteSuggestionAndSendMail = async (req, res) => {
     }
 
     await transporter.sendMail({
-      from: '"Scintel Team" <lap100gbfree@gmail.com>',
+      from: teamMailFrom,
       to: suggestion.email,
       subject: "Regarding Your Suggestion",
       html: `

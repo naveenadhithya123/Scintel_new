@@ -1,6 +1,6 @@
 import sequelize from "../config/database.js";
 import { QueryTypes } from "sequelize";
-import transporter from "../config/mailer.js";
+import transporter, { teamMailFrom } from "../config/mailer.js";
 
 const normalizeSolverRequestPayload = (teamMembers) => {
   if (!teamMembers) {
@@ -97,7 +97,7 @@ export const acceptProblemSolverRequest = async (req, res) => {
 
     if (studentRecipients) {
       await transporter.sendMail({
-        from: '"Scintel Team" <yourrealemail@gmail.com>',
+        from: teamMailFrom,
         to: studentRecipients,
         subject: "Problem Solver Request Approved",
         html: `
@@ -113,7 +113,7 @@ export const acceptProblemSolverRequest = async (req, res) => {
 
     if (mentorEmail) {
       await transporter.sendMail({
-        from: '"Scintel Team" <yourrealemail@gmail.com>',
+        from: teamMailFrom,
         to: mentorEmail,
         subject: "Mentorship Approval for Problem Solver Request",
         html: `

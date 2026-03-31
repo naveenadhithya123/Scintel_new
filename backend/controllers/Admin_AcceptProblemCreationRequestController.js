@@ -1,6 +1,6 @@
 import sequelize from "../config/database.js";
 import { QueryTypes } from "sequelize";
-import transporter from "../config/mailer.js";
+import transporter, { teamMailFrom } from "../config/mailer.js";
 
 export const acceptProblemCreationRequest = async (req, res) => {
   const t = await sequelize.transaction();
@@ -49,7 +49,7 @@ export const acceptProblemCreationRequest = async (req, res) => {
     // ============================
 
     await transporter.sendMail({
-      from: '"Scintel Team" <yourrealemail@gmail.com>',
+      from: teamMailFrom,
       to: email,
       subject: "Problem Request Approved - Scintel",
       html: `

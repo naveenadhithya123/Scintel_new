@@ -1,4 +1,4 @@
-import transporter from "../config/mailer.js";
+import transporter, { verificationMailFrom } from "../config/mailer.js";
 
 export const otpStore = {};
 
@@ -20,7 +20,7 @@ export const sendOtp = async (req, res) => {
         };
 
 await transporter.sendMail({
-    from: '"Scintel Verification" <yourrealemail@gmail.com>',
+    from: verificationMailFrom,
     to: email,
     subject: "Scintel OTP Verification",
     html: `
