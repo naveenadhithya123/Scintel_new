@@ -147,7 +147,62 @@ function CancelBtn({ onClick, disabled }) {
 /* ─────────────────────────────────────────
    DROPZONE
 ───────────────────────────────────────── */
-function DropZone({ value, onChange, isThumbnail }) {
+const emptyTestimonial = () => ({ name: '', className: '', feedback: '' });
+
+const cleanStoredValue = (value) => {
+  if (value === null || value === undefined) return '';
+  const text = String(value).trim();
+  if (!text || text.toLowerCase() === 'not applicable') return '';
+  return text;
+};
+
+const parseStoredList = (value) => {
+  const cleaned = cleanStoredValue(value);
+  if (!cleaned) return [];
+
+  try {
+    const parsed = JSON.parse(cleaned);
+    return Array.isArray(parsed)
+      ? parsed.map((item) => cleanStoredValue(item)).filter(Boolean)
+      : [];
+  } catch {
+    return [cleaned];
+  }
+};
+
+const normalizeTestimonials = (data = {}) => {
+  const names = parseStoredList(data.testimonials_name);
+  const classes = parseStoredList(data.testimonials_class);
+  const feedbacks = parseStoredList(data.testimonials_feedback);
+  const total = Math.max(names.length, classes.length, feedbacks.length);
+
+  if (!total) return [emptyTestimonial()];
+
+  return Array.from({ length: total }, (_, index) => ({
+    name: names[index] || '',
+    className: classes[index] || '',
+    feedback: feedbacks[index] || '',
+  }));
+};
+
+const appendTestimonials = (formData, testimonials = []) => {
+  const filledTestimonials = testimonials.filter(
+    (item) => item.name.trim() || item.className.trim() || item.feedback.trim()
+  );
+
+  if (!filledTestimonials.length) {
+    formData.append('testimonials_name', '');
+    formData.append('testimonials_class', '');
+    formData.append('testimonials_feedback', '');
+    return;
+  }
+
+  formData.append('testimonials_name', JSON.stringify(filledTestimonials.map((item) => item.name.trim())));
+  formData.append('testimonials_class', JSON.stringify(filledTestimonials.map((item) => item.className.trim())));
+  formData.append('testimonials_feedback', JSON.stringify(filledTestimonials.map((item) => item.feedback.trim())));
+};
+
+function DropZone({ value, onChange }) {
   const ref = useRef();
   const handleFile = (file) => { if (file) onChange(file); };
   const previewUrl = value instanceof File ? URL.createObjectURL(value) : value;
@@ -160,12 +215,6 @@ function DropZone({ value, onChange, isThumbnail }) {
       background: '#f0fafc', cursor: 'pointer', overflow: 'hidden',
       position: 'relative', fontSize: 13, color: '#64748b', marginBottom: '10px'
     }}>
-      {isThumbnail && (
-        <div style={{
-          position: 'absolute', top: 5, left: 5, background: '#083A4B',
-          color: '#fff', fontSize: '10px', padding: '2px 6px', borderRadius: '4px', zIndex: 2
-        }}>Thumbnail (Card Image)</div>
-      )}
       {hasImage
         ? <img src={previewUrl} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         : <span>Drag and Drop or <span style={{ color: '#2563eb' }}>choose file</span></span>
@@ -218,6 +267,15 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
   const updateImageSlot = (index, val) => {
     const imgs = [...form.eventImages]; imgs[index] = val;
     updateForm('eventImages', imgs);
+  };
+  const clearImageSlot = (index) => {
+    const updatedImages = [...form.eventImages];
+    updatedImages[index] = null;
+    updateForm('eventImages', updatedImages);
+  };
+  const removeImageSlot = (index) => {
+    const remainingImages = form.eventImages.filter((_, idx) => idx !== index);
+    updateForm('eventImages', remainingImages.length > 0 ? remainingImages : [null]);
   };
 
   const updateTestimonial = (index, field, val) => {
@@ -311,10 +369,50 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
 
       <label style={labelStyle}>Brochure (File/Image)</label>
       <input type="file" style={base} onChange={e => updateForm('brochure', e.target.files[0])} />
+      {form.brochure && (
+        <button
+          type="button"
+          onClick={() => updateForm('brochure', null)}
+          style={{
+            width: '100%',
+            marginTop: -4,
+            marginBottom: 14,
+            padding: '10px 14px',
+            borderRadius: 8,
+            border: '1px solid #fed7aa',
+            background: '#fff7ed',
+            color: '#c2410c',
+            fontWeight: 700,
+            cursor: 'pointer'
+          }}
+        >
+          Clear Brochure
+        </button>
+      )}
 
       {/* Resource Person */}
       <h3 style={sectionTitle}>Resource Person</h3>
       <DropZone value={form.resourceImage} onChange={v => updateForm('resourceImage', v)} />
+      {form.resourceImage && (
+        <button
+          type="button"
+          onClick={() => updateForm('resourceImage', null)}
+          style={{
+            width: '100%',
+            marginTop: -4,
+            marginBottom: 14,
+            padding: '10px 14px',
+            borderRadius: 8,
+            border: '1px solid #fed7aa',
+            background: '#fff7ed',
+            color: '#c2410c',
+            fontWeight: 700,
+            cursor: 'pointer'
+          }}
+        >
+          Clear Resource Image
+        </button>
+      )}
       <input placeholder="Name" style={base} value={form.resourceName}
         onChange={e => updateForm('resourceName', e.target.value)} />
       <textarea placeholder="Description" style={{ ...base, height: 60 }}
@@ -323,22 +421,61 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
 
       {/* Participants */}
       <h3 style={sectionTitle}>Participants</h3>
-      <label style={labelStyle}>Number of Participants *</label>
+      <label style={labelStyle}>Participants Details *</label>
       <input
         key={`parts-${animKey}`}
-        type="number"
         className={errors.participants ? 'field-error' : ''}
         style={base} value={form.participants}
         onChange={e => updateForm('participants', e.target.value)}
+        placeholder="Example: 120 students and 8 faculty members"
       />
       <ErrMsg show={errors.participants} />
 
       {/* Event Images */}
-      <h3 style={sectionTitle}>Event Images (First one is the Thumbnail)</h3>
+      <h3 style={sectionTitle}>Event Images</h3>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
         {form.eventImages.map((img, idx) => (
-          <DropZone key={idx} value={img} isThumbnail={idx === 0}
-            onChange={v => updateImageSlot(idx, v)} />
+          <div key={idx}>
+            <DropZone value={img} onChange={v => updateImageSlot(idx, v)} />
+            <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
+              {img && (
+                <button
+                  type="button"
+                  onClick={() => clearImageSlot(idx)}
+                  style={{
+                    flex: 1,
+                    padding: '10px 14px',
+                    borderRadius: 8,
+                    border: '1px solid #fed7aa',
+                    background: '#fff7ed',
+                    color: '#c2410c',
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Clear Image
+                </button>
+              )}
+              {form.eventImages.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeImageSlot(idx)}
+                  style={{
+                    flex: 1,
+                    padding: '10px 14px',
+                    borderRadius: 8,
+                    border: '1px solid #fecaca',
+                    background: '#fff5f5',
+                    color: '#dc2626',
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Delete Slot
+                </button>
+              )}
+            </div>
+          </div>
         ))}
         <button type="button" onClick={addImageSlot}
           style={{ height: 130, border: '1.5px dashed #ccc', borderRadius: 8, cursor: 'pointer', background: 'none' }}>
@@ -349,6 +486,26 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
       {/* Winner */}
       <h3 style={sectionTitle}>Winner Section</h3>
       <DropZone value={form.winnerImage} onChange={v => updateForm('winnerImage', v)} />
+      {form.winnerImage && (
+        <button
+          type="button"
+          onClick={() => updateForm('winnerImage', null)}
+          style={{
+            width: '100%',
+            marginTop: -4,
+            marginBottom: 14,
+            padding: '10px 14px',
+            borderRadius: 8,
+            border: '1px solid #fed7aa',
+            background: '#fff7ed',
+            color: '#c2410c',
+            fontWeight: 700,
+            cursor: 'pointer'
+          }}
+        >
+          Clear Winner Image
+        </button>
+      )}
       <input placeholder="Winner Name" style={base} value={form.winnerName}
         onChange={e => updateForm('winnerName', e.target.value)} />
       <textarea placeholder="Winner Feedback" style={{ ...base, height: 60 }}
@@ -359,6 +516,20 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
       <h3 style={sectionTitle}>Testimonials</h3>
       {form.testimonials.map((t, idx) => (
         <div key={idx} style={{ marginBottom: 20, padding: 15, background: '#f8fafc', borderRadius: 8 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: '#083A4B' }}>
+              Testimonial {idx + 1}
+            </span>
+            {form.testimonials.length > 1 && (
+              <button
+                type="button"
+                onClick={() => removeTestimonial(idx)}
+                style={{ border: 'none', background: 'none', color: '#dc2626', cursor: 'pointer', fontSize: 12, fontWeight: 700 }}
+              >
+                Remove
+              </button>
+            )}
+          </div>
           <input placeholder="Name" style={base} value={t.name}
             onChange={e => updateTestimonial(idx, 'name', e.target.value)} />
           <input placeholder="Class" style={base} value={t.className}
@@ -408,29 +579,24 @@ export function EditEvent() {
         const result   = await response.json();
         const data     = result.data || result;
         if (data) {
-          const clean    = (val) => (val === "Not Applicable" ? "" : val);
           const imgArray = (data.event_image_url || "").split(',')
             .filter(x => x && x !== "Not Applicable");
           setInitialData({
-            title:               clean(data.title),
-            description:         clean(data.description),
+            title:               cleanStoredValue(data.title),
+            description:         cleanStoredValue(data.description),
             start_date:          data.start_date ? data.start_date.split('T')[0] : '',
             end_date:            data.end_date && data.end_date !== "Not Applicable"
                                    ? data.end_date.split('T')[0] : '',
-            participants:        clean(data.participants),
-            brochure:            clean(data.brochure_url),
-            resourceName:        clean(data.resource_person_name),
-            resourceDescription: clean(data.resource_person_description),
-            resourceImage:       clean(data.resource_person_image_url),
-            winnerName:          clean(data.winner_name),
-            winnerFeedback:      clean(data.winner_description),
-            winnerImage:         clean(data.winner_image),
+            participants:        cleanStoredValue(data.participants),
+            brochure:            cleanStoredValue(data.brochure_url),
+            resourceName:        cleanStoredValue(data.resource_person_name),
+            resourceDescription: cleanStoredValue(data.resource_person_description),
+            resourceImage:       cleanStoredValue(data.resource_person_image_url),
+            winnerName:          cleanStoredValue(data.winner_name),
+            winnerFeedback:      cleanStoredValue(data.winner_description),
+            winnerImage:         cleanStoredValue(data.winner_image),
             eventImages:         imgArray.length > 0 ? imgArray : [null],
-            testimonials: [{
-              name:      clean(data.testimonials_name),
-              className: clean(data.testimonials_class),
-              feedback:  clean(data.testimonials_feedback),
-            }],
+            testimonials:        normalizeTestimonials(data),
           });
         }
       } catch (err) { console.error(err); }
@@ -452,9 +618,7 @@ export function EditEvent() {
     formData.append('resource_person_description', formState.resourceDescription);
     formData.append('winner_name',                 formState.winnerName);
     formData.append('winner_description',          formState.winnerFeedback);
-    formData.append('testimonials_name',           formState.testimonials[0].name);
-    formData.append('testimonials_class',          formState.testimonials[0].className);
-    formData.append('testimonials_feedback',       formState.testimonials[0].feedback);
+    appendTestimonials(formData, formState.testimonials);
 
     const orderMap = [];
     formState.eventImages.forEach((img, idx) => {
@@ -519,9 +683,7 @@ export function AddEvent() {
     formData.append('resource_person_description', formState.resourceDescription);
     formData.append('winner_name',                 formState.winnerName);
     formData.append('winner_description',          formState.winnerFeedback);
-    formData.append('testimonials_name',           formState.testimonials[0].name);
-    formData.append('testimonials_class',          formState.testimonials[0].className);
-    formData.append('testimonials_feedback',       formState.testimonials[0].feedback);
+    appendTestimonials(formData, formState.testimonials);
 
     if (formState.brochure)      formData.append('brochure',              formState.brochure);
     if (formState.resourceImage) formData.append('resource_person_image', formState.resourceImage);
@@ -587,9 +749,7 @@ export function AddNewYear() {
     formData.append('resource_person_description', formState.resourceDescription);
     formData.append('winner_name',                 formState.winnerName);
     formData.append('winner_description',          formState.winnerFeedback);
-    formData.append('testimonials_name',           formState.testimonials[0].name);
-    formData.append('testimonials_class',          formState.testimonials[0].className);
-    formData.append('testimonials_feedback',       formState.testimonials[0].feedback);
+    appendTestimonials(formData, formState.testimonials);
 
     if (formState.brochure)      formData.append('brochure',              formState.brochure);
     if (formState.resourceImage) formData.append('resource_person_image', formState.resourceImage);

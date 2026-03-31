@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
+const YEAR_OPTIONS = ["I", "II", "III", "IV"];
+
 export default function Verification() {
   const [showOTP, setShowOTP] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -120,7 +122,6 @@ export default function Verification() {
                 { label: "Full Name", name: "name", type: "text" },
                 { label: "Academic Email", name: "email", type: "email" },
                 { label: "Mobile Number", name: "phone_number", type: "text" },
-                { label: "Batch Year", name: "year", type: "text" },
                 { label: "Section Assignment", name: "section", type: "text", full: true }
               ].map((field) => (
                 <div key={field.name} className={`${field.full ? "md:col-span-2" : ""}`}>
@@ -136,6 +137,23 @@ export default function Verification() {
                   />
                 </div>
               ))}
+              <div>
+                <label className="text-[10px] font-bold tracking-widest uppercase text-[#023347]/50 mb-3 block text-left">
+                  Batch Year
+                </label>
+                <select
+                  name="year"
+                  required
+                  value={formData.year}
+                  onChange={handleChange}
+                  className="w-full bg-transparent border-b border-[#023347]/10 py-3 font-sans text-lg outline-none focus:border-[#D4AF37] transition-colors text-left"
+                >
+                  <option value="">Select year</option>
+                  {YEAR_OPTIONS.map((year) => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <div className="pt-10 flex justify-end">

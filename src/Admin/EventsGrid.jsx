@@ -187,8 +187,7 @@ export default function EventsGrid() {
             id: item.activity_id,
             title: item.title,
             description: item.description,
-            // Changed to exclusively show brochure_url as the thumbnail
-            thumbnail: item.brochure_url || '' 
+            thumbnail: item.brochure_url || item.event_image_url?.split(',')[0]?.trim() || ''
           };
         });
         setEvents(formattedEvents);

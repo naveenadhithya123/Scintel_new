@@ -3,6 +3,23 @@ import { useNavigate } from "react-router-dom";
 import AdminSidebar from "./AdminSidebar";
 
 const API_BASE = "http://localhost:3000/api";
+const ROLE_ORDER = [
+  "Secretary",
+  "Joint-Secretary",
+  "Treasurer",
+  "Joint-Treasurer",
+  "Executive member",
+];
+
+const sortMembersByRole = (members = []) =>
+  [...members].sort((a, b) => {
+    const aIndex = ROLE_ORDER.indexOf(a.role);
+    const bIndex = ROLE_ORDER.indexOf(b.role);
+    const safeAIndex = aIndex === -1 ? ROLE_ORDER.length : aIndex;
+    const safeBIndex = bIndex === -1 ? ROLE_ORDER.length : bIndex;
+    if (safeAIndex !== safeBIndex) return safeAIndex - safeBIndex;
+    return (a.name || "").localeCompare(b.name || "");
+  });
 
 export default function AdminMembers() {
   const navigate = useNavigate();
@@ -15,6 +32,10 @@ export default function AdminMembers() {
   const selectedBatch = useMemo(
     () => batches.find((batch) => String(batch.batch_id) === String(selectedBatchId)) || null,
     [batches, selectedBatchId]
+  );
+  const orderedMembers = useMemo(
+    () => sortMembersByRole(batchDetails?.members || []),
+    [batchDetails]
   );
 
   const fetchBatches = async () => {
@@ -206,8 +227,8 @@ export default function AdminMembers() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {batchDetails.members.length > 0 ? (
-                      batchDetails.members.map((member) => (
+                    {orderedMembers.length > 0 ? (
+                      orderedMembers.map((member) => (
                        <tr key={member.member_id} className="hover:bg-[#f4fafb] transition-colors duration-200">
                           <td className="px-6 py-5 text-[#023347] font-bold text-center">{member.name}</td>
                           <td className="px-6 py-5 text-center text-gray-600 text-sm">{member.register_number || member.phone_number}</td>
@@ -227,10 +248,10 @@ export default function AdminMembers() {
 
             {/* Mobile Cards */}
             <div className="am-cards">
-              {batchDetails.members.map((member) => (
+              {orderedMembers.map((member) => (
                 <div key={member.member_id} className="am-card">
                   <div className="am-card-name">{member.name}</div>
-                  <div className="am-card-row"><span>Reg: {member.register_number || member.phone_number}</span><span>Yr: {member.year}</span></div>
+                  <div className="am-card-row"><span>Phone: {member.register_number || member.phone_number}</span><span>Yr: {member.year}</span></div>
                   <div className="am-card-row" style={{ color: "#083A4B", fontWeight: 500 }}>{member.role}</div>
                 </div>
               ))}

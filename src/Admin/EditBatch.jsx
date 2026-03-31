@@ -4,6 +4,18 @@ import AdminSidebar from "./AdminSidebar";
 
 const API_BASE = "http://localhost:3000/api";
 const YEAR_OPTIONS = ["I", "II", "III", "IV"];
+const ROLE_OPTIONS = ["Secretary", "Joint-Secretary", "Treasurer", "Joint-Treasurer", "Executive member"];
+
+const sortMembersByRole = (members = []) =>
+  [...members].sort((a, b) => {
+    const roleOrder = ROLE_OPTIONS;
+    const aIndex = roleOrder.indexOf(a.role);
+    const bIndex = roleOrder.indexOf(b.role);
+    const safeAIndex = aIndex === -1 ? roleOrder.length : aIndex;
+    const safeBIndex = bIndex === -1 ? roleOrder.length : bIndex;
+    if (safeAIndex !== safeBIndex) return safeAIndex - safeBIndex;
+    return (a.name || "").localeCompare(b.name || "");
+  });
 
 export default function EditBatch() {
   const navigate = useNavigate();
@@ -43,8 +55,8 @@ export default function EditBatch() {
       setDescription(info.description || "");
       setExistingImageUrl(info.image_url || "");
       setPreviewUrl(info.image_url || "");
-      setMembers(normalizedMembers);
-      setOriginalMembers(normalizedMembers);
+      setMembers(sortMembersByRole(normalizedMembers));
+      setOriginalMembers(sortMembersByRole(normalizedMembers));
     } else {
       console.warn("No batch data found in state. Redirecting...");
       navigate("/admin/members");
@@ -62,7 +74,7 @@ export default function EditBatch() {
     );
 
     if (hasInvalidMember) {
-      alert("Each member needs a name, register number, role and year.");
+      alert("Each member needs a name, phone number, role and year.");
       return;
     }
 
@@ -144,18 +156,18 @@ export default function EditBatch() {
 
   // ── Opens modal instead of inline row ──
   const handleAddMemberSubmit = () => {
-    if (!memberForm.name.trim() || !memberForm.reg.trim()) {
-      alert("Name and Register Number are required.");
+    if (!memberForm.name.trim() || !memberForm.reg.trim() || !memberForm.role.trim() || !memberForm.year) {
+      alert("Name, Phone Number, Role and Year are required.");
       return;
     }
-    setMembers(prev => [...prev, {
+    setMembers(prev => sortMembersByRole([...prev, {
       member_id: null,
       name: memberForm.name,
       register_number: memberForm.reg,
       role: memberForm.role,
       year: memberForm.year,
       batch_year: batchYear
-    }]);
+    }]));
     setMemberForm({ name: "", reg: "", role: "", year: "" });
     setShowAddModal(false);
   };
@@ -241,16 +253,21 @@ export default function EditBatch() {
                 {members.length > 0 ? members.map((m, index) => (
                   <tr key={m.member_id || `new-${index}`} className="hover:bg-[#f4fafb] transition-colors duration-200">
                     <td className="px-6 py-4 text-center">
-                      <input className="eb-input" value={m.name} onChange={e => { const u = [...members]; u[index].name = e.target.value; setMembers(u); }} />
+                      <input className="eb-input" value={m.name} onChange={e => { const u = [...members]; u[index].name = e.target.value; setMembers(sortMembersByRole(u)); }} />
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <input className="eb-input" value={m.register_number} onChange={e => { const u = [...members]; u[index].register_number = e.target.value; setMembers(u); }} />
+                      <input className="eb-input" type="tel" value={m.register_number} onChange={e => { const u = [...members]; u[index].register_number = e.target.value; setMembers(sortMembersByRole(u)); }} />
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <input className="eb-input" value={m.role} onChange={e => { const u = [...members]; u[index].role = e.target.value; setMembers(u); }} />
+                      <select className="eb-input" value={m.role} onChange={e => { const u = [...members]; u[index].role = e.target.value; setMembers(sortMembersByRole(u)); }}>
+                        <option value="">Select role</option>
+                        {ROLE_OPTIONS.map((role) => (
+                          <option key={role} value={role}>{role}</option>
+                        ))}
+                      </select>
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <select className="eb-input" value={m.year} onChange={e => { const u = [...members]; u[index].year = e.target.value; setMembers(u); }}>
+                      <select className="eb-input" value={m.year} onChange={e => { const u = [...members]; u[index].year = e.target.value; setMembers(sortMembersByRole(u)); }}>
                         <option value="">Select year</option>
                         {YEAR_OPTIONS.map((year) => (
                           <option key={year} value={year}>{year}</option>
@@ -306,23 +323,52 @@ export default function EditBatch() {
           >
             <h3 style={{ fontSize: 17, fontWeight: 700, color: "#111827", marginBottom: 20 }}>Add Member</h3>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
-              {[
-                { label: "Name", key: "name", placeholder: "Full name" },
-                { label: "Register Number", key: "reg", placeholder: "611..." },
-                { label: "Role", key: "role", placeholder: "Secretary" },
-                { label: "Year", key: "year", placeholder: "4" },
-              ].map(({ label, key, placeholder }) => (
-                <div key={key}>
-                  <label style={{ display: "block", marginBottom: 4, color: "#4b5563", fontSize: 14 }}>{label}</label>
-                  <input
-                    type="text"
-                    placeholder={placeholder}
-                    className="eb-input"
-                    value={memberForm[key]}
-                    onChange={(e) => setMemberForm(prev => ({ ...prev, [key]: e.target.value }))}
-                  />
-                </div>
-              ))}
+              <div>
+                <label style={{ display: "block", marginBottom: 4, color: "#4b5563", fontSize: 14 }}>Name</label>
+                <input
+                  type="text"
+                  placeholder="Full name"
+                  className="eb-input"
+                  value={memberForm.name}
+                  onChange={(e) => setMemberForm(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label style={{ display: "block", marginBottom: 4, color: "#4b5563", fontSize: 14 }}>Phone Number</label>
+                <input
+                  type="tel"
+                  placeholder="9876543210"
+                  className="eb-input"
+                  value={memberForm.reg}
+                  onChange={(e) => setMemberForm(prev => ({ ...prev, reg: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label style={{ display: "block", marginBottom: 4, color: "#4b5563", fontSize: 14 }}>Role</label>
+                <select
+                  className="eb-input"
+                  value={memberForm.role}
+                  onChange={(e) => setMemberForm(prev => ({ ...prev, role: e.target.value }))}
+                >
+                  <option value="">Select role</option>
+                  {ROLE_OPTIONS.map((role) => (
+                    <option key={role} value={role}>{role}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label style={{ display: "block", marginBottom: 4, color: "#4b5563", fontSize: 14 }}>Year</label>
+                <select
+                  className="eb-input"
+                  value={memberForm.year}
+                  onChange={(e) => setMemberForm(prev => ({ ...prev, year: e.target.value }))}
+                >
+                  <option value="">Select year</option>
+                  {YEAR_OPTIONS.map((year) => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+              </div>
             </div>
             <div style={{ display: "flex", justifyContent: "flex-end", gap: 12 }}>
               <button

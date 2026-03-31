@@ -125,9 +125,18 @@ function ProblemStatements() {
                   </h3>
                 </div>
                 <div className="flex-[2] border-l border-[#023347]/5 pl-0 md:pl-8">
-                  <p className="text-sm text-[#023347]/70 leading-relaxed line-clamp-2 md:line-clamp-3 italic">
-                    {item.short_description || item.shortDescription}
-                  </p>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[9px] font-bold tracking-[0.2em] uppercase text-[#023347]/45">
+                      Status
+                    </span>
+                    <span className={`inline-flex rounded-full px-4 py-2 text-[10px] font-bold uppercase tracking-[0.16em] ${
+                      (item.status || "").toLowerCase() === "in progress"
+                        ? "bg-orange-100 text-orange-700"
+                        : "bg-emerald-100 text-emerald-700"
+                    }`}>
+                      {item.status || "Open to Build"}
+                    </span>
+                  </div>
                 </div>
                 <div className="w-full md:w-auto">
                   <button

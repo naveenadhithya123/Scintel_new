@@ -4,6 +4,7 @@ import AdminSidebar from "./AdminSidebar";
 
 const API_BASE = "http://localhost:3000/api";
 const YEAR_OPTIONS = ["I", "II", "III", "IV"];
+const ROLE_OPTIONS = ["Secretary", "Joint-Secretary", "Treasurer", "Joint-Treasurer", "Executive member"];
 
 export default function EditMember() {
   const navigate = useNavigate();
@@ -56,6 +57,10 @@ export default function EditMember() {
     }
     if (!form.year) {
       alert("Year is required.");
+      return;
+    }
+    if (!form.role) {
+      alert("Role is required.");
       return;
     }
 
@@ -131,13 +136,18 @@ export default function EditMember() {
           </div>
 
           <div>
-            <label style={labelStyle}>Register Number (Read-only)</label>
-            <input name="register_number" value={form.register_number} readOnly style={{ ...inputStyle, background: "#f3f4f6", cursor: "not-allowed" }} />
+            <label style={labelStyle}>Phone Number (Read-only)</label>
+            <input name="register_number" type="tel" value={form.register_number} readOnly style={{ ...inputStyle, background: "#f3f4f6", cursor: "not-allowed" }} />
           </div>
 
           <div>
             <label style={labelStyle}>Role</label>
-            <input name="role" value={form.role} onChange={handleChange} style={inputStyle} />
+            <select name="role" value={form.role} onChange={handleChange} style={inputStyle}>
+              <option value="">Select role</option>
+              {ROLE_OPTIONS.map((role) => (
+                <option key={role} value={role}>{role}</option>
+              ))}
+            </select>
           </div>
 
           <div>

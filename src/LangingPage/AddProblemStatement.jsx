@@ -1,6 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
+const CATEGORY_OPTIONS = [
+  "Artificial Intelligence and Machine Learning",
+  "HealthTech and Biomedical Innovation",
+  "Smart Cities and Mobility",
+  "Agriculture and Rural Innovation",
+  "Climate and Sustainability",
+  "Education Technology",
+  "FinTech and Digital Commerce",
+  "Cybersecurity and Digital Trust",
+  "Open Innovation",
+];
+
 export default function AddProblemStatement() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -100,7 +112,17 @@ export default function AddProblemStatement() {
               </div>
               <div>
                 <label className="text-[10px] font-bold tracking-widest uppercase text-[#023347]/50 mb-3 block">Category</label>
-                <input type="text" name="category" onChange={handleChange} className="w-full bg-transparent border-b border-[#023347]/10 py-4 font-sans text-lg outline-none focus:border-[#D4AF37] transition-all" />
+                <select
+                  name="category"
+                  value={form.category}
+                  onChange={handleChange}
+                  className="w-full bg-transparent border-b border-[#023347]/10 py-4 font-sans text-lg outline-none focus:border-[#D4AF37] transition-all"
+                >
+                  <option value="">Select category</option>
+                  {CATEGORY_OPTIONS.map((category) => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="text-[10px] font-bold tracking-widest uppercase text-[#023347]/50 mb-3 block">Abstract Summary</label>

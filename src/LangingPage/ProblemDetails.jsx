@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
+const YEAR_OPTIONS = ["I", "II", "III", "IV"];
+
 const createEmptyMember = () => ({
   name: "",
   email: "",
@@ -13,7 +15,7 @@ const leadFieldConfig = [
   { label: "Lead Student Name", name: "name", type: "text" },
   { label: "Lead Student Email", name: "email", type: "email" },
   { label: "Lead Student Phone", name: "phone_number", type: "text" },
-  { label: "Year", name: "year", type: "text" },
+  { label: "Year", name: "year", type: "select", options: YEAR_OPTIONS },
   { label: "Section", name: "section", type: "text" },
   { label: "Mentor Name", name: "mentor", type: "text" },
   { label: "Mentor Email", name: "mentor_email", type: "email", full: true },
@@ -412,14 +414,29 @@ export default function ProblemDetails() {
                     <label className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#023347]/45 mb-3 block">
                       {field.label}
                     </label>
-                    <input
-                      name={field.name}
-                      type={field.type}
-                      required
-                      value={solverForm[field.name]}
-                      onChange={handleLeadFieldChange}
-                      className="w-full rounded-2xl border border-[#023347]/10 bg-white px-5 py-4 text-sm text-[#023347] outline-none transition-colors focus:border-[#D4AF37]"
-                    />
+                    {field.type === "select" ? (
+                      <select
+                        name={field.name}
+                        required
+                        value={solverForm[field.name]}
+                        onChange={handleLeadFieldChange}
+                        className="w-full rounded-2xl border border-[#023347]/10 bg-white px-5 py-4 text-sm text-[#023347] outline-none transition-colors focus:border-[#D4AF37]"
+                      >
+                        <option value="">Select year</option>
+                        {field.options.map((option) => (
+                          <option key={option} value={option}>{option}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        name={field.name}
+                        type={field.type}
+                        required
+                        value={solverForm[field.name]}
+                        onChange={handleLeadFieldChange}
+                        className="w-full rounded-2xl border border-[#023347]/10 bg-white px-5 py-4 text-sm text-[#023347] outline-none transition-colors focus:border-[#D4AF37]"
+                      />
+                    )}
                   </div>
                 ))}
               </div>
@@ -461,13 +478,16 @@ export default function ProblemDetails() {
                           placeholder="Phone"
                           className="rounded-2xl border border-[#023347]/10 bg-white px-4 py-3 text-sm outline-none focus:border-[#D4AF37]"
                         />
-                        <input
-                          type="text"
+                        <select
                           value={member.year}
                           onChange={(event) => handleTeamMemberChange(index, "year", event.target.value)}
-                          placeholder="Year"
                           className="rounded-2xl border border-[#023347]/10 bg-white px-4 py-3 text-sm outline-none focus:border-[#D4AF37]"
-                        />
+                        >
+                          <option value="">Year</option>
+                          {YEAR_OPTIONS.map((year) => (
+                            <option key={year} value={year}>{year}</option>
+                          ))}
+                        </select>
                         <input
                           type="text"
                           value={member.section}

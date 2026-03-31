@@ -4,6 +4,7 @@ import AdminSidebar from "./AdminSidebar";
 
 const API_BASE = "http://localhost:3000/api";
 const YEAR_OPTIONS = ["I", "II", "III", "IV"];
+const ROLE_OPTIONS = ["Secretary", "Joint-Secretary", "Treasurer", "Joint-Treasurer", "Executive member"];
 
 export default function AddMember() {
   const navigate = useNavigate();
@@ -21,8 +22,8 @@ export default function AddMember() {
 
   const handleAdd = async () => {
     // Basic validation
-    if (!form.name || !form.reg || !form.year) {
-      alert("Name, Register Number and Year are required.");
+    if (!form.name || !form.reg || !form.role || !form.year) {
+      alert("Name, Phone Number, Role and Year are required.");
       return;
     }
 
@@ -156,10 +157,11 @@ export default function AddMember() {
           </div>
 
           <div>
-            <label style={labelStyle}>Register Number</label>
+            <label style={labelStyle}>Phone Number</label>
             <input
               name="reg"
-              placeholder="e.g. 611221104000"
+              type="tel"
+              placeholder="e.g. 9876543210"
               value={form.reg}
               onChange={handleChange}
               style={inputStyle}
@@ -168,13 +170,17 @@ export default function AddMember() {
 
           <div>
             <label style={labelStyle}>Role</label>
-            <input
+            <select
               name="role"
-              placeholder="e.g. President, Member"
               value={form.role}
               onChange={handleChange}
               style={inputStyle}
-            />
+            >
+              <option value="">Select role</option>
+              {ROLE_OPTIONS.map((role) => (
+                <option key={role} value={role}>{role}</option>
+              ))}
+            </select>
           </div>
 
           <div>

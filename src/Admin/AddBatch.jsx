@@ -4,6 +4,18 @@ import AdminSidebar from "./AdminSidebar";
 
 const API_BASE = "http://localhost:3000/api";
 const YEAR_OPTIONS = ["I", "II", "III", "IV"];
+const ROLE_OPTIONS = ["Secretary", "Joint-Secretary", "Treasurer", "Joint-Treasurer", "Executive member"];
+
+const sortMembersByRole = (members = []) =>
+  [...members].sort((a, b) => {
+    const roleOrder = ROLE_OPTIONS;
+    const aIndex = roleOrder.indexOf(a.role);
+    const bIndex = roleOrder.indexOf(b.role);
+    const safeAIndex = aIndex === -1 ? roleOrder.length : aIndex;
+    const safeBIndex = bIndex === -1 ? roleOrder.length : bIndex;
+    if (safeAIndex !== safeBIndex) return safeAIndex - safeBIndex;
+    return (a.name || "").localeCompare(b.name || "");
+  });
 
 export default function AddBatch() {
   const navigate = useNavigate();
@@ -34,11 +46,11 @@ export default function AddBatch() {
 
   /* ── Add member to local list ── */
   const handleAddMember = () => {
-    if (!memberForm.name.trim() || !memberForm.reg.trim() || !memberForm.year) {
-      alert("Name, Register Number and Year are required.");
+    if (!memberForm.name.trim() || !memberForm.reg.trim() || !memberForm.role.trim() || !memberForm.year) {
+      alert("Name, Phone Number, Role and Year are required.");
       return;
     }
-    setMembers((prev) => [...prev, memberForm]);
+    setMembers((prev) => sortMembersByRole([...prev, memberForm]));
     setMemberForm({ name: "", reg: "", role: "", year: "" });
     setShowAddModal(false);
   };
@@ -258,7 +270,7 @@ export default function AddBatch() {
             <thead>
               <tr>
                 <th>Name</th>
-                <th>Register no.</th>
+                <th>Phone no.</th>
                 <th>Role</th>
                 <th>Year</th>
                 <th>Action</th>
@@ -320,13 +332,12 @@ export default function AddBatch() {
             <div className="ab-modal-grid">
               {[
                 { label: "Name", key: "name", placeholder: "Full name" },
-                { label: "Register Number", key: "reg", placeholder: "611..." },
-                { label: "Role", key: "role", placeholder: "Secretary" },
+                { label: "Phone Number", key: "reg", placeholder: "9876543210" },
               ].map(({ label, key, placeholder }) => (
                 <div key={key}>
                   <label style={labelStyle}>{label}</label>
                   <input
-                    type="text"
+                    type={key === "reg" ? "tel" : "text"}
                     placeholder={placeholder}
                     className="ab-input"
                     value={memberForm[key]}
@@ -334,6 +345,19 @@ export default function AddBatch() {
                   />
                 </div>
               ))}
+              <div>
+                <label style={labelStyle}>Role</label>
+                <select
+                  style={inputStyle}
+                  value={memberForm.role}
+                  onChange={(e) => setMemberForm((prev) => ({ ...prev, role: e.target.value }))}
+                >
+                  <option value="">Select role</option>
+                  {ROLE_OPTIONS.map((role) => (
+                    <option key={role} value={role}>{role}</option>
+                  ))}
+                </select>
+              </div>
               <div>
                 <label style={labelStyle}>Year</label>
                 <select

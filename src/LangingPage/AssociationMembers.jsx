@@ -2,6 +2,23 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 const API_BASE = "http://localhost:3000/api";
+const ROLE_ORDER = [
+  "Secretary",
+  "Joint-Secretary",
+  "Treasurer",
+  "Joint-Treasurer",
+  "Executive member",
+];
+
+const sortMembersByRole = (members = []) =>
+  [...members].sort((a, b) => {
+    const aIndex = ROLE_ORDER.indexOf(a.role);
+    const bIndex = ROLE_ORDER.indexOf(b.role);
+    const safeAIndex = aIndex === -1 ? ROLE_ORDER.length : aIndex;
+    const safeBIndex = bIndex === -1 ? ROLE_ORDER.length : bIndex;
+    if (safeAIndex !== safeBIndex) return safeAIndex - safeBIndex;
+    return (a.name || "").localeCompare(b.name || "");
+  });
 
 export default function AssociationMembers() {
   const navigate = useNavigate();
@@ -17,6 +34,7 @@ export default function AssociationMembers() {
   const [selectedImage, setSelectedImage] = useState(null);
   const sectionRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
+  const orderedMembers = sortMembersByRole(batchDetails?.members || []);
 
   // 1. FETCH ALL BATCHES
   useEffect(() => {
@@ -184,7 +202,7 @@ export default function AssociationMembers() {
 
           {loading ? (
              [...Array(8)].map((_, i) => <div key={i} className="h-16 bg-black/5 rounded-2xl animate-pulse" />)
-          ) : batchDetails?.members?.map((member, idx) => (
+          ) : orderedMembers.map((member, idx) => (
             <div 
               key={idx}
               className={`group relative grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-white/[0.02] backdrop-blur-[4px] border border-black/5 rounded-2xl overflow-hidden px-6 md:px-10 py-5 transition-all duration-700 hover:border-[#D4AF37]/40 hover:shadow-2xl hover:-translate-y-1.5 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
