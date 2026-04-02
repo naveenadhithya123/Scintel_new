@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminSidebar from './AdminSidebar';
-
+import {API_BASE} from '../config/api';
 /* ─── Toast ─────────────────────────────────────────────────────────────── */
 function Toast({ toasts, removeToast }) {
   return (
@@ -104,7 +104,7 @@ export default function ActivitiesAdmin() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3000/api/admin/activities/batches');
+      const response = await fetch(`${API_BASE}/admin/activities/batches`);
       const data = await response.json();
       const result = data.data || data;
       const mappedData = result.map((item, index) => ({
@@ -127,7 +127,7 @@ export default function ActivitiesAdmin() {
     const year = deleteTarget?.year;
     setDeleteTarget(null);
     try {
-      const response = await fetch(`http://localhost:3000/api/admin/activities/batch/${encodeURIComponent(year)}`, {
+      const response = await fetch(`${API_BASE}/admin/activities/batch/${encodeURIComponent(year)}`, {
         method: 'DELETE',
       });
       if (response.ok) {
