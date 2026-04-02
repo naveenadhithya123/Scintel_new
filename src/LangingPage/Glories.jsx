@@ -204,7 +204,7 @@ function Glories() {
                               {item.title}
                             </h3>
 
-                            <p className="text-[11px] md:text-[13px] text-[#023347]/60 leading-relaxed font-medium line-clamp-2">
+                            <p className="text-[11px] md:text-[13px] text-[#023347]/60 leading-relaxed font-medium whitespace-pre-line">
                               {item.description}
                             </p>
                           </div>
