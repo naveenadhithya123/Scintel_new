@@ -623,7 +623,7 @@ const AnnouncementAdmin = () => {
                       cursor: 'pointer', transition: 'all 0.2s',
                     }}
                   >
-                    Prestige Event (With Reg)
+                    With Registration
                   </button>
                   <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
                     onClick={() => { setRegType('without'); setErrors({}); }}
@@ -634,7 +634,7 @@ const AnnouncementAdmin = () => {
                       cursor: 'pointer', transition: 'all 0.2s',
                     }}
                   >
-                    Celebration (No Reg)
+                    without Registartion
                   </button>
                 </div>
               )}
@@ -642,7 +642,7 @@ const AnnouncementAdmin = () => {
               {/* Form Content Wrapper with directional slide transition triggered by tab change */}
               <div key={regType} className={`animate-in fade-in zoom-in-[0.98] duration-500 ease-out ${regType === 'with' ? 'slide-in-from-left-4' : 'slide-in-from-right-4'}`}>
                 {/* ── Brochure / Thumbnail ── */}
-                <h3 style={sectionTitleStyle}>Brochure / Thumbnail *</h3>
+                <h3 style={sectionTitleStyle}>Brochure (Ratio:16)*</h3>
 
                 <div
                   className={`ann-img-upload-container ${errors.brochure_url ? 'error' : ''} ${isDragOver ? 'bg-[#e0f2fe] border-[#2A8E9E]' : ''}`}
