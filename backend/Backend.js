@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import sequelize from "./config/database.js";
+import sequelize, { withDbRetry } from "./config/database.js";
 import verifyAdminToken from "./middleware/verifyAdminToken.js";
 
 import activityFetchWithBatchRoutes from "./routes/activityFetchWithBatchRoutes.js";
@@ -80,7 +80,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.get("/api/health", async (req, res) => {
   try {
-    await sequelize.authenticate();
+    await withDbRetry(() => sequelize.authenticate(), { label: "Health check database ping" });
     res.status(200).json({ ok: true });
   } catch (error) {
     res.status(503).json({ ok: false, message: "Database unavailable" });
@@ -155,7 +155,7 @@ app.use("/api", AdminDeleteSpecificActivityRoutes);
 
 const startServer = async () => {
   try {
-    await sequelize.authenticate();
+    await withDbRetry(() => sequelize.authenticate(), { label: "Initial database connection" });
     console.log("Database connected successfully");
 
     app.listen(PORT, () => {
