@@ -4,9 +4,43 @@ import { API_BASE } from "../config/api";
 
 const YEAR_OPTIONS = ["I", "II", "III", "IV"];
 
+// ── PhoneInput: digits only, hard cap at 10 ──
+function PhoneInput({ value, onChange, className }) {
+  const handleChange = (e) => {
+    const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
+    onChange(digits);
+  };
+  const handleKeyDown = (e) => {
+    const nav = ["Backspace","Delete","ArrowLeft","ArrowRight","ArrowUp","ArrowDown","Tab","Home","End"];
+    if (nav.includes(e.key)) return;
+    if (!/^\d$/.test(e.key)) { e.preventDefault(); return; }
+    if (value.length >= 10) { e.preventDefault(); }
+  };
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const digits = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 10);
+    onChange(digits);
+  };
+  return (
+    <input
+      type="text"
+      inputMode="numeric"
+      pattern="[0-9]*"
+      maxLength={10}
+      value={value}
+      required
+      onChange={handleChange}
+      onKeyDown={handleKeyDown}
+      onPaste={handlePaste}
+      className={className}
+    />
+  );
+}
+
 export default function Verification() {
   const [showOTP, setShowOTP] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);       // for Verify Account button
+  const [otpLoading, setOtpLoading] = useState(false); // for Confirm OTP button
   const [isVisible, setIsVisible] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -15,7 +49,7 @@ export default function Verification() {
     year: "",
     section: ""
   });
-  
+
   const navigate = useNavigate();
   const inputs = useRef([]);
 
@@ -64,6 +98,7 @@ export default function Verification() {
 
   const handleSubmitOTP = async () => {
     const otpValue = inputs.current.map(input => input.value).join("");
+    setOtpLoading(true);
     try {
       const response = await fetch(`${API_BASE}/verify-otp`, {
         method: "POST",
@@ -78,6 +113,8 @@ export default function Verification() {
       }
     } catch (error) {
       console.error("Verification error:", error);
+    } finally {
+      setOtpLoading(false);
     }
   };
 
@@ -92,7 +129,7 @@ export default function Verification() {
       <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-[#D4AF37]/5 via-transparent to-transparent pointer-events-none" />
 
       <main className="relative z-10 mx-auto max-w-[1500px] px-5 py-12 md:px-12 md:py-16">
-        
+
         {/* --- LEFT-ALIGNED PRESTIGE HEADER --- */}
         <header className="mb-16 border-b border-[#023347]/5 pb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
           <div className="flex flex-col items-start text-left">
@@ -120,11 +157,11 @@ export default function Verification() {
           <form onSubmit={handleVerifyRequest} className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
               {[
-                { label: "Full Name", name: "name", type: "text" },
-                { label: "Academic Email", name: "email", type: "email" },
-                { label: "Mobile Number", name: "phone_number", type: "text" },
-                { label: "Batch Year", name: "year", type: "select" },
-                { label: "Section Assignment", name: "section", type: "text", full: true }
+                { label: "Full Name",           name: "name",         type: "text"   },
+                { label: "Academic Email",       name: "email",        type: "email"  },
+                { label: "Mobile Number",        name: "phone_number", type: "phone"  },
+                { label: "Batch Year",           name: "year",         type: "select" },
+                { label: "Section",   name: "section",      type: "text",  full: true }
               ].map((field) => (
                 <div key={field.name} className={`${field.full ? "md:col-span-2" : ""}`}>
                   <label className="text-[10px] font-bold tracking-widest uppercase text-[#023347]/50 mb-3 block text-left">
@@ -143,13 +180,19 @@ export default function Verification() {
                         <option key={year} value={year}>{year}</option>
                       ))}
                     </select>
+                  ) : field.type === "phone" ? (
+                    <PhoneInput
+                      value={formData.phone_number}
+                      onChange={(val) => setFormData((prev) => ({ ...prev, phone_number: val }))}
+                      className="w-full bg-transparent border-b border-[#023347]/10 py-3 font-sans text-lg outline-none focus:border-[#D4AF37] transition-colors placeholder:text-gray-300 text-left"
+                    />
                   ) : (
-                    <input 
+                    <input
                       name={field.name}
                       type={field.type}
-                      required 
-                      onChange={handleChange} 
-                      className="w-full bg-transparent border-b border-[#023347]/10 py-3 font-sans text-lg outline-none focus:border-[#D4AF37] transition-colors placeholder:text-gray-300 text-left" 
+                      required
+                      onChange={handleChange}
+                      className="w-full bg-transparent border-b border-[#023347]/10 py-3 font-sans text-lg outline-none focus:border-[#D4AF37] transition-colors placeholder:text-gray-300 text-left"
                     />
                   )}
                 </div>
@@ -160,8 +203,14 @@ export default function Verification() {
               <button
                 type="submit"
                 disabled={loading}
-                className="landing-btn-primary disabled:opacity-50"
+                className="landing-btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
+                {loading && (
+                  <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                  </svg>
+                )}
                 {loading ? "Authenticating..." : "Verify Account"}
               </button>
             </div>
@@ -181,18 +230,36 @@ export default function Verification() {
             </div>
             <div className="flex justify-between gap-3 mb-10">
               {[...Array(6)].map((_, index) => (
-                <input 
-                  key={index} maxLength="1" 
-                  ref={(el) => (inputs.current[index] = el)} 
+                <input
+                  key={index} maxLength="1"
+                  ref={(el) => (inputs.current[index] = el)}
                   onChange={(e) => handleOtpChange(e, index)}
                   onKeyDown={(e) => handleOtpKeyDown(e, index)}
-                  className="w-12 h-14 border border-[#023347]/10 rounded-xl text-center text-xl font-bold bg-gray-50/50 outline-none focus:border-[#D4AF37] transition-all" 
+                  className="w-12 h-14 border border-[#023347]/10 rounded-xl text-center text-xl font-bold bg-gray-50/50 outline-none focus:border-[#D4AF37] transition-all"
                 />
               ))}
             </div>
             <div className="space-y-4">
-              <button onClick={handleSubmitOTP} className="landing-btn-primary w-full">Confirm</button>
-              <button onClick={handleCancel} className="landing-btn-secondary w-full">Cancel</button>
+              <button
+                onClick={handleSubmitOTP}
+                disabled={otpLoading}
+                className="landing-btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {otpLoading && (
+                  <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                  </svg>
+                )}
+                {otpLoading ? "Verifying..." : "Confirm"}
+              </button>
+              <button
+                onClick={handleCancel}
+                disabled={otpLoading}
+                className="landing-btn-secondary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>
@@ -210,4 +277,3 @@ export default function Verification() {
     </div>
   );
 }
-
