@@ -217,10 +217,10 @@ function GlToast({ message, onClose }) {
 
 function LoadingButton({ loading, onClick, className, style, children, loadingLabel, disabled }) {
   return (
-    <button className={`transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95 ${`${className}`}
+    <button
+      className={`transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95 ${className || ""}`}
       onClick={onClick}
       disabled={loading || disabled}
-      transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md active:scale-95`}
       style={{ opacity: loading ? 0.8 : 1, cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, ...style }}
     >
       {loading && <span className="gl-spinner" />}
@@ -343,6 +343,8 @@ export default function GloriesAdmin() {
 
   const showToast = (msg) => { setToast(msg); };
 
+  const getGloryId = (glory) => glory?.glorie_id ?? glory?.glory_id ?? glory?.id ?? null;
+
   useEffect(() => {
     loadData();
     const handleResetView = (e) => {
@@ -370,20 +372,37 @@ export default function GloriesAdmin() {
   };
 
   const handleSaveEdit = async ({ title, description, imageFile }) => {
+    const gloryId = getGloryId(editTarget);
+    if (!gloryId) {
+      showToast("Unable to update this glory. Missing id.");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("title", title);
     formData.append("description", description);
     if (editTarget?.image_url) formData.append("existing_image_url", editTarget.image_url);
     if (imageFile) formData.append("image", imageFile);
-    const res = await fetch(`${API_BASE_URL}/${editTarget.glorie_id}`, { method: "PUT", body: formData });
+    const res = await fetch(`${API_BASE_URL}/${gloryId}`, { method: "PUT", body: formData });
     if (res.ok) { showToast("Glory updated successfully!"); setEditTarget(null); setView("list"); loadData(); }
   };
 
   const handleConfirmDelete = async () => {
+    const gloryId = getGloryId(deleteTarget);
+    if (!gloryId) {
+      showToast("Unable to delete this glory. Missing id.");
+      return;
+    }
+
     setDeleteLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/${deleteTarget.glorie_id}`, { method: "DELETE" });
-      if (res.ok) { showToast("Glory deleted."); setDeleteTarget(null); loadData(); }
+      const res = await fetch(`${API_BASE_URL}/${gloryId}`, { method: "DELETE" });
+      if (res.ok) {
+        setGlories((prev) => prev.filter((glory) => String(getGloryId(glory)) !== String(gloryId)));
+        showToast("Glory deleted.");
+        setDeleteTarget(null);
+        loadData();
+      }
     } catch (err) { console.error(err); }
     finally { setDeleteLoading(false); }
   };
@@ -425,7 +444,7 @@ export default function GloriesAdmin() {
 
         <div className="gl-grid">
           {glories.map((g) => (
-            <div key={g.glorie_id} className="gl-card group">
+            <div key={getGloryId(g) ?? `${g.title}-${g.image_url || "glory"}`} className="gl-card group">
               <div className="gl-card-img-container">
                 {g.image_url && <img src={g.image_url} alt={g.title} />}
               </div>
