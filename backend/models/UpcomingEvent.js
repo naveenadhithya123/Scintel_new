@@ -15,7 +15,7 @@ const UpcomingEvent = sequelize.define("UpcomingEvent", {
   },
 
   event_short_description: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false
   },
 
