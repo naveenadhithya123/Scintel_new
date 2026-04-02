@@ -138,7 +138,8 @@ function EventRegister() {
                   <FileText size={14} />
                   <h4 className="text-[9px] md:text-[10px] font-bold tracking-widest uppercase">Abstract</h4>
                 </div>
-                <p className="text-[#023347]/70 text-base md:text-lg leading-relaxed font-sans italic">
+                {/* ✅ FIX: whitespace-pre-wrap preserves line breaks and paragraph spacing from the admin input */}
+                <p className="text-[#023347]/70 text-base md:text-lg leading-relaxed font-sans italic whitespace-pre-wrap">
                   {event?.description || event?.short_description || "Further details are currently being finalized by the department."}
                 </p>
               </section>
@@ -203,4 +204,3 @@ function EventRegister() {
 }
 
 export default EventRegister;
-

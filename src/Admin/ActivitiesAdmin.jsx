@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminSidebar from './AdminSidebar';
-import { API_BASE } from "../config/api";
 
 /* ─── Toast ─────────────────────────────────────────────────────────────── */
 function Toast({ toasts, removeToast }) {
@@ -23,7 +22,7 @@ function Toast({ toasts, removeToast }) {
             <p style={{ margin: 0, fontWeight: 700, fontSize: 14, color: '#023347' }}>{t.title}</p>
             <p style={{ margin: '4px 0 0', fontSize: 13, color: '#64748b', lineHeight: 1.4 }}>{t.message}</p>
           </div>
-          <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95" onClick={() => removeToast(t.id)}
+          <button onClick={() => removeToast(t.id)}
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: 18, lineHeight: 1, padding: 0 }}>×</button>
         </div>
       ))}
@@ -75,16 +74,20 @@ function DeleteModal({ open, yearLabel, onConfirm, onCancel }) {
         <p style={{ fontSize: 12, color: '#ef4444', marginBottom: 24, fontWeight: 600 }}>
           ⚠ This action cannot be undone.
         </p>
-        <div className="flex gap-4 mt-2">
-          {/* Fixed Cancel Button Classes */}
-          <button className="flex-1 py-3 bg-[#023347] text-white rounded-xl font-bold border-0 cursor-pointer transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95 hover:bg-red-700" onClick={onCancel}>
-            Cancel
-          </button>
-          {/* Fixed Delete Button Classes */}
-          <button className="flex-1 py-3 bg-red-600 text-white rounded-xl font-bold border-0 cursor-pointer transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95 hover:bg-red-700" onClick={onConfirm}>
-            Delete
-          </button>
-        </div>
+        <button onClick={onConfirm} style={{
+          width: '100%', padding: '12px 0', borderRadius: 10,
+          backgroundColor: '#ef4444', color: '#fff',
+          border: 'none', fontWeight: 600, fontSize: 15, cursor: 'pointer', marginBottom: 10,
+        }}>
+          Yes, Delete Permanently
+        </button>
+        <button onClick={onCancel} style={{
+          width: '100%', padding: '11px 0', borderRadius: 10,
+          backgroundColor: '#fff', color: '#374151',
+          border: '1.5px solid #e2e8f0', fontWeight: 500, fontSize: 14, cursor: 'pointer',
+        }}>
+          Cancel
+        </button>
       </div>
     </div>
   );
@@ -101,7 +104,7 @@ export default function ActivitiesAdmin() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/admin/activities/batches`);
+      const response = await fetch('http://localhost:3000/api/admin/activities/batches');
       const data = await response.json();
       const result = data.data || data;
       const mappedData = result.map((item, index) => ({
@@ -124,7 +127,7 @@ export default function ActivitiesAdmin() {
     const year = deleteTarget?.year;
     setDeleteTarget(null);
     try {
-      const response = await fetch(`${API_BASE}/admin/activities/batch/${encodeURIComponent(year)}`, {
+      const response = await fetch(`http://localhost:3000/api/admin/activities/batch/${encodeURIComponent(year)}`, {
         method: 'DELETE',
       });
       if (response.ok) {
@@ -157,10 +160,10 @@ export default function ActivitiesAdmin() {
           <header className="mb-8 flex-shrink-0">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl md:text-3xl font-bold text-[#023347]">Activities</h2>
-              {/* Fixed Add Batch Button: Merged the two className attributes into one */}
-              <button 
+              {/* ✅ CHANGED: styled to match Edit button */}
+              <button
                 onClick={() => navigate('/admin/activities/add-new-year')}
-                className="bg-[#023347] text-white px-8 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95 hover:bg-[#2A8E9E]"
+                className="bg-[#023347] text-white px-6 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 hover:bg-[#2A8E9E]"
               >
                 + Add Batch
               </button>
@@ -201,17 +204,15 @@ export default function ActivitiesAdmin() {
                         <td className="px-6 py-5 text-center text-gray-600 text-sm">{row.count}</td>
                         <td className="px-6 py-5 text-center">
                           <div className="flex justify-center gap-4">
-                            {/* Fixed Edit Button: Merged the two className attributes into one */}
-                            <button 
+                            <button
                               onClick={() => navigate(`/admin/activities/${row.year}`)}
-                              className="bg-[#023347] text-white px-6 py-2 rounded-lg text-sm font-semibold transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95 hover:bg-[#2A8E9E]"
+                              className="bg-[#023347] text-white px-6 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 hover:bg-[#2A8E9E]"
                             >
                               Edit
                             </button>
-                            {/* Fixed Delete Button: Merged the two className attributes into one */}
-                            <button 
+                            <button
                               onClick={() => setDeleteTarget({ year: row.year })}
-                              className="bg-[#023347] text-white px-6 py-2 rounded-lg text-sm font-semibold transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95 hover:bg-red-700"
+                              className="bg-[#023347] text-white px-6 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 hover:bg-red-700"
                             >
                               Delete
                             </button>

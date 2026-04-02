@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import AdminSidebar from './AdminSidebar';
-import { API_BASE } from "../config/api";
 
 /* ─── Toast ─────────────────────────────────────────────────────────────── */
 function Toast({ toasts, removeToast }) {
@@ -23,7 +22,7 @@ function Toast({ toasts, removeToast }) {
             <p style={{ margin: 0, fontWeight: 700, fontSize: 14, color: '#023347' }}>{t.title}</p>
             <p style={{ margin: '4px 0 0', fontSize: 13, color: '#64748b', lineHeight: 1.4 }}>{t.message}</p>
           </div>
-          <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95" onClick={() => removeToast(t.id)}
+          <button onClick={() => removeToast(t.id)}
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: 18, lineHeight: 1, padding: 0 }}>×</button>
         </div>
       ))}
@@ -77,16 +76,18 @@ function DeleteModal({ open, eventTitle, onConfirm, onCancel }) {
         <p style={{ fontSize: 12, color: '#ef4444', marginBottom: 24, fontWeight: 600 }}>
           ⚠ This action cannot be undone.
         </p>
-        <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95" onClick={onConfirm} style={{
+        <button onClick={onConfirm} style={{
           width: '100%', padding: '12px 0', borderRadius: 10,
           backgroundColor: '#ef4444', color: '#fff',
-          border: 'none', fontWeight: 600, fontSize: 15, cursor: 'pointer', marginBottom: 10}}>
+          border: 'none', fontWeight: 600, fontSize: 15, cursor: 'pointer', marginBottom: 10,
+        }}>
           Yes, Delete Permanently
         </button>
-        <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95" onClick={onCancel} style={{
+        <button onClick={onCancel} style={{
           width: '100%', padding: '11px 0', borderRadius: 10,
           backgroundColor: '#fff', color: '#374151',
-          border: '1.5px solid #e2e8f0', fontWeight: 500, fontSize: 14, cursor: 'pointer'}}>
+          border: '1.5px solid #e2e8f0', fontWeight: 500, fontSize: 14, cursor: 'pointer',
+        }}>
           Cancel
         </button>
       </div>
@@ -96,11 +97,12 @@ function DeleteModal({ open, eventTitle, onConfirm, onCancel }) {
 
 /* ─── Back Button ────────────────────────────────────────────────────────── */
 const StyledBackButton = ({ onClick }) => (
-  <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95" onClick={onClick} style={{
+  <button onClick={onClick} style={{
     display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#083A4B',
     color: 'white', padding: '8px 20px', borderRadius: '10px', fontSize: '12px',
-    fontWeight: '700', border: 'none', cursor: 'pointer'}}
-    onMouseOver={e => e.currentTarget.style.backgroundColor = '#dc2626'}
+    fontWeight: '700', border: 'none', cursor: 'pointer', transition: 'background-color 0.2s ease',
+  }}
+    onMouseOver={e => e.currentTarget.style.backgroundColor = '#388E9C'}
     onMouseOut={e => e.currentTarget.style.backgroundColor = '#083A4B'}
   >
     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -135,6 +137,7 @@ function EventCard({ event, onEdit, onDelete }) {
         backgroundSize: 'cover', backgroundPosition: 'center',
         transition: 'transform 0.3s ease', transformOrigin: 'center',
         transform: hovered ? 'scale(1.03)' : 'scale(1)',
+        flexShrink: 0,
       }} />
       <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
         <h3 style={{ fontSize: 17, fontWeight: 700, color: '#0d2233', marginBottom: 10 }}>{event.title}</h3>
@@ -145,7 +148,7 @@ function EventCard({ event, onEdit, onDelete }) {
           {event.description}
         </p>
         <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
-          <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
+          <button
             onMouseEnter={() => setEditHovered(true)}
             onMouseLeave={() => setEditHovered(false)}
             onClick={onEdit}
@@ -155,10 +158,11 @@ function EventCard({ event, onEdit, onDelete }) {
               color: '#fff', borderRadius: 12, fontSize: 14, fontWeight: 600,
               border: 'none', cursor: 'pointer',
               boxShadow: editHovered ? '0 6px 16px rgba(0,0,0,0.18)' : '0 2px 6px rgba(0,0,0,0.12)',
+              transform: editHovered ? 'translateY(-2px)' : 'translateY(0)',
               transition: 'all 0.2s ease',
             }}
           >Edit</button>
-          <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
+          <button
             onMouseEnter={() => setDeleteHovered(true)}
             onMouseLeave={() => setDeleteHovered(false)}
             onClick={onDelete}
@@ -168,6 +172,7 @@ function EventCard({ event, onEdit, onDelete }) {
               color: '#fff', borderRadius: 12, fontSize: 14, fontWeight: 600,
               border: 'none', cursor: 'pointer',
               boxShadow: deleteHovered ? '0 6px 16px rgba(0,0,0,0.18)' : '0 2px 6px rgba(0,0,0,0.12)',
+              transform: deleteHovered ? 'translateY(-2px)' : 'translateY(0)',
               transition: 'all 0.2s ease',
             }}
           >Delete</button>
@@ -183,14 +188,14 @@ export default function EventsGrid() {
   const navigate = useNavigate();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [deleteTarget, setDeleteTarget] = useState(null); // { id, title }
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [addHovered, setAddHovered] = useState(false);
   const { toasts, removeToast, showToast } = useToast();
 
   const fetchEvents = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE}/admin/activities/${encodeURIComponent(year)}`);
+      const response = await fetch(`http://localhost:3000/api/admin/activities/${encodeURIComponent(year)}`);
       const result = await response.json();
       if (result.success && Array.isArray(result.data)) {
         setEvents(result.data.map(item => ({
@@ -214,7 +219,7 @@ export default function EventsGrid() {
     const { id, title } = deleteTarget;
     setDeleteTarget(null);
     try {
-      const response = await fetch(`${API_BASE}/admin/activities/${id}`, { method: 'DELETE' });
+      const response = await fetch(`http://localhost:3000/api/admin/activities/${id}`, { method: 'DELETE' });
       if (response.ok) {
         setEvents(prev => prev.filter(e => e.id !== id));
         showToast('success', 'Event Deleted', `"${title}" has been permanently deleted.`);
@@ -228,7 +233,8 @@ export default function EventsGrid() {
   };
 
   return (
-    <div style={{ display: 'flex' }}>
+    // ✅ FIX: alignItems: 'stretch' ensures sidebar stretches full height on scroll
+    <div style={{ display: 'flex', alignItems: 'stretch', minHeight: '100vh' }}>
       <Toast toasts={toasts} removeToast={removeToast} />
 
       <DeleteModal
@@ -238,7 +244,17 @@ export default function EventsGrid() {
         onCancel={() => setDeleteTarget(null)}
       />
 
-      <AdminSidebar />
+      {/* ✅ FIX: Sidebar wrapper — sticky so it doesn't scroll away and leave a gap */}
+      <div style={{
+        position: 'sticky',
+        top: 0,
+        height: '100vh',
+        flexShrink: 0,
+        overflowY: 'auto',
+      }}>
+        <AdminSidebar />
+      </div>
+
       <main style={{ flex: 1, padding: '32px 36px', backgroundColor: '#F5F9FA', minHeight: '100vh', overflowY: 'auto' }}>
 
         {/* Header */}
@@ -248,7 +264,7 @@ export default function EventsGrid() {
           </h1>
           <div style={{ display: 'flex', gap: '12px' }}>
             <StyledBackButton onClick={() => navigate('/admin/activities')} />
-            <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
+            <button
               onMouseEnter={() => setAddHovered(true)}
               onMouseLeave={() => setAddHovered(false)}
               onClick={() => navigate(`/admin/activities/${year}/add-event`)}
@@ -257,6 +273,7 @@ export default function EventsGrid() {
                 backgroundColor: addHovered ? '#2A8E9E' : '#0d2233',
                 color: '#fff', fontWeight: 600, fontSize: 14, cursor: 'pointer',
                 transition: 'background-color 0.2s ease, transform 0.2s ease',
+                transform: addHovered ? 'translateY(-2px)' : 'translateY(0)',
               }}
             >+ Add Event</button>
           </div>

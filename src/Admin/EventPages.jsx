@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import AdminSidebar from './AdminSidebar';
-import { API_BASE } from "../config/api";
 
 /* ─────────────────────────────────────────
    GLOBAL KEYFRAMES
@@ -71,9 +70,10 @@ function SuccessToast({ message, onClose }) {
         </svg>
       </span>
       {message}
-      <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95" onClick={onClose} style={{
+      <button onClick={onClose} style={{
         background: 'none', border: 'none', color: '#9bd3e0',
-        cursor: 'pointer', fontSize: 20, lineHeight: 1, marginLeft: 6, padding: 0}}>×</button>
+        cursor: 'pointer', fontSize: 20, lineHeight: 1, marginLeft: 6, padding: 0,
+      }}>×</button>
     </div>
   );
 }
@@ -98,7 +98,7 @@ function BtnSpinner() {
 function PrimaryBtn({ onClick, loading, label, loadingLabel }) {
   const [hovered, setHovered] = useState(false);
   return (
-    <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95" type="button" onClick={onClick} disabled={loading}
+    <button type="button" onClick={onClick} disabled={loading}
       onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
       style={{
         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
@@ -107,6 +107,7 @@ function PrimaryBtn({ onClick, loading, label, loadingLabel }) {
         color: '#fff', fontWeight: 600, fontSize: 14,
         cursor: loading ? 'not-allowed' : 'pointer',
         boxShadow: hovered && !loading ? '0 6px 16px rgba(0,0,0,0.18)' : '0 2px 6px rgba(0,0,0,0.12)',
+        transform: hovered && !loading ? 'translateY(-2px)' : 'translateY(0)',
         transition: 'all 0.2s ease', minWidth: 150,
       }}>
       {loading && <BtnSpinner />}
@@ -121,16 +122,17 @@ function PrimaryBtn({ onClick, loading, label, loadingLabel }) {
 function CancelBtn({ onClick, disabled }) {
   const [hovered, setHovered] = useState(false);
   return (
-    <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95" type="button" onClick={onClick} disabled={disabled}
+    <button type="button" onClick={onClick} disabled={disabled}
       onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
       style={{
         display: 'flex', alignItems: 'center', gap: 8,
         height: 44, padding: '0 24px', borderRadius: 12, border: 'none',
-        backgroundColor: hovered ? '#dc2626' : '#083A4B',
+        backgroundColor: hovered ? '#388E9C' : '#083A4B',
         color: '#fff', fontWeight: 700, fontSize: 12,
         cursor: disabled ? 'not-allowed' : 'pointer',
         opacity: disabled ? 0.6 : 1,
         boxShadow: hovered && !disabled ? '0 6px 16px rgba(0,0,0,0.18)' : '0 2px 6px rgba(0,0,0,0.12)',
+        transform: hovered && !disabled ? 'translateY(-2px)' : 'translateY(0)',
         transition: 'all 0.2s ease',
       }}>
       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
@@ -143,7 +145,86 @@ function CancelBtn({ onClick, disabled }) {
 }
 
 /* ─────────────────────────────────────────
-   DROPZONE
+   DROPZONE (UPDATED WITH DRAG & DROP)
+───────────────────────────────────────── */
+function DropZone({ value, onChange }) {
+  const ref = useRef();
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleFile = (file) => {
+    if (file) onChange(file);
+  };
+
+  const onDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const onDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const onDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const previewUrl = value instanceof File ? URL.createObjectURL(value) : value;
+  const hasImage = value && value !== "Not Applicable" && value !== "";
+
+  return (
+    <div 
+      onClick={() => ref.current.click()} 
+      onDragOver={onDragOver}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
+      style={{
+        border: isDragging ? '2px solid #2A8E9E' : '1.5px dashed #9bd3e0', 
+        borderRadius: 8, 
+        height: 130,
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        background: isDragging ? '#e0f4f7' : '#f0fafc', 
+        cursor: 'pointer', 
+        overflow: 'hidden',
+        position: 'relative', 
+        fontSize: 13, 
+        color: '#64748b', 
+        marginBottom: '10px',
+        transition: 'all 0.2s ease'
+      }}
+    >
+      {hasImage
+        ? <img src={previewUrl} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        : (
+          <div style={{ textAlign: 'center', padding: '10px' }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: 8, color: '#2A8E9E' }}>
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
+            <div>Drag and Drop or <span style={{ color: '#2563eb', fontWeight: 600 }}>choose file</span></div>
+          </div>
+        )
+      }
+      <input 
+        ref={ref} 
+        type="file" 
+        hidden 
+        accept="image/*"
+        onChange={(e) => handleFile(e.target.files[0])} 
+      />
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────
+   HELPER UTILS
 ───────────────────────────────────────── */
 const emptyTestimonial = () => ({ name: '', className: '', feedback: '' });
 
@@ -157,7 +238,6 @@ const cleanStoredValue = (value) => {
 const parseStoredList = (value) => {
   const cleaned = cleanStoredValue(value);
   if (!cleaned) return [];
-
   try {
     const parsed = JSON.parse(cleaned);
     return Array.isArray(parsed)
@@ -173,9 +253,7 @@ const normalizeTestimonials = (data = {}) => {
   const classes = parseStoredList(data.testimonials_class);
   const feedbacks = parseStoredList(data.testimonials_feedback);
   const total = Math.max(names.length, classes.length, feedbacks.length);
-
   if (!total) return [emptyTestimonial()];
-
   return Array.from({ length: total }, (_, index) => ({
     name: names[index] || '',
     className: classes[index] || '',
@@ -187,41 +265,16 @@ const appendTestimonials = (formData, testimonials = []) => {
   const filledTestimonials = testimonials.filter(
     (item) => item.name.trim() || item.className.trim() || item.feedback.trim()
   );
-
   if (!filledTestimonials.length) {
     formData.append('testimonials_name', '');
     formData.append('testimonials_class', '');
     formData.append('testimonials_feedback', '');
     return;
   }
-
   formData.append('testimonials_name', JSON.stringify(filledTestimonials.map((item) => item.name.trim())));
   formData.append('testimonials_class', JSON.stringify(filledTestimonials.map((item) => item.className.trim())));
   formData.append('testimonials_feedback', JSON.stringify(filledTestimonials.map((item) => item.feedback.trim())));
 };
-
-function DropZone({ value, onChange }) {
-  const ref = useRef();
-  const handleFile = (file) => { if (file) onChange(file); };
-  const previewUrl = value instanceof File ? URL.createObjectURL(value) : value;
-  const hasImage = value && value !== "Not Applicable" && value !== "";
-
-  return (
-    <div onClick={() => ref.current.click()} style={{
-      border: '1.5px dashed #9bd3e0', borderRadius: 8, height: 130,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: '#f0fafc', cursor: 'pointer', overflow: 'hidden',
-      position: 'relative', fontSize: 13, color: '#64748b', marginBottom: '10px'
-    }}>
-      {hasImage
-        ? <img src={previewUrl} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        : <span>Drag and Drop or <span style={{ color: '#2563eb' }}>choose file</span></span>
-      }
-      <input ref={ref} type="file" hidden accept="image/*"
-        onChange={(e) => handleFile(e.target.files[0])} />
-    </div>
-  );
-}
 
 /* ─────────────────────────────────────────
    INLINE ERROR MESSAGE
@@ -246,8 +299,7 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
     winnerFeedback: '', testimonials: [{ name: '', className: '', feedback: '' }]
   });
 
-  const [errors,  setErrors]  = useState({});
-  // animKey forces re-mount of errored fields so shake replays on repeat submits
+  const [errors, setErrors] = useState({});
   const [animKey, setAnimKey] = useState(0);
 
   useEffect(() => {
@@ -286,7 +338,6 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
     updateForm('testimonials', newTesti.length > 0 ? newTesti : [emptyTestimonial()]);
   };
 
-  /* validation */
   const validate = () => {
     const e = {};
     if (!form.title.trim())       e.title       = true;
@@ -300,7 +351,7 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
     const e = validate();
     if (Object.keys(e).length > 0) {
       setErrors(e);
-      setAnimKey(k => k + 1); // re-trigger shake on repeat click
+      setAnimKey(k => k + 1);
       setTimeout(() => {
         const el = document.querySelector('.field-error');
         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -315,7 +366,7 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
     borderRadius: 6, fontSize: 13, marginBottom: 14, boxSizing: 'border-box',
     backgroundColor: '#fff', transition: 'border-color 0.2s, box-shadow 0.2s, background-color 0.2s',
   };
-  const labelStyle   = { display: 'block', fontSize: 12, color: '#6b7280', marginBottom: 5, fontWeight: 500 };
+  const labelStyle = { display: 'block', fontSize: 12, color: '#6b7280', marginBottom: 5, fontWeight: 500 };
   const sectionTitle = {
     fontSize: 16, fontWeight: 700, color: '#111827',
     margin: '25px 0 15px', borderBottom: '1px solid #f1f5f9', paddingBottom: '5px',
@@ -325,7 +376,6 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
     <div style={{ background: '#fff', padding: '32px', borderRadius: 12, border: '1px solid #e2e8f0' }}>
       {extraTopField}
 
-      {/* General Information */}
       <h3 style={sectionTitle}>General Information</h3>
 
       <label style={labelStyle}>Title *</label>
@@ -365,47 +415,32 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
       />
       <ErrMsg show={errors.description} />
 
-      <label style={labelStyle}>Brochure (File/Image)</label>
-      <input type="file" style={base} onChange={e => updateForm('brochure', e.target.files[0])} />
+      <label style={labelStyle}>Brochure (Drop Image or Choose File)</label>
+      <DropZone value={form.brochure} onChange={(v) => updateForm('brochure', v)} />
       {form.brochure && (
-        <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
+        <button
           type="button"
           onClick={() => updateForm('brochure', null)}
           style={{
-            width: '100%',
-            marginTop: -4,
-            marginBottom: 14,
-            padding: '10px 14px',
-            borderRadius: 8,
-            border: '1px solid #fed7aa',
-            background: '#fff7ed',
-            color: '#c2410c',
-            fontWeight: 700,
-            cursor: 'pointer'
+            width: '100%', marginTop: -4, marginBottom: 14, padding: '10px 14px',
+            borderRadius: 8, border: '1px solid #fed7aa', background: '#fff7ed',
+            color: '#c2410c', fontWeight: 700, cursor: 'pointer'
           }}
         >
           Clear Brochure
         </button>
       )}
 
-      {/* Resource Person */}
       <h3 style={sectionTitle}>Resource Person</h3>
       <DropZone value={form.resourceImage} onChange={v => updateForm('resourceImage', v)} />
       {form.resourceImage && (
-        <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
+        <button
           type="button"
           onClick={() => updateForm('resourceImage', null)}
           style={{
-            width: '100%',
-            marginTop: -4,
-            marginBottom: 14,
-            padding: '10px 14px',
-            borderRadius: 8,
-            border: '1px solid #fed7aa',
-            background: '#fff7ed',
-            color: '#c2410c',
-            fontWeight: 700,
-            cursor: 'pointer'
+            width: '100%', marginTop: -4, marginBottom: 14, padding: '10px 14px',
+            borderRadius: 8, border: '1px solid #fed7aa', background: '#fff7ed',
+            color: '#c2410c', fontWeight: 700, cursor: 'pointer'
           }}
         >
           Clear Resource Image
@@ -417,7 +452,6 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
         value={form.resourceDescription}
         onChange={e => updateForm('resourceDescription', e.target.value)} />
 
-      {/* Participants */}
       <h3 style={sectionTitle}>Participants</h3>
       <label style={labelStyle}>Participants Details *</label>
       <input
@@ -429,7 +463,6 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
       />
       <ErrMsg show={errors.participants} />
 
-      {/* Event Images */}
       <h3 style={sectionTitle}>Event Images</h3>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
         {form.eventImages.map((img, idx) => (
@@ -437,36 +470,26 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
             <DropZone value={img} onChange={v => updateImageSlot(idx, v)} />
             <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
               {img && (
-                <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
+                <button
                   type="button"
                   onClick={() => clearImageSlot(idx)}
                   style={{
-                    flex: 1,
-                    padding: '10px 14px',
-                    borderRadius: 8,
-                    border: '1px solid #fed7aa',
-                    background: '#fff7ed',
-                    color: '#c2410c',
-                    fontWeight: 700,
-                    cursor: 'pointer'
+                    flex: 1, padding: '10px 14px', borderRadius: 8,
+                    border: '1px solid #fed7aa', background: '#fff7ed',
+                    color: '#c2410c', fontWeight: 700, cursor: 'pointer'
                   }}
                 >
                   Clear Image
                 </button>
               )}
               {form.eventImages.length > 1 && (
-                <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
+                <button
                   type="button"
                   onClick={() => removeImageSlot(idx)}
                   style={{
-                    flex: 1,
-                    padding: '10px 14px',
-                    borderRadius: 8,
-                    border: '1px solid #fecaca',
-                    background: '#fff5f5',
-                    color: '#dc2626',
-                    fontWeight: 700,
-                    cursor: 'pointer'
+                    flex: 1, padding: '10px 14px', borderRadius: 8,
+                    border: '1px solid #fecaca', background: '#fff5f5',
+                    color: '#dc2626', fontWeight: 700, cursor: 'pointer'
                   }}
                 >
                   Delete Slot
@@ -475,30 +498,22 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
             </div>
           </div>
         ))}
-        <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95" type="button" onClick={addImageSlot}
+        <button type="button" onClick={addImageSlot}
           style={{ height: 130, border: '1.5px dashed #ccc', borderRadius: 8, cursor: 'pointer', background: 'none' }}>
           + Add Image Slot
         </button>
       </div>
 
-      {/* Winner */}
       <h3 style={sectionTitle}>Winner Section</h3>
       <DropZone value={form.winnerImage} onChange={v => updateForm('winnerImage', v)} />
       {form.winnerImage && (
-        <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
+        <button
           type="button"
           onClick={() => updateForm('winnerImage', null)}
           style={{
-            width: '100%',
-            marginTop: -4,
-            marginBottom: 14,
-            padding: '10px 14px',
-            borderRadius: 8,
-            border: '1px solid #fed7aa',
-            background: '#fff7ed',
-            color: '#c2410c',
-            fontWeight: 700,
-            cursor: 'pointer'
+            width: '100%', marginTop: -4, marginBottom: 14, padding: '10px 14px',
+            borderRadius: 8, border: '1px solid #fed7aa', background: '#fff7ed',
+            color: '#c2410c', fontWeight: 700, cursor: 'pointer'
           }}
         >
           Clear Winner Image
@@ -510,7 +525,6 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
         value={form.winnerFeedback}
         onChange={e => updateForm('winnerFeedback', e.target.value)} />
 
-      {/* Testimonials */}
       <h3 style={sectionTitle}>Testimonials</h3>
       {form.testimonials.map((t, idx) => (
         <div key={idx} style={{ marginBottom: 20, padding: 15, background: '#f8fafc', borderRadius: 8 }}>
@@ -519,7 +533,7 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
               Testimonial {idx + 1}
             </span>
             {form.testimonials.length > 1 && (
-              <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
+              <button
                 type="button"
                 onClick={() => removeTestimonial(idx)}
                 style={{ border: 'none', background: 'none', color: '#dc2626', cursor: 'pointer', fontSize: 12, fontWeight: 700 }}
@@ -537,7 +551,7 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
             onChange={e => updateTestimonial(idx, 'feedback', e.target.value)} />
         </div>
       ))}
-      <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
+      <button
         type="button"
         onClick={addTestimonial}
         style={{ padding: '10px 18px', borderRadius: 8, border: '1px dashed #9bd3e0', background: '#f8fdff', color: '#083A4B', fontWeight: 700, cursor: 'pointer' }}
@@ -545,7 +559,6 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
         + Add Testimonial
       </button>
 
-      {/* Buttons */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 40 }}>
         <CancelBtn onClick={onCancel} disabled={loading} />
         <PrimaryBtn
@@ -564,18 +577,18 @@ function EventForm({ mode = 'add', initialData = {}, onSubmit, onCancel, extraTo
 ───────────────────────────────────────── */
 export function EditEvent() {
   const { year, id } = useParams();
-  const navigate     = useNavigate();
+  const navigate = useNavigate();
   const [initialData, setInitialData] = useState(null);
-  const [loading,     setLoading]     = useState(true);
-  const [submitting,  setSubmitting]  = useState(false);
-  const [toast,       setToast]       = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     const fetchEventData = async () => {
       try {
-        const response = await fetch(`${API_BASE}/admin/activity/${id}`);
-        const result   = await response.json();
-        const data     = result.data || result;
+        const response = await fetch(`http://localhost:3000/api/admin/activity/${id}`);
+        const result = await response.json();
+        const data = result.data || result;
         if (data) {
           const imgArray = (data.event_image_url || "").split(',')
             .filter(x => x && x !== "Not Applicable");
@@ -606,16 +619,16 @@ export function EditEvent() {
   const handleUpdate = async (formState) => {
     setSubmitting(true);
     const formData = new FormData();
-    formData.append('batch',                       year);
-    formData.append('title',                       formState.title);
-    formData.append('description',                 formState.description);
-    formData.append('start_date',                  formState.start_date);
-    formData.append('end_date',                    formState.end_date || "");
-    formData.append('participants',                formState.participants);
-    formData.append('resource_person_name',        formState.resourceName);
+    formData.append('batch', year);
+    formData.append('title', formState.title);
+    formData.append('description', formState.description);
+    formData.append('start_date', formState.start_date);
+    formData.append('end_date', formState.end_date || "");
+    formData.append('participants', formState.participants);
+    formData.append('resource_person_name', formState.resourceName);
     formData.append('resource_person_description', formState.resourceDescription);
-    formData.append('winner_name',                 formState.winnerName);
-    formData.append('winner_description',          formState.winnerFeedback);
+    formData.append('winner_name', formState.winnerName);
+    formData.append('winner_description', formState.winnerFeedback);
     appendTestimonials(formData, formState.testimonials);
 
     const orderMap = [];
@@ -625,15 +638,15 @@ export function EditEvent() {
     });
     formData.append('image_order', JSON.stringify(orderMap));
 
-    if (formState.brochure instanceof File)      formData.append('brochure', formState.brochure);
-    else                                          formData.append('brochure_url', formState.brochure || "");
+    if (formState.brochure instanceof File) formData.append('brochure', formState.brochure);
+    else formData.append('brochure_url', formState.brochure || "");
     if (formState.resourceImage instanceof File) formData.append('resource_person_image', formState.resourceImage);
-    else                                          formData.append('existing_resource_person_image', formState.resourceImage || "");
-    if (formState.winnerImage instanceof File)   formData.append('winner_image', formState.winnerImage);
-    else                                          formData.append('existing_winner_image', formState.winnerImage || "");
+    else formData.append('existing_resource_person_image', formState.resourceImage || "");
+    if (formState.winnerImage instanceof File) formData.append('winner_image', formState.winnerImage);
+    else formData.append('existing_winner_image', formState.winnerImage || "");
 
     try {
-      const response = await fetch(`${API_BASE}/admin/activity/${id}`, { method: 'PUT', body: formData });
+      const response = await fetch(`http://localhost:3000/api/admin/activity/${id}`, { method: 'PUT', body: formData });
       if (response.ok) {
         setToast('Event updated successfully!');
         setTimeout(() => navigate(`/admin/activities/${year}`), 2000);
@@ -666,30 +679,30 @@ export function AddEvent() {
   const { year } = useParams();
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
-  const [toast,      setToast]      = useState(null);
+  const [toast, setToast] = useState(null);
 
   const handleAdd = async (formState) => {
     setSubmitting(true);
     const formData = new FormData();
-    formData.append('batch',                       year);
-    formData.append('title',                       formState.title);
-    formData.append('description',                 formState.description);
-    formData.append('start_date',                  formState.start_date);
-    formData.append('end_date',                    formState.end_date || "");
-    formData.append('participants',                formState.participants);
-    formData.append('resource_person_name',        formState.resourceName);
+    formData.append('batch', year);
+    formData.append('title', formState.title);
+    formData.append('description', formState.description);
+    formData.append('start_date', formState.start_date);
+    formData.append('end_date', formState.end_date || "");
+    formData.append('participants', formState.participants);
+    formData.append('resource_person_name', formState.resourceName);
     formData.append('resource_person_description', formState.resourceDescription);
-    formData.append('winner_name',                 formState.winnerName);
-    formData.append('winner_description',          formState.winnerFeedback);
+    formData.append('winner_name', formState.winnerName);
+    formData.append('winner_description', formState.winnerFeedback);
     appendTestimonials(formData, formState.testimonials);
 
-    if (formState.brochure)      formData.append('brochure',              formState.brochure);
+    if (formState.brochure) formData.append('brochure', formState.brochure);
     if (formState.resourceImage) formData.append('resource_person_image', formState.resourceImage);
-    if (formState.winnerImage)   formData.append('winner_image',          formState.winnerImage);
+    if (formState.winnerImage) formData.append('winner_image', formState.winnerImage);
     formState.eventImages.forEach(img => { if (img) formData.append('event_images', img); });
 
     try {
-      const response = await fetch(`${API_BASE}/admin/activity`, { method: 'POST', body: formData });
+      const response = await fetch(`http://localhost:3000/api/admin/activity`, { method: 'POST', body: formData });
       if (response.ok) {
         setToast('Event added successfully!');
         setTimeout(() => navigate(`/admin/activities/${year}`), 2000);
@@ -714,11 +727,11 @@ export function AddEvent() {
    ADD NEW YEAR PAGE
 ───────────────────────────────────────── */
 export function AddNewYear() {
-  const navigate    = useNavigate();
+  const navigate = useNavigate();
   const currentYear = new Date().getFullYear();
-  const [startYear,  setStartYear]  = useState(currentYear);
+  const [startYear, setStartYear] = useState(currentYear);
   const [submitting, setSubmitting] = useState(false);
-  const [toast,      setToast]      = useState(null);
+  const [toast, setToast] = useState(null);
   const batch = `${startYear}-${String(startYear + 1).slice(2)}`;
 
   const YearHeader = (
@@ -737,25 +750,25 @@ export function AddNewYear() {
   const handleAddYear = async (formState) => {
     setSubmitting(true);
     const formData = new FormData();
-    formData.append('batch',                       batch);
-    formData.append('title',                       formState.title);
-    formData.append('description',                 formState.description);
-    formData.append('start_date',                  formState.start_date);
-    formData.append('end_date',                    formState.end_date || "");
-    formData.append('participants',                formState.participants);
-    formData.append('resource_person_name',        formState.resourceName);
+    formData.append('batch', batch);
+    formData.append('title', formState.title);
+    formData.append('description', formState.description);
+    formData.append('start_date', formState.start_date);
+    formData.append('end_date', formState.end_date || "");
+    formData.append('participants', formState.participants);
+    formData.append('resource_person_name', formState.resourceName);
     formData.append('resource_person_description', formState.resourceDescription);
-    formData.append('winner_name',                 formState.winnerName);
-    formData.append('winner_description',          formState.winnerFeedback);
+    formData.append('winner_name', formState.winnerName);
+    formData.append('winner_description', formState.winnerFeedback);
     appendTestimonials(formData, formState.testimonials);
 
-    if (formState.brochure)      formData.append('brochure',              formState.brochure);
+    if (formState.brochure) formData.append('brochure', formState.brochure);
     if (formState.resourceImage) formData.append('resource_person_image', formState.resourceImage);
-    if (formState.winnerImage)   formData.append('winner_image',          formState.winnerImage);
+    if (formState.winnerImage) formData.append('winner_image', formState.winnerImage);
     formState.eventImages.forEach(img => { if (img) formData.append('event_images', img); });
 
     try {
-      const response = await fetch(`${API_BASE}/admin/activity`, { method: 'POST', body: formData });
+      const response = await fetch(`http://localhost:3000/api/admin/activity`, { method: 'POST', body: formData });
       if (response.ok) {
         setToast('New academic year created successfully!');
         setTimeout(() => navigate(`/admin/activities/${batch}`), 2000);
@@ -776,4 +789,3 @@ export function AddNewYear() {
     </AdminSidebar>
   );
 }
-

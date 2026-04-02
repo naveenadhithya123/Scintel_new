@@ -179,16 +179,16 @@ export default function UpcomingEvents() {
                         </div>
 
                         <div className="p-8 flex flex-col justify-between flex-1 font-sans">
-                          <div>
-                            <h3 className="text-xl font-bold text-[#023347] mb-3 tracking-tight group-hover:text-[#B8860B] transition-colors duration-500 line-clamp-1">
-                              {event.title}
-                            </h3>
-                            <p className="text-[13px] text-[#023347]/60 leading-relaxed font-medium line-clamp-3">
-                              {event.short_description || "Detailed schedule and guidelines provided in the full announcement."}
-                            </p>
-                          </div>
+  <div className="flex flex-col flex-1 min-h-0">
+    <h3 className="text-xl font-bold text-[#023347] mb-3 tracking-tight group-hover:text-[#B8860B] transition-colors duration-500 line-clamp-1">
+      {event.title}
+    </h3>
+    <p className="text-[13px] text-[#023347]/60 leading-relaxed font-medium flex-1 overflow-hidden" style={{ display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 999, overflow: 'hidden' }}>
+      {event.short_description || "Detailed schedule and guidelines provided in the full announcement."}
+    </p>
+  </div>
 
-                          <div className="mt-8">
+  <div className="mt-8">
                             <button 
                               type="button"
                               onClick={() => navigate(`/event-register/${event.id}/${event.type}`)}
