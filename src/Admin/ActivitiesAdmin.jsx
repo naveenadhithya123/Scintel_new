@@ -5,14 +5,52 @@ import {API_BASE} from '../config/api';
 /* ─── Toast ─────────────────────────────────────────────────────────────── */
 function Toast({ toasts, removeToast }) {
   return (
-    <div style={{ position: 'fixed', top: 24, right: 28, zIndex: 9999, display: 'flex', flexDirection: 'column', gap: 10 }}>
+    <div style={{ position: 'fixed', top: 28, right: 32, zIndex: 9999, display: 'flex', flexDirection: 'column', gap: 10 }}>
       {toasts.map(t => (
         <div key={t.id} style={{
           display: 'flex', alignItems: 'flex-start', gap: 12,
-          backgroundColor: '#fff', borderRadius: 14, padding: '16px 20px',
-          minWidth: 320, maxWidth: 420,
-          boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
-          borderLeft: `4px solid ${t.type === 'success' ? '#22c55e' : t.type === 'error' ? '#ef4444' : '#f59e0b'}`,
+          backgroundColor: '#023347', color: '#fff',
+          padding: '14px 22px', borderRadius: 12,
+          minWidth: 300, maxWidth: 420,
+          boxShadow: '0 8px 32px rgba(2,51,71,0.25)',
+          animation: 'toastIn 0.3s ease',
+        }}>
+          <span style={{
+            width: 26, height: 26, borderRadius: '50%',
+            backgroundColor: t.type === 'error' ? '#ef4444' : t.type === 'warning' ? '#f59e0b' : '#2A8E9E',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+          }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              {t.type === 'error'
+                ? <path d="M18 6 6 18M6 6l12 12" />
+                : t.type === 'warning'
+                  ? <path d="M12 8v5m0 4h.01" />
+                  : <polyline points="20 6 9 17 4 12" />}
+            </svg>
+          </span>
+          <div style={{ flex: 1 }}>
+            {t.title ? <p style={{ margin: 0, fontWeight: 700, fontSize: 14, color: '#fff' }}>{t.title}</p> : null}
+            {t.message ? <p style={{ margin: t.title ? '4px 0 0' : 0, fontSize: 13, color: '#d7e7ec', lineHeight: 1.4 }}>{t.message}</p> : null}
+          </div>
+          <button
+            onClick={() => removeToast(t.id)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9bd3e0', fontSize: 20, lineHeight: 1, marginLeft: 6, padding: 0 }}
+          >
+            ×
+          </button>
+        </div>
+      ))}
+      <style>{`@keyframes toastIn { from { opacity:0; transform:translateY(-16px) scale(0.96); } to { opacity:1; transform:translateY(0) scale(1); } }`}</style>
+    </div>
+  );
+  return (
+    <div style={{ position: 'fixed', top: 28, right: 32, zIndex: 9999, display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {toasts.map(t => (
+        <div key={t.id} style={{
+          display: 'flex', alignItems: 'flex-start', gap: 12,
+          backgroundColor: '#023347', color: '#fff', borderRadius: 12, padding: '14px 22px',
+          minWidth: 300, maxWidth: 420,
+          boxShadow: '0 8px 32px rgba(2,51,71,0.25)',
           animation: 'toastIn 0.3s ease',
         }}>
           <span style={{ fontSize: 20, lineHeight: 1 }}>
@@ -78,14 +116,26 @@ function DeleteModal({ open, yearLabel, onConfirm, onCancel }) {
           width: '100%', padding: '12px 0', borderRadius: 10,
           backgroundColor: '#ef4444', color: '#fff',
           border: 'none', fontWeight: 600, fontSize: 15, cursor: 'pointer', marginBottom: 10,
-        }}>
+          transition: 'all 0.2s',
+        }}
+          onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(239,68,68,0.3)'; }}
+          onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = ''; }}
+          onMouseDown={e => e.currentTarget.style.transform = 'scale(0.96)'}
+          onMouseUp={e => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
+        >
           Yes, Delete Permanently
         </button>
         <button onClick={onCancel} style={{
           width: '100%', padding: '11px 0', borderRadius: 10,
           backgroundColor: '#fff', color: '#374151',
           border: '1.5px solid #e2e8f0', fontWeight: 500, fontSize: 14, cursor: 'pointer',
-        }}>
+          transition: 'all 0.2s',
+        }}
+          onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'; }}
+          onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = ''; }}
+          onMouseDown={e => e.currentTarget.style.transform = 'scale(0.96)'}
+          onMouseUp={e => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
+        >
           Cancel
         </button>
       </div>
@@ -158,12 +208,12 @@ export default function ActivitiesAdmin() {
 
           {/* Header */}
           <header className="mb-8 flex-shrink-0">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
               <h2 className="text-2xl md:text-3xl font-bold text-[#023347]">Activities</h2>
               {/* ✅ CHANGED: styled to match Edit button */}
               <button
                 onClick={() => navigate('/admin/activities/add-new-year')}
-                className="bg-[#023347] text-white px-6 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 hover:bg-[#2A8E9E]"
+                className="inline-flex items-center gap-2 bg-[#023347] text-white px-5 py-2.5 rounded-[10px] text-sm font-semibold transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md hover:bg-[#2A8E9E] active:scale-95"
               >
                 + Add Batch
               </button>
@@ -206,13 +256,13 @@ export default function ActivitiesAdmin() {
                           <div className="flex justify-center gap-4">
                             <button
                               onClick={() => navigate(`/admin/activities/${row.year}`)}
-                              className="bg-[#023347] text-white px-6 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 hover:bg-[#2A8E9E]"
+                              className="bg-[#023347] text-white px-6 py-2 rounded-lg text-sm font-semibold transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md hover:bg-[#2A8E9E] active:scale-95"
                             >
                               Edit
                             </button>
                             <button
                               onClick={() => setDeleteTarget({ year: row.year })}
-                              className="bg-[#023347] text-white px-6 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 hover:bg-red-700"
+                              className="bg-[#023347] text-white px-6 py-2 rounded-lg text-sm font-semibold transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md hover:bg-red-700 active:scale-95"
                             >
                               Delete
                             </button>

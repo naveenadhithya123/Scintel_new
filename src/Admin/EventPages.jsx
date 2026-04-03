@@ -44,43 +44,84 @@ const GlobalStyles = () => (
 /* ─────────────────────────────────────────
    SUCCESS TOAST
 ───────────────────────────────────────── */
-function SuccessToast({ message, onClose }) {
-  useEffect(() => {
-    const t = setTimeout(onClose, 3000);
-    return () => clearTimeout(t);
-  }, [onClose]);
+function Toast({ toasts, removeToast }) {
+  const toastList = Array.isArray(toasts) ? toasts : [];
 
   return (
-    <div style={{
-      position: 'fixed', top: 28, right: 32, zIndex: 9999,
-      display: 'flex', alignItems: 'center', gap: 12,
-      backgroundColor: '#023347', color: '#fff',
-      padding: '14px 22px', borderRadius: 12,
-      boxShadow: '0 8px 32px rgba(2,51,71,0.25)',
-      fontSize: 14, fontWeight: 600,
-      animation: 'toastSlideIn 0.3s ease forwards',
-    }}>
-      <span style={{
-        width: 26, height: 26, borderRadius: '50%', backgroundColor: '#2A8E9E',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-      }}>
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-          stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="20 6 9 17 4 12" />
-        </svg>
-      </span>
-      {message}
-      <button onClick={onClose} style={{
-        background: 'none', border: 'none', color: '#9bd3e0',
-        cursor: 'pointer', fontSize: 20, lineHeight: 1, marginLeft: 6, padding: 0,
-      }}>×</button>
+    <div style={{ position: 'fixed', top: 28, right: 32, zIndex: 9999, display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {toastList.map(t => (
+        <div key={t.id} style={{
+          display: 'flex', alignItems: 'flex-start', gap: 12,
+          backgroundColor: '#023347', color: '#fff',
+          padding: '14px 22px', borderRadius: 12,
+          minWidth: 300, maxWidth: 420,
+          boxShadow: '0 8px 32px rgba(2,51,71,0.25)',
+          animation: 'toastIn 0.3s ease',
+        }}>
+          <span style={{
+            width: 26, height: 26, borderRadius: '50%',
+            backgroundColor: t.type === 'error' ? '#ef4444' : t.type === 'warning' ? '#f59e0b' : '#2A8E9E',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+          }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              {t.type === 'error'
+                ? <path d="M18 6 6 18M6 6l12 12" />
+                : t.type === 'warning'
+                  ? <path d="M12 8v5m0 4h.01" />
+                  : <polyline points="20 6 9 17 4 12" />}
+            </svg>
+          </span>
+          <div style={{ flex: 1 }}>
+            {t.title ? <p style={{ margin: 0, fontWeight: 700, fontSize: 14, color: '#fff' }}>{t.title}</p> : null}
+            {t.message ? <p style={{ margin: t.title ? '4px 0 0' : 0, fontSize: 13, color: '#d7e7ec', lineHeight: 1.4 }}>{t.message}</p> : null}
+          </div>
+          <button
+            onClick={() => removeToast(t.id)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9bd3e0', fontSize: 20, lineHeight: 1, marginLeft: 6, padding: 0 }}
+          >
+            ×
+          </button>
+        </div>
+      ))}
+      <style>{`@keyframes toastIn { from { opacity:0; transform:translateY(-16px) scale(0.96); } to { opacity:1; transform:translateY(0) scale(1); } }`}</style>
+    </div>
+  );
+  return (
+    <div style={{ position: 'fixed', top: 24, right: 28, zIndex: 9999, display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {toastList.map(t => (
+        <div key={t.id} style={{
+          display: 'flex', alignItems: 'flex-start', gap: 12,
+          backgroundColor: '#fff', borderRadius: 14, padding: '16px 20px',
+          minWidth: 320, maxWidth: 420,
+          boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
+          borderLeft: '4px solid ' + (t.type === 'success' ? '#22c55e' : t.type === 'error' ? '#ef4444' : '#f59e0b'),
+          animation: 'toastIn 0.3s ease',
+        }}>
+          <span style={{ fontSize: 20, lineHeight: 1 }}>
+            {t.type === 'success' ? '✅' : t.type === 'error' ? '❌' : '⚠️'}
+          </span>
+          <div style={{ flex: 1 }}>
+            <p style={{ margin: 0, fontWeight: 700, fontSize: 14, color: '#023347' }}>{t.title}</p>
+            <p style={{ margin: '4px 0 0', fontSize: 13, color: '#64748b', lineHeight: 1.4 }}>{t.message}</p>
+          </div>
+          <button onClick={() => removeToast(t.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: 18, lineHeight: 1, padding: 0 }}>×</button>
+        </div>
+      ))}
+      <style>{'@keyframes toastIn { from { opacity:0; transform:translateX(30px); } to { opacity:1; transform:translateX(0); } }'}</style>
     </div>
   );
 }
 
-/* ─────────────────────────────────────────
-   SPINNER
-───────────────────────────────────────── */
+function useToast() {
+  const [toasts, setToasts] = useState([]);
+  const showToast = (type, title, message, duration = 4000) => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, type, title, message }]);
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), duration);
+  };
+  const removeToast = (id) => setToasts(prev => prev.filter(t => t.id !== id));
+  return { toasts, removeToast, showToast };
+}
 function BtnSpinner() {
   return (
     <span style={{
@@ -127,7 +168,7 @@ function CancelBtn({ onClick, disabled }) {
       style={{
         display: 'flex', alignItems: 'center', gap: 8,
         height: 44, padding: '0 24px', borderRadius: 12, border: 'none',
-        backgroundColor: hovered ? '#388E9C' : '#083A4B',
+        backgroundColor: hovered && !disabled ? '#b91c1c' : '#083A4B',
         color: '#fff', fontWeight: 700, fontSize: 12,
         cursor: disabled ? 'not-allowed' : 'pointer',
         opacity: disabled ? 0.6 : 1,
@@ -581,7 +622,7 @@ export function EditEvent() {
   const [initialData, setInitialData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [toast, setToast] = useState(null);
+  const { toasts, removeToast, showToast } = useToast();
 
   useEffect(() => {
     const fetchEventData = async () => {
@@ -648,13 +689,20 @@ export function EditEvent() {
     try {
       const response = await fetch(`${API_BASE}/admin/activity/${id}`, { method: 'PUT', body: formData });
       if (response.ok) {
-        setToast('Event updated successfully!');
-        setTimeout(() => navigate(`/admin/activities/${year}`), 2000);
+        navigate(`/admin/activities/${year}`, {
+          state: {
+            toast: {
+              type: 'success',
+              title: 'Event Updated',
+              message: 'Event updated successfully.',
+            },
+          },
+        });
       } else {
         const errData = await response.json();
-        setToast(`Error: ${errData.message}`);
+        showToast('error', 'Update Failed', errData.message || 'Failed to update the event.');
       }
-    } catch (err) { setToast('Update failed. Please try again.'); }
+    } catch (err) { showToast('error', 'Update Failed', 'Update failed. Please try again.'); }
     finally { setSubmitting(false); }
   };
 
@@ -662,7 +710,7 @@ export function EditEvent() {
   return (
     <AdminSidebar>
       <GlobalStyles />
-      {toast && <SuccessToast message={toast} onClose={() => setToast(null)} />}
+      <Toast toasts={toasts} removeToast={removeToast} />
       <div style={{ flex: 1, height: '100vh', overflowY: 'auto', padding: '32px', backgroundColor: '#f4f7f9' }}>
         <h2 style={{ color: '#083A4B', marginBottom: 20 }}>Edit Event</h2>
         <EventForm mode="edit" initialData={initialData} onSubmit={handleUpdate}
@@ -679,7 +727,7 @@ export function AddEvent() {
   const { year } = useParams();
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
-  const [toast, setToast] = useState(null);
+  const { toasts, removeToast, showToast } = useToast();
 
   const handleAdd = async (formState) => {
     setSubmitting(true);
@@ -704,17 +752,24 @@ export function AddEvent() {
     try {
       const response = await fetch(`${API_BASE}/admin/activity`, { method: 'POST', body: formData });
       if (response.ok) {
-        setToast('Event added successfully!');
-        setTimeout(() => navigate(`/admin/activities/${year}`), 2000);
-      } else { setToast('Failed to add event. Please try again.'); }
-    } catch (err) { setToast('Failed to add event. Please try again.'); }
+        navigate(`/admin/activities/${year}`, {
+          state: {
+            toast: {
+              type: 'success',
+              title: 'Event Added',
+              message: 'Event added successfully.',
+            },
+          },
+        });
+      } else { showToast('error', 'Add Failed', 'Failed to add event. Please try again.'); }
+    } catch (err) { showToast('error', 'Add Failed', 'Failed to add event. Please try again.'); }
     finally { setSubmitting(false); }
   };
 
   return (
     <AdminSidebar>
       <GlobalStyles />
-      {toast && <SuccessToast message={toast} onClose={() => setToast(null)} />}
+      <Toast toasts={toasts} removeToast={removeToast} />
       <div style={{ flex: 1, height: '100vh', overflowY: 'auto', padding: '32px', backgroundColor: '#f4f7f9' }}>
         <h2 style={{ color: '#083A4B', marginBottom: 20 }}>Add Event to {year}</h2>
         <EventForm mode="add" onSubmit={handleAdd} onCancel={() => navigate(-1)} loading={submitting} />
@@ -731,7 +786,7 @@ export function AddNewYear() {
   const currentYear = new Date().getFullYear();
   const [startYear, setStartYear] = useState(currentYear);
   const [submitting, setSubmitting] = useState(false);
-  const [toast, setToast] = useState(null);
+  const { toasts, removeToast, showToast } = useToast();
   const batch = `${startYear}-${String(startYear + 1).slice(2)}`;
 
   const YearHeader = (
@@ -770,17 +825,24 @@ export function AddNewYear() {
     try {
       const response = await fetch(`${API_BASE}/admin/activity`, { method: 'POST', body: formData });
       if (response.ok) {
-        setToast('New academic year created successfully!');
-        setTimeout(() => navigate(`/admin/activities/${batch}`), 2000);
-      } else { setToast('Failed to create year. Please try again.'); }
-    } catch (err) { setToast('Failed to create year. Please try again.'); }
+        navigate(`/admin/activities/${batch}`, {
+          state: {
+            toast: {
+              type: 'success',
+              title: 'Batch Created',
+              message: `New academic year "${batch}" created successfully.`,
+            },
+          },
+        });
+      } else { showToast('error', 'Create Failed', 'Failed to create year. Please try again.'); }
+    } catch (err) { showToast('error', 'Create Failed', 'Failed to create year. Please try again.'); }
     finally { setSubmitting(false); }
   };
 
   return (
     <AdminSidebar>
       <GlobalStyles />
-      {toast && <SuccessToast message={toast} onClose={() => setToast(null)} />}
+      <Toast toasts={toasts} removeToast={removeToast} />
       <div style={{ flex: 1, height: '100vh', overflowY: 'auto', padding: '32px', backgroundColor: '#f4f7f9' }}>
         <h2 style={{ color: '#083A4B', marginBottom: 20 }}>Create New Academic Year</h2>
         <EventForm mode="add" extraTopField={YearHeader} onSubmit={handleAddYear}
@@ -789,3 +851,8 @@ export function AddNewYear() {
     </AdminSidebar>
   );
 }
+
+
+
+
+

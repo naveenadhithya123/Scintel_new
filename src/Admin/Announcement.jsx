@@ -64,7 +64,7 @@ function SidebarInner({ children }) {
       <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#023347] text-white flex flex-col shadow-xl transition-transform duration-300 transform lg:relative lg:translate-x-0 ${isMenuOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="p-6 flex justify-between items-center">
           <h1 className="text-xl md:text-2xl font-bold">Admin Portal</h1>
-          <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95 lg:hidden" onClick={() => setIsMenuOpen(false)}><CloseIcon /></button>
+          <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md active:scale-95 lg:hidden" onClick={() => setIsMenuOpen(false)}><CloseIcon /></button>
         </div>
         <nav className="flex flex-col gap-2 px-4 mt-2">
           {items.map((item) => (
@@ -89,7 +89,7 @@ function SidebarInner({ children }) {
               setIsMenuOpen(false);
               navigate("/admin", { replace: true });
             }}
-            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition-all transform duration-200 hover:-translate-y-1 hover:bg-red-700 hover:border-red-600/50 hover:shadow-lg active:scale-95"
+            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition-all duration-200 transform hover:-translate-y-1 hover:bg-red-700 hover:border-red-600/50 hover:shadow-md active:scale-95"
           >
             Logout
           </button>
@@ -97,7 +97,7 @@ function SidebarInner({ children }) {
       </aside>
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="lg:hidden bg-white border-b border-gray-200 p-4 flex items-center justify-between">
-          <button onClick={() => setIsMenuOpen(true)} className="text-[#023347] transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"><MenuIcon /></button>
+          <button onClick={() => setIsMenuOpen(true)} className="text-[#023347] transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md active:scale-95"><MenuIcon /></button>
           <h1 className="text-lg font-bold text-[#023347]">Admin Portal</h1>
           <div className="w-6" />
         </header>
@@ -509,11 +509,40 @@ const AnnouncementAdmin = () => {
     return baseClasses + "border-gray-300 focus:border-[#2A8E9E] focus:ring-2 focus:ring-[#2A8E9E]/20";
   };
 
+  const activityButtonBaseClass = "bg-[#023347] text-white px-6 py-2 rounded-lg text-sm font-semibold transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md active:scale-95";
+  const activityButtonPrimaryClass = `${activityButtonBaseClass} hover:bg-[#2A8E9E]`;
+  const activityButtonDangerClass = `${activityButtonBaseClass} hover:bg-red-700`;
+  const topActionButtonClass = "inline-flex items-center gap-2 bg-[#023347] text-white px-5 py-2.5 rounded-[10px] text-sm font-semibold transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md hover:bg-[#2A8E9E] active:scale-95";
+
   return (
     <AdminSidebar>
+      <div className="announcement-admin w-full h-full">
       {toast && (
-        <div className="fixed top-10 right-10 z-[150] flex items-center gap-3 bg-white px-6 py-4 rounded-2xl shadow-2xl border-l-4 border-[#2A8E9E] animate-in slide-in-from-right-8 fade-in">
-          <CheckCircleIcon /><span className="font-bold text-[#023347]">{toast}</span>
+        <div style={{
+          position: 'fixed', top: 28, right: 32, zIndex: 9999,
+          display: 'flex', alignItems: 'center', gap: 12,
+          background: '#023347', color: '#fff',
+          padding: '14px 22px', borderRadius: 12,
+          boxShadow: '0 8px 32px rgba(2,51,71,0.25)',
+          fontSize: 14, fontWeight: 600,
+          animation: 'annToastIn 0.3s ease forwards',
+        }}>
+          <span style={{
+            width: 26, height: 26, borderRadius: '50%', background: '#2A8E9E',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+          }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </span>
+          <span>{toast}</span>
+          <button
+            type="button"
+            onClick={() => setToast(null)}
+            style={{ background: 'none', border: 'none', color: '#9bd3e0', cursor: 'pointer', fontSize: 20, lineHeight: 1, marginLeft: 6, padding: 0 }}
+          >
+            ×
+          </button>
         </div>
       )}
 
@@ -523,8 +552,8 @@ const AnnouncementAdmin = () => {
             <h3 className="text-xl font-bold text-[#023347] mb-2 text-center">Confirm Delete</h3>
             <p className="text-gray-600 mb-8 text-center">Are you sure you want to remove this {deleteModal.type}?</p>
             <div className="flex gap-4">
-              <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95" onClick={() => setDeleteModal({ isOpen: false })} className="flex-1 py-3 bg-gray-100 rounded-xl font-bold transition-all hover:bg-red-600 hover:text-white">Cancel</button>
-              <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95 flex-1 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700" onClick={confirmDelete}>Delete</button>
+              <button type="button" className="flex-1 bg-gray-100 text-[#023347] px-6 py-2 rounded-lg text-sm font-semibold transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md hover:bg-gray-200 active:scale-95" onClick={() => setDeleteModal({ isOpen: false, id: null, type: null })}>Cancel</button>
+              <button type="button" className={`flex-1 ${activityButtonDangerClass}`} onClick={confirmDelete}>Delete</button>
             </div>
           </div>
         </div>
@@ -533,9 +562,9 @@ const AnnouncementAdmin = () => {
       <div ref={sectionRef} className="max-w-7xl mx-auto w-full h-full flex flex-col">
         {view === 'grid' ? (
           <>
-            <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+            <header className="flex flex-wrap items-center justify-between gap-3 mb-10">
               <h1 className={`text-3xl font-extrabold text-[#023347] transition-all duration-1000 ${isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}>Announcements</h1>
-              <button onClick={() => { setView('add'); setRegType('with'); setErrors({}); }} className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md active:scale-95 bg-[#023347] text-white px-8 py-3 rounded-2xl font-bold shadow-md hover:bg-[#2A8E9E]">Add Event</button>
+              <button onClick={() => { setView('add'); setRegType('with'); setErrors({}); }} className={topActionButtonClass}>Add Event</button>
             </header>
 
             {loading ? (
@@ -563,31 +592,21 @@ const AnnouncementAdmin = () => {
                           <p className="text-sm text-gray-500 line-clamp-2 break-words" title={event.short_description}>{event.short_description}</p>
                         </div>
                         <div className="mt-6 flex gap-3">
-                          <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
+                          <button className={activityButtonPrimaryClass}
                             onClick={() => handleEditClick(event.id, event.type)}
                             style={{
-                              flex: 1, height: 40,
-                              background: '#083A4B', color: '#fff',
-                              border: 'none', borderRadius: 12,
-                              fontSize: 12, fontWeight: 700,
-                              cursor: 'pointer', transition: 'background 0.2s',
+                              flex: 1,
+                              border: 'none',
                             }}
-                            onMouseEnter={e => e.currentTarget.style.background = '#2A8E9E'}
-                            onMouseLeave={e => e.currentTarget.style.background = '#083A4B'}
                           >
                             Edit
                           </button>
-                          <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
+                          <button className={activityButtonDangerClass}
                             onClick={() => setDeleteModal({ isOpen: true, id: event.id, type: event.type })}
                             style={{
-                              flex: 1, height: 40,
-                              background: '#083A4B', color: '#fff',
-                              border: 'none', borderRadius: 12,
-                              fontSize: 12, fontWeight: 700,
-                              cursor: 'pointer', transition: 'background 0.2s',
+                              flex: 1,
+                              border: 'none',
                             }}
-                            onMouseEnter={e => e.currentTarget.style.background = '#dc2626'}
-                            onMouseLeave={e => e.currentTarget.style.background = '#083A4B'}
                           >
                             Delete
                           </button>
@@ -614,27 +633,31 @@ const AnnouncementAdmin = () => {
               {/* Type tabs — only show on Add */}
               {view === 'add' && (
                 <div style={{ display: 'flex', gap: 24, borderBottom: '1px solid #f1f5f9', marginBottom: 20 }}>
-                  <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
+                  <button
+                    type="button"
+                    className="transition-colors duration-200"
                     onClick={() => { setRegType('with'); setErrors({}); }}
                     style={{
                       paddingBottom: 10, fontSize: 14, fontWeight: regType === 'with' ? 700 : 400,
                       color: regType === 'with' ? '#083A4B' : '#9ca3af',
                       background: 'none', border: 'none', borderBottom: regType === 'with' ? '2px solid #083A4B' : '2px solid transparent',
-                      cursor: 'pointer', transition: 'all 0.2s',
+                      transition: 'all 0.2s', outline: 'none', boxShadow: 'none', WebkitTapHighlightColor: 'transparent',
                     }}
                   >
                     With Registration
                   </button>
-                  <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
+                  <button
+                    type="button"
+                    className="transition-colors duration-200"
                     onClick={() => { setRegType('without'); setErrors({}); }}
                     style={{
                       paddingBottom: 10, fontSize: 14, fontWeight: regType === 'without' ? 700 : 400,
                       color: regType === 'without' ? '#083A4B' : '#9ca3af',
                       background: 'none', border: 'none', borderBottom: regType === 'without' ? '2px solid #083A4B' : '2px solid transparent',
-                      cursor: 'pointer', transition: 'all 0.2s',
+                      transition: 'all 0.2s', outline: 'none', boxShadow: 'none', WebkitTapHighlightColor: 'transparent',
                     }}
                   >
-                    without Registartion
+                    Without Registration
                   </button>
                 </div>
               )}
@@ -642,7 +665,7 @@ const AnnouncementAdmin = () => {
               {/* Form Content Wrapper with directional slide transition triggered by tab change */}
               <div key={regType} className={`animate-in fade-in zoom-in-[0.98] duration-500 ease-out ${regType === 'with' ? 'slide-in-from-left-4' : 'slide-in-from-right-4'}`}>
                 {/* ── Brochure / Thumbnail ── */}
-                <h3 style={sectionTitleStyle}>Brochure (Ratio:16)*</h3>
+                <h3 style={sectionTitleStyle}>Brochure (Ratio: 16:9)</h3>
 
                 <div
                   className={`ann-img-upload-container ${errors.brochure_url ? 'error' : ''} ${isDragOver ? 'bg-[#e0f2fe] border-[#2A8E9E]' : ''}`}
@@ -747,21 +770,19 @@ const AnnouncementAdmin = () => {
 
                 {/* ── Submit ── */}
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 40 }}>
-                  <button className="px-8 py-3 rounded-2xl font-bold bg-[#023347] text-white shadow-md hover:bg-red-700 transition-all active:scale-95 duration-200 transform hover:-translate-y-1 hover:shadow-md"
+                  <button className={activityButtonDangerClass}
                     onClick={resetFormAndGoHome}
                     disabled={isSubmitting}
                    
-                    style={{ cursor: isSubmitting ? 'not-allowed' : 'pointer', fontSize: 14, opacity: isSubmitting ? 0.5 : 1, border: 'none' }}
+                    style={{ opacity: isSubmitting ? 0.5 : 1, border: 'none' }}
                   >
                     Cancel
                   </button>
-                  <button className="px-8 py-3 rounded-2xl font-bold bg-[#023347] text-white shadow-md hover:bg-[#2A8E9E] transition-all active:scale-95 duration-200 transform hover:-translate-y-1 hover:shadow-md"
+                  <button className={activityButtonPrimaryClass}
                     onClick={handleAnnounce}
                     disabled={isSubmitting}
                    
                     style={{
-                      cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                      fontSize: 14,
                       border: 'none',
                       display: 'flex',
                       alignItems: 'center',
@@ -794,9 +815,11 @@ const AnnouncementAdmin = () => {
           </div>
         )}
       </div>
+      </div>
       <style dangerouslySetInnerHTML={{ __html: `
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        @keyframes annToastIn { from { opacity: 0; transform: translateY(-16px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         ${IMG_UPLOAD_STYLES}
       ` }} />
