@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from "react-router-dom";
+import { ChevronLeft } from "lucide-react"; 
 import { API_BASE } from "../config/api";
 
 function ProblemStatements() {
@@ -11,6 +12,7 @@ function ProblemStatements() {
   const [loading, setLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
   const [toast, setToast] = useState(null);
+  const [showFloatingBack, setShowFloatingBack] = useState(false);
 
   // Intersection Observer for Animations
   useEffect(() => {
@@ -28,7 +30,7 @@ function ProblemStatements() {
     return () => clearTimeout(timer);
   }, [toast]);
 
-  // Fetch Problems
+  // Fetch Problems & Scroll Listener
   useEffect(() => {
     const fetchProblems = async () => {
       try {
@@ -42,6 +44,13 @@ function ProblemStatements() {
       }
     };
     fetchProblems();
+
+    const handleScroll = () => {
+      if (window.scrollY > 300) setShowFloatingBack(true);
+      else setShowFloatingBack(false);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
@@ -49,6 +58,16 @@ function ProblemStatements() {
       ref={sectionRef}
       className="relative min-h-screen bg-[#FDFCFB] text-[#023347] font-sans selection:bg-[#D4AF37]/20 overflow-x-hidden"
     >
+      {/* --- FLOATING MOBILE BACK BUTTON (Matches Activities Page Logic) --- */}
+      <button
+        onClick={() => navigate(-1)}
+        className={`fixed bottom-8 right-6 z-[100] flex md:hidden items-center justify-center w-14 h-14 bg-[#023347] text-[#D4AF37] rounded-full shadow-2xl border border-[#D4AF37]/30 transition-all duration-500 transform ${
+          showFloatingBack ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0"
+        }`}
+      >
+        <ChevronLeft size={28} />
+      </button>
+
       {toast ? (
         <div className="fixed left-4 right-4 top-4 z-[120] md:left-auto md:right-10 md:top-10">
           <div className="relative flex w-full items-center overflow-hidden rounded-xl border border-black/5 bg-white shadow-2xl animate-[slideInRight_0.45s_cubic-bezier(0.16,1,0.3,1)_forwards] md:min-w-[320px]">
@@ -64,29 +83,33 @@ function ProblemStatements() {
       {/* --- AMBIENT LIGHTING --- */}
       <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-[#D4AF37]/5 via-transparent to-transparent pointer-events-none" />
 
+      {/* RESTORED: Main Desktop Container Padding (px-12) */}
       <main className="relative z-10 mx-auto max-w-[1500px] px-5 py-12 md:px-12 md:py-16">
         
-        {/* --- HEADER --- */}
-        <header className="mb-16 flex flex-col gap-6 border-b border-[#023347]/5 pb-10 md:flex-row md:items-end md:justify-between md:gap-8">
-          <div>
+        {/* --- HEADER (Restored Desktop Alignment) --- */}
+        <header className="mb-16 flex flex-col md:flex-row items-start md:items-end justify-between gap-8 border-b border-[#023347]/5 pb-10">
+          <div className="max-w-2xl">
             <span className={`text-[10px] font-bold tracking-[0.5em] uppercase text-[#D4AF37] mb-4 block transition-all duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
               Open Challenges for Curious Minds
             </span>
-            <h1 className={`text-3xl font-semibold leading-tight transition-all duration-[1200ms] sm:text-4xl md:text-6xl ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
+            <h1 className={`text-3xl md:text-6xl font-semibold text-[#023347] tracking-tight transition-all duration-[1200ms] ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}>
               Problem <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-[#B8860B]">Statements</span>
             </h1>
           </div>
 
-          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:gap-4">
+          <div className="flex items-center gap-3 md:gap-4 w-full md:w-auto">
+            {/* COMPACT: Back button reduced width on mobile, full on desktop */}
             <button
               onClick={() => navigate(-1)}
-              className="landing-btn-secondary landing-btn-compact-mobile px-6 py-3 border border-[#023347]/10 rounded-xl hover:bg-[#023347]/5 transition-colors"
+              className="landing-btn-primary landing-btn-compact-mobile"
             >
-              Back
+              <ChevronLeft size={16} className="md:mr-1" />
+              <span className="hidden md:inline">Back</span>
             </button>
+            
             <button
               onClick={() => navigate("/ProblemStatementVerification")}
-              className="landing-btn-primary px-6 py-3 bg-[#023347] text-white rounded-xl hover:bg-[#023347]/90 transition-colors shadow-lg"
+              className="flex-1 md:flex-none px-6 py-4 bg-[#023347] text-white rounded-xl text-[10px] md:text-xs font-bold uppercase tracking-widest hover:bg-[#D4AF37] transition-all duration-300 shadow-lg whitespace-nowrap"
             >
               + Submit Statement
             </button>
@@ -115,10 +138,8 @@ function ProblemStatements() {
                 className={`group relative flex flex-col gap-6 bg-white/[0.02] backdrop-blur-[4px] border border-black/5 rounded-[2rem] overflow-hidden p-6 md:grid md:grid-cols-3 md:items-center md:gap-8 md:p-8 transition-all duration-700 hover:border-[#D4AF37]/40 hover:shadow-2xl hover:-translate-y-1.5 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}
                 style={{ transitionDelay: `${idx * 100}ms` }}
               >
-                {/* Accent Side Bar */}
                 <div className="absolute left-0 top-0 w-full md:w-1.5 h-2 md:h-full bg-[#023347] group-hover:bg-[#D4AF37] transition-all duration-500" />
                 
-                {/* Column 1: Title */}
                 <div className="min-w-0">
                   <span className="text-[9px] font-bold text-[#D4AF37] uppercase tracking-[0.2em] mb-1 block">Case #{idx + 1}</span>
                   <h3 className="text-lg font-bold text-[#023347] leading-snug group-hover:text-[#B8860B] transition-colors">
@@ -126,9 +147,9 @@ function ProblemStatements() {
                   </h3>
                 </div>
 
-                {/* Column 2: Status (Centered) */}
                 <div className="flex justify-start md:justify-center">
-                  <div className="flex items-center gap-3 md:rounded-2xl md:border md:border-[#023347]/10 md:bg-white/70 md:px-5 md:py-3 shadow-sm">
+                  {/* UPDATED: Changed md:rounded-2xl to rounded-2xl for mobile support */}
+                  <div className="flex items-center gap-3 rounded-2xl md:border md:border-[#023347]/10 md:bg-white/70 md:px-5 md:py-3 shadow-sm p-3">
                     <span className="text-[9px] font-bold tracking-[0.2em] uppercase text-[#023347]/45">
                       Status
                     </span>
@@ -142,7 +163,6 @@ function ProblemStatements() {
                   </div>
                 </div>
 
-                {/* Column 3: Action (Right Aligned) */}
                 <div className="w-full md:flex md:justify-end">
                   <button
                     onClick={() => {
@@ -152,7 +172,7 @@ function ProblemStatements() {
                       }
                       navigate(`/problem-details/${item.problem_id}`);
                     }}
-                    className="w-full md:w-auto px-8 py-4 bg-[#023347] text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-[#D4AF37] transition-all duration-300"
+                    className="w-full md:w-auto px-8 py-4 bg-[#023347] text-white rounded-2xl font-bold text-[10px] uppercase tracking-widest hover:bg-[#D4AF37] transition-all duration-300"
                   >
                     View Details
                   </button>
@@ -160,7 +180,7 @@ function ProblemStatements() {
               </div>
             ))
           ) : (
-            <div className="py-20 text-center text-[#023347]/40">No records currently available.</div>
+            <div className="py-20 text-center text-[#023347]/40 italic">No records currently available.</div>
           )}
         </div>
       </main>
@@ -169,10 +189,6 @@ function ProblemStatements() {
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;600;700&display=swap');
         .font-serif { font-family: 'Playfair Display', serif; }
         .font-sans { font-family: 'Inter', sans-serif; }
-
-        @keyframes shimmer {
-          100% { transform: translateX(100%); }
-        }
 
         .animate-pulse {
           animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
@@ -193,4 +209,3 @@ function ProblemStatements() {
 }
 
 export default ProblemStatements;
-

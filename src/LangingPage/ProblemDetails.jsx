@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { ChevronLeft } from "lucide-react"; 
 import { API_BASE } from "../config/api";
 
 const YEAR_OPTIONS = ["I", "II", "III", "IV"];
@@ -36,6 +37,7 @@ export default function ProblemDetails() {
   const [otpLoading, setOtpLoading] = useState(false);
   const [submissionState, setSubmissionState] = useState(null);
   const [pendingPayload, setPendingPayload] = useState(null);
+  const [showFloatingBack, setShowFloatingBack] = useState(false); 
   const otpInputs = useRef([]);
   const [solverForm, setSolverForm] = useState({
     name: "",
@@ -47,6 +49,16 @@ export default function ProblemDetails() {
     mentor_email: "",
     team_members: Array.from({ length: 5 }, createEmptyMember),
   });
+
+  // Scroll logic for floating button
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) setShowFloatingBack(true);
+      else setShowFloatingBack(false);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -308,15 +320,27 @@ export default function ProblemDetails() {
       ref={sectionRef}
       className="relative min-h-screen bg-[#FDFCFB] text-[#023347] font-sans selection:bg-[#D4AF37]/20 overflow-x-hidden"
     >
+      {/* --- FLOATING MOBILE BACK BUTTON --- */}
+      <button
+        onClick={() => navigate(-1)}
+        className={`fixed bottom-8 right-6 z-[100] flex md:hidden items-center justify-center w-14 h-14 bg-[#023347] text-[#D4AF37] rounded-full shadow-2xl border border-[#D4AF37]/30 transition-all duration-500 transform ${
+          showFloatingBack ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0"
+        }`}
+      >
+        <ChevronLeft size={28} />
+      </button>
+
       <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-[#D4AF37]/5 via-transparent to-transparent pointer-events-none" />
 
       <main className="relative z-10 mx-auto max-w-[1500px] px-5 py-12 md:px-12 md:py-16">
-        <header className="mb-16 flex flex-col gap-6 border-b border-[#023347]/5 pb-10 md:flex-row md:items-end md:justify-between md:gap-8">
+        
+        {/* --- FIXED HEADER --- */}
+        <header className="mb-16 flex flex-row items-center justify-between gap-4 border-b border-[#023347]/5 pb-10 md:items-end md:gap-8">
           <div className="overflow-visible">
-            <span className={`text-[10px] font-bold tracking-[0.5em] uppercase text-[#D4AF37] mb-4 block transition-all duration-1000 ${isVisible ? "opacity-100" : "opacity-0"}`}>
+            <span className={`text-[10px] font-bold tracking-[0.5em] uppercase text-[#D4AF37] mb-2 md:mb-4 block transition-all duration-1000 ${isVisible ? "opacity-100" : "opacity-0"}`}>
               From Problem Insight to Practical Action
             </span>
-            <h1 className={`font-serif text-3xl md:text-5xl font-semibold leading-tight transition-all duration-[1200ms] ${isVisible ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"}`}>
+            <h1 className={`font-serif text-2xl md:text-5xl font-semibold leading-tight transition-all duration-[1200ms] ${isVisible ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"}`}>
               {titleParts.primary}
               {titleParts.accent ? (
                 <>
@@ -329,15 +353,15 @@ export default function ProblemDetails() {
             </h1>
           </div>
 
-          <button
-            onClick={() => navigate(-1)}
-            className="landing-btn-secondary landing-btn-compact-mobile"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 transition-transform group-hover:-translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-              <path d="M19 12H5M5 12l7 7M5 12l7-7" />
-            </svg>
-            Back to archives
-          </button>
+          <div className="flex-shrink-0">
+            <button
+              onClick={() => navigate(-1)}
+              className="landing-btn-primary landing-btn-compact-mobile flex items-center justify-center shrink-0"
+            >
+              <ChevronLeft size={18} className="md:mr-1" />
+              <span className="hidden md:inline">Back to archives</span>
+            </button>
+          </div>
         </header>
 
         <div className={`group relative bg-white/[0.02] backdrop-blur-[4px] border border-black/5 rounded-[2rem] p-8 md:p-16 transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}>
@@ -599,4 +623,3 @@ export default function ProblemDetails() {
     </div>
   );
 }
-
