@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from "react-router-dom";
+import { ChevronLeft } from "lucide-react"; 
 
 function Suggestions() {
   const navigate = useNavigate();
+  const sectionRef = useRef(null);
   const [form, setForm] = useState({
     title: '',
     description: ''
@@ -10,9 +12,18 @@ function Suggestions() {
   const [errors, setErrors] = useState({});
   const [isShaking, setIsShaking] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [showFloatingBack, setShowFloatingBack] = useState(false);
 
   useEffect(() => {
     setIsVisible(true);
+
+    // Scroll Listener for Floating Back Button
+    const handleScroll = () => {
+      if (window.scrollY > 300) setShowFloatingBack(true);
+      else setShowFloatingBack(false);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleChange = (e) => {
@@ -41,39 +52,48 @@ function Suggestions() {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#FDFCFB] text-[#023347] font-sans selection:bg-[#D4AF37]/20 overflow-x-hidden">
-      
-      {/* --- AMBIENT LIGHTING (God Ray) --- */}
+    <div 
+      ref={sectionRef}
+      className="relative min-h-screen bg-[#FDFCFB] text-[#023347] font-sans selection:bg-[#D4AF37]/20 overflow-x-hidden"
+    >
+      {/* --- FLOATING MOBILE BACK BUTTON --- */}
+      <button
+        onClick={() => navigate(-1)}
+        className={`fixed bottom-8 right-6 z-[100] flex md:hidden items-center justify-center w-14 h-14 bg-[#023347] text-[#D4AF37] rounded-full shadow-2xl border border-[#D4AF37]/30 transition-all duration-500 transform ${
+          showFloatingBack ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0"
+        }`}
+      >
+        <ChevronLeft size={28} />
+      </button>
+
+      {/* --- AMBIENT LIGHTING --- */}
       <div className="absolute top-0 left-0 w-full h-[300px] md:h-[400px] bg-gradient-to-b from-[#D4AF37]/5 via-transparent to-transparent pointer-events-none" />
 
       <main className="max-w-[1500px] mx-auto px-5 md:px-12 py-10 md:py-16 relative z-10">
         
-        {/* --- HEADER ZONE --- */}
-        <header className="mb-10 md:mb-16 border-b border-[#023347]/5 pb-8 md:pb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 md:gap-8">
-          <div className="flex flex-col items-start text-left">
-            <span className={`text-[9px] md:text-[10px] font-bold tracking-[0.4em] md:tracking-[0.5em] uppercase text-[#D4AF37] mb-3 md:mb-4 block transition-all duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+        {/* --- HEADER ZONE (Updated Discard Button Style) --- */}
+        <header className="mb-10 md:mb-16 border-b border-[#023347]/5 pb-8 md:pb-12 flex flex-row justify-between items-end gap-4">
+          <div className="flex-1">
+            <span className={`text-[9px] md:text-[10px] font-bold tracking-[0.4em] md:tracking-[0.5em] uppercase text-[#D4AF37] mb-2 md:mb-5 block transition-all duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
               Thoughtful Ideas, Meaningful Change
             </span>
-            <h1 className={`text-3xl md:text-5xl font-semibold leading-tight transition-all duration-[1200ms] ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 md:translate-y-12 opacity-0'}`}>
+            <h1 className={`text-2xl md:text-5xl font-semibold leading-tight transition-all duration-[1200ms] ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 md:translate-y-12 opacity-0'}`}>
               Submit <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] via-[#B8860B] to-[#D4AF37]">Suggestions</span>
             </h1>
           </div>
           
           <button
             onClick={() => navigate(-1)}
-            className="landing-btn-secondary landing-btn-compact-mobile"
+            className={`flex items-center gap-2 px-5 py-2.5 md:px-8 md:py-4 bg-[#023347] text-white rounded-full text-[10px] md:text-xs font-bold uppercase tracking-widest hover:bg-[#D4AF37] transition-all duration-300 shadow-lg shadow-[#023347]/10 w-auto shrink-0 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 md:w-4 h-4 transition-transform group-hover:-translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-              <path d="M19 12H5M5 12l7 7M5 12l7-7" />
-            </svg>
-            Discard
+            <ChevronLeft size={16} />
+            <span className="hidden sm:inline">Discard</span>
           </button>
         </header>
 
-        {/* --- FORM MODULE (Corporate Glass) --- */}
+        {/* --- FORM MODULE --- */}
         <div className={`group relative bg-white/[0.02] backdrop-blur-[4px] border border-black/5 rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-16 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
           
-          {/* Prestige Pillar Anchor */}
           <div className="absolute left-0 top-12 w-1 md:w-1.5 h-24 md:h-28 bg-[#023347] rounded-r-full group-hover:bg-[#D4AF37] transition-all duration-500" />
 
           <div className="space-y-8 md:space-y-12">
@@ -142,11 +162,6 @@ function Suggestions() {
           75% { transform: translateX(8px); }
         }
         .animate-shake { animation: shake 0.4s ease-in-out; }
-
-        /* Custom extra-small breakpoint for very narrow phones */
-        @media (min-width: 380px) {
-          .xs\:block { display: block; }
-        }
       `}</style>
     </div>
   );
