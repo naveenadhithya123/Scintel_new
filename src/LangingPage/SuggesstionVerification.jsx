@@ -72,12 +72,13 @@ export default function SuggesstionVerification() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: formData.email }),
       });
+      const result = await response.json().catch(() => ({}));
       if (response.ok) {
           setShowOTP(true);
           setTimer(300);
           setCanResend(false);
       } else {
-          showFeedback('error', 'HANDSHAKE FAILED', 'Check email credentials and retry.');
+          showFeedback('error', 'HANDSHAKE FAILED', result.message || 'Unable to send OTP right now.');
       }
     } catch (error) {
         showFeedback('error', 'NETWORK ERROR', 'Unable to reach security server.');

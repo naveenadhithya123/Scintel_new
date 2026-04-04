@@ -8,6 +8,7 @@ export default function Verification() {
   const [showOTP, setShowOTP] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [requestError, setRequestError] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -29,6 +30,7 @@ export default function Verification() {
 
   const handleVerifyRequest = async (e) => {
     e.preventDefault();
+    setRequestError("");
     setLoading(true);
     try {
       const response = await fetch(`${API_BASE}/send-otp`, {
@@ -36,10 +38,12 @@ export default function Verification() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: formData.email }),
       });
+      const result = await response.json().catch(() => ({}));
       if (response.ok) setShowOTP(true);
-      else alert("Failed to send OTP. Please check the email.");
+      else setRequestError(result.message || "Failed to send OTP. Please try again.");
     } catch (error) {
       console.error("Error:", error);
+      setRequestError("Unable to reach the OTP service right now.");
     } finally {
       setLoading(false);
     }
@@ -117,6 +121,11 @@ export default function Verification() {
 
         {/* --- FORM MODULE --- */}
         <div className={`bg-white/[0.02] backdrop-blur-[4px] border border-black/5 rounded-[2rem] p-6 md:p-16 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+          {requestError ? (
+            <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {requestError}
+            </div>
+          ) : null}
           <form onSubmit={handleVerifyRequest} className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
               {[
