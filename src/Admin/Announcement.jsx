@@ -191,6 +191,24 @@ const sectionTitleStyle = {
   paddingBottom: '5px',
 };
 
+const normalizeExternalUrl = (value) => {
+  const trimmed = value?.trim();
+
+  if (!trimmed) {
+    return "";
+  }
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+
+  if (/^\/\//.test(trimmed)) {
+    return `https:${trimmed}`;
+  }
+
+  return `https://${trimmed}`;
+};
+
 // Fallback mock data in case the localhost backend is unavailable in this environment
 let MOCK_EVENTS = [
   {
@@ -412,7 +430,7 @@ const AnnouncementAdmin = () => {
     };
 
     if (typeValue === 'event') {
-      payload.event_link = formData.event_link;
+      payload.event_link = normalizeExternalUrl(formData.event_link);
       payload.registration_start_date = formData.registration_start_date;
       payload.registration_end_date = formData.registration_end_date;
     }
