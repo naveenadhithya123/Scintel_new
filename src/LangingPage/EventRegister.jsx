@@ -14,6 +14,24 @@ function EventRegister() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [isDownloading, setIsDownloading] = useState(false);
 
+  const normalizeExternalUrl = (value) => {
+    const trimmed = value?.trim();
+
+    if (!trimmed) {
+      return "";
+    }
+
+    if (/^https?:\/\//i.test(trimmed)) {
+      return trimmed;
+    }
+
+    if (/^\/\//.test(trimmed)) {
+      return `https:${trimmed}`;
+    }
+
+    return `https://${trimmed}`;
+  };
+
   // Helper to format dates
   const formatDate = (dateString) => {
     if (!dateString || dateString.startsWith("0000")) return "NA";
@@ -241,9 +259,9 @@ function EventRegister() {
 
               {/* Actions */}
               <div className="flex flex-col sm:flex-row gap-4 pt-4 md:pt-6">
-                {event?.event_link && (
+                {normalizeExternalUrl(event?.event_link) && (
                   <a 
-                    href={event.event_link} 
+                    href={normalizeExternalUrl(event?.event_link)} 
                     target="_blank" 
                     rel="noreferrer" 
                     className="flex-1 flex items-center justify-center gap-2 bg-[#023347] text-white py-4 rounded-2xl text-[11px] font-bold tracking-widest uppercase hover:bg-[#D4AF37] transition-all shadow-xl shadow-[#023347]/10"

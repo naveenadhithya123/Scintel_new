@@ -73,17 +73,46 @@ import AdminDeleteSpecificActivityRoutes from "./routes/Admin_DeleteSpecificActi
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+let dbReady = false;
+let dbWarmupInFlight = null;
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get("/api/health", async (req, res) => {
+const warmDatabaseConnection = async () => {
+  if (dbWarmupInFlight) {
+    return dbWarmupInFlight;
+  }
+
+  dbWarmupInFlight = (async () => {
+    try {
+      await withDbRetry(() => sequelize.authenticate(), { label: "Database warmup" });
+      dbReady = true;
+      console.log("Database connected successfully");
+    } catch (error) {
+      dbReady = false;
+      console.error("Unable to connect to database:", error);
+    } finally {
+      dbWarmupInFlight = null;
+    }
+  })();
+
+  return dbWarmupInFlight;
+};
+
+app.get("/api/health", (req, res) => {
+  res.status(200).json({ ok: true, dbReady });
+});
+
+app.get("/api/ready", async (req, res) => {
   try {
     await withDbRetry(() => sequelize.authenticate(), { label: "Health check database ping" });
-    res.status(200).json({ ok: true });
+    dbReady = true;
+    res.status(200).json({ ok: true, dbReady: true });
   } catch (error) {
-    res.status(503).json({ ok: false, message: "Database unavailable" });
+    dbReady = false;
+    res.status(503).json({ ok: false, dbReady: false, message: "Database unavailable" });
   }
 });
 
@@ -153,18 +182,11 @@ app.use("/api", AdminDenyProblemSolverRequestRoutes);
 app.use("/api", AdminDeleteSpecificBatchActivityRoutes);
 app.use("/api", AdminDeleteSpecificActivityRoutes);
 
-const startServer = async () => {
-  try {
-    await withDbRetry(() => sequelize.authenticate(), { label: "Initial database connection" });
-    console.log("Database connected successfully");
-
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
-  } catch (error) {
-    console.error("Unable to connect to database:", error);
-    process.exit(1);
-  }
+const startServer = () => {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    warmDatabaseConnection();
+  });
 };
 
 startServer();
