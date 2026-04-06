@@ -138,7 +138,25 @@ export default function UpcomingEvents() {
           style={{ touchAction: "pan-y", WebkitOverflowScrolling: 'touch' }}
         >
           {loading ? (
-             <div className="w-full text-center py-20 text-[#023347]/50">Loading...</div>
+            <div className="flex-none w-full snap-start snap-always shrink-0">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-2 pb-12">
+                 {[...Array(cardsPerPage)].map((_, i) => (
+                    <article key={`skeleton-${i}`} className="w-full">
+                      <div className="flex flex-col sm:flex-row bg-[#023347]/5 backdrop-blur-md rounded-[2rem] border-2 border-transparent h-[200px] animate-pulse">
+                        <div className="w-full sm:w-[200px] h-[200px] sm:h-[196px] bg-[#023347]/10 rounded-t-[2rem] sm:rounded-tr-none sm:rounded-l-[2rem]"></div>
+                        <div className="p-8 flex flex-col justify-between flex-1">
+                          <div>
+                            <div className="h-6 bg-[#023347]/10 rounded w-3/4 mb-4"></div>
+                            <div className="h-4 bg-[#023347]/10 rounded w-full mb-2"></div>
+                            <div className="h-4 bg-[#023347]/10 rounded w-5/6"></div>
+                          </div>
+                          <div className="h-10 mt-6 bg-[#023347]/10 rounded-xl w-full"></div>
+                        </div>
+                      </div>
+                    </article>
+                 ))}
+               </div>
+            </div>
           ) : pages.length > 0 ? (
             pages.map((pageCards, pageIndex) => (
               /* 4. Added snap-start and flex-shrink-0 to ensure pages align perfectly */
@@ -147,15 +165,20 @@ export default function UpcomingEvents() {
                   {pageCards.map((event, idx) => (
                     <article 
                       key={event.id || idx} 
-                      className={`group relative transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}
+                      className={`group relative transition-all duration-700 ease-out ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}
+                      style={{ 
+                        transitionDelay: `${idx * 100}ms`,
+                        animation: isVisible ? `gentle-float ${4 + (idx % 3)}s ease-in-out infinite alternate` : 'none',
+                        animationDelay: `${idx * 0.2}s`
+                      }}
                     >
-                      <div className="flex flex-col sm:flex-row bg-white/80 backdrop-blur-md rounded-[2rem] border-2 border-[#023347]/10 hover:border-[#D4AF37]/50 transition-all overflow-hidden h-full">
-                        <div className="w-full sm:w-[200px] h-[200px] sm:h-auto bg-[#023347]/5">
-                          {event.brochure_url && <img src={event.brochure_url} className="w-full h-full object-cover" alt="" />}
+                      <div className="flex flex-col sm:flex-row bg-white/60 backdrop-blur-md rounded-[2rem] border-2 border-slate-200 transition-all duration-700 overflow-hidden h-full group-hover:border-[#D4AF37] group-hover:shadow-xl md:group-hover:-translate-y-2 group-hover:bg-white/95">
+                        <div className="w-full sm:w-[200px] h-[200px] sm:h-auto bg-[#023347]/5 pointer-events-none overflow-hidden">
+                          {event.brochure_url && <img src={event.brochure_url} className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-105" alt="" />}
                         </div>
                         <div className="p-8 flex flex-col justify-between flex-1">
                           <div>
-                            <h3 className="text-xl font-bold mb-2 line-clamp-1">{event.title}</h3>
+                            <h3 className="text-xl font-bold mb-2 line-clamp-1 text-[#023347] group-hover:text-[#B8860B] transition-colors">{event.title}</h3>
                             <p className="text-sm text-[#023347]/60 line-clamp-3">{event.short_description}</p>
                           </div>
                           <button 
