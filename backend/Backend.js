@@ -28,7 +28,7 @@ import AdminActivitySpecificBatchRoutes from "./routes/Admin_ActivitySpecificBat
 import AdminAddActivityRoutes from "./routes/Admin_AddActivityRoutes.js";
 import AdminEditActivityRoutes from "./routes/Admin_editActivityRoutes.js";
 import AdminUpdateEditActivityRoutes from "./routes/Admin_UpdateEditActivityRoutes.js";
-import AdminDeleteActivityRoutes from "./routes/Admin_DeleteSpecificSuggestionRoutes.js";
+import AdminDeleteActivityRoutes from "./routes/Admin_DeleteSpecificActivityRoutes.js";
 import AdminLoginRoutes from "./routes/Admin_LoginRoutes.js";
 import AdminDeleteSuggestionAndSendMailRoutes from "./routes/Admin_deleteSuggestionAndSendMailRoutes.js";
 import AdminFetchAllSuggestionWithAcknowledgedRoutes from "./routes/Admin_fetchAllSuggestionWithAcknowledgedRoutes.js";
@@ -73,18 +73,78 @@ import AdminDeleteSpecificActivityRoutes from "./routes/Admin_DeleteSpecificActi
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const DB_RECONNECT_INTERVAL_MS = Number.parseInt(
+  process.env.DB_RECONNECT_INTERVAL_MS ?? "30000",
+  10
+);
+const dbReconnectIntervalMs = Number.isNaN(DB_RECONNECT_INTERVAL_MS)
+  ? 30000
+  : DB_RECONNECT_INTERVAL_MS;
+const databaseState = {
+  connected: false,
+  lastError: null,
+  lastCheckedAt: null
+};
+let databaseReconnectTimer = null;
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get("/api/health", async (req, res) => {
+const refreshDatabaseState = async (label) => {
   try {
-    await withDbRetry(() => sequelize.authenticate(), { label: "Health check database ping" });
-    res.status(200).json({ ok: true });
+    await withDbRetry(() => sequelize.authenticate(), { label });
+
+    const wasDisconnected = !databaseState.connected;
+    databaseState.connected = true;
+    databaseState.lastError = null;
+    databaseState.lastCheckedAt = new Date().toISOString();
+
+    if (wasDisconnected) {
+      console.log("Database connected successfully");
+    }
+
+    return true;
   } catch (error) {
-    res.status(503).json({ ok: false, message: "Database unavailable" });
+    databaseState.connected = false;
+    databaseState.lastError = error.message;
+    databaseState.lastCheckedAt = new Date().toISOString();
+    console.error(`${label} failed:`, error.message);
+    return false;
   }
+};
+
+const ensureDatabaseReconnectLoop = () => {
+  if (databaseReconnectTimer) {
+    return;
+  }
+
+  databaseReconnectTimer = setInterval(() => {
+    if (!databaseState.connected) {
+      void refreshDatabaseState("Background database reconnect");
+    }
+  }, dbReconnectIntervalMs);
+};
+
+app.get("/", (req, res) => {
+  res.status(200).json({
+    ok: true,
+    service: "scintel-backend",
+    database: databaseState.connected ? "up" : "down"
+  });
+});
+
+app.get("/api/health", async (req, res) => {
+  const isDatabaseAvailable = await refreshDatabaseState("Health check database ping");
+
+  res.status(isDatabaseAvailable ? 200 : 503).json({
+    ok: isDatabaseAvailable,
+    service: "scintel-backend",
+    database: isDatabaseAvailable ? "up" : "down",
+    lastCheckedAt: databaseState.lastCheckedAt,
+    message: isDatabaseAvailable ? "Service is healthy" : "Database unavailable",
+    error: isDatabaseAvailable ? null : databaseState.lastError
+  });
 });
 
 app.use("/api", activityFetchWithBatchRoutes);
@@ -154,17 +214,13 @@ app.use("/api", AdminDeleteSpecificBatchActivityRoutes);
 app.use("/api", AdminDeleteSpecificActivityRoutes);
 
 const startServer = async () => {
-  try {
-    await withDbRetry(() => sequelize.authenticate(), { label: "Initial database connection" });
-    console.log("Database connected successfully");
+  ensureDatabaseReconnectLoop();
 
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
-  } catch (error) {
-    console.error("Unable to connect to database:", error);
-    process.exit(1);
-  }
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+
+  void refreshDatabaseState("Initial database connection");
 };
 
 startServer();
