@@ -34,9 +34,20 @@ export default function EditBatch() {
   const [loading, setLoading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
+  // ── Toast State ──
+  const [toast, setToast] = useState(null); // { message, type: "success"|"error" }
+
+  const showToast = (message, type = "success") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3500);
+  };
+
   // ── Modal State ──
   const [showAddModal, setShowAddModal] = useState(false);
   const [memberForm, setMemberForm] = useState({ name: "", reg: "", role: "", year: "" });
+
+  // ── Confirm Delete Modal State ──
+  const [confirmDelete, setConfirmDelete] = useState(null); // { index, name }
 
   useEffect(() => {
     const data = location.state?.batch;
@@ -66,7 +77,7 @@ export default function EditBatch() {
 
   const handleSaveAll = async () => {
     if (!batchId || !batchYear.trim() || !title.trim() || !description.trim()) {
-      alert("Batch year, title and description are required.");
+      showToast("Batch year, title and description are required.", "error");
       return;
     }
 
@@ -75,7 +86,7 @@ export default function EditBatch() {
     );
 
     if (hasInvalidMember) {
-      alert("Each member needs a name, phone number, role and year.");
+      showToast("Each member needs a name, phone number, role and year.", "error");
       return;
     }
 
@@ -141,24 +152,34 @@ export default function EditBatch() {
         })
       );
 
-      alert("Batch and members updated successfully!");
-      navigate("/admin/members");
+      showToast("Batch and members updated successfully!");
+      setTimeout(() => navigate("/admin/members"), 1500);
     } catch (err) {
-      alert(err.message);
+      showToast(err.message, "error");
     } finally {
       setLoading(false);
     }
   };
 
   const handleRemoveMember = (index) => {
-    if (!window.confirm("Remove this member?")) return;
-    setMembers(prev => prev.filter((_, i) => i !== index));
+    const member = members[index];
+    setConfirmDelete({ index, name: member.name || "this member" });
+  };
+
+  const confirmRemoveMember = () => {
+    setMembers(prev => prev.filter((_, i) => i !== confirmDelete.index));
+    showToast(`${confirmDelete.name} removed from list.`);
+    setConfirmDelete(null);
   };
 
   // ── Opens modal instead of inline row ──
   const handleAddMemberSubmit = () => {
     if (!memberForm.name.trim() || !memberForm.reg.trim() || !memberForm.role.trim() || !memberForm.year) {
-      alert("Name, Phone Number, Role and Year are required.");
+      showToast("Name, Phone Number, Role and Year are required.", "error");
+      return;
+    }
+    if (memberForm.reg.length !== 10) {
+      showToast("Phone number must be exactly 10 digits.", "error");
       return;
     }
     setMembers(prev => sortMembersByRole([...prev, {
@@ -169,9 +190,13 @@ export default function EditBatch() {
       year: memberForm.year,
       batch_year: batchYear
     }]));
+    showToast(`${memberForm.name} added successfully.`);
     setMemberForm({ name: "", reg: "", role: "", year: "" });
     setShowAddModal(false);
   };
+
+  // ── Helper: only allow digits, max 10 ──
+  const handlePhoneInput = (value) => value.replace(/\D/g, "").slice(0, 10);
 
   return (
     <AdminSidebar>
@@ -188,14 +213,33 @@ export default function EditBatch() {
         .eb-img-drop img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .eb-img-drop-overlay { position: absolute; inset: 0; background: rgba(2,51,71,0.55); display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 600; opacity: 0; transition: opacity 0.2s; pointer-events: none; gap: 6px; }
         .eb-img-drop:hover .eb-img-drop-overlay { opacity: 1; }
+
+        /* Toast */
+        .eb-toast {
+          position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+          padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 600;
+          color: #fff; z-index: 9999; box-shadow: 0 4px 18px rgba(0,0,0,0.18);
+          animation: eb-fadein 0.25s ease;
+          white-space: nowrap;
+        }
+        .eb-toast.success { background: #2A8E9E; }
+        .eb-toast.error { background: #dc2626; }
+        @keyframes eb-fadein { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
       `}</style>
+
+      {/* ── Toast ── */}
+      {toast && (
+        <div className={`eb-toast ${toast.type}`}>
+          {toast.type === "success" ? "✓ " : "✕ "}{toast.message}
+        </div>
+      )}
 
       <div style={{ flex: 1, overflowY: "auto", padding: "36px 40px" }}>
 
         {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "28px" }}>
           <h2 style={{ fontSize: "22px", fontWeight: 700, color: "#083A4B", margin: 0 }}>Edit Batch</h2>
-          <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
+          <button
             onClick={() => setShowAddModal(true)}
             className="h-11 px-6 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5"
           >
@@ -268,7 +312,16 @@ export default function EditBatch() {
                       <input className="eb-input" value={m.name} onChange={e => { const u = [...members]; u[index].name = e.target.value; setMembers(sortMembersByRole(u)); }} />
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <input className="eb-input" type="tel" value={m.register_number} onChange={e => { const u = [...members]; u[index].register_number = e.target.value; setMembers(sortMembersByRole(u)); }} />
+                      <input
+                        className="eb-input"
+                        type="tel"
+                        value={m.register_number}
+                        maxLength={10}
+                        onChange={e => {
+                          const val = handlePhoneInput(e.target.value);
+                          const u = [...members]; u[index].register_number = val; setMembers(sortMembersByRole(u));
+                        }}
+                      />
                     </td>
                     <td className="px-6 py-4 text-center">
                       <select className="eb-input" value={m.role} onChange={e => { const u = [...members]; u[index].role = e.target.value; setMembers(sortMembersByRole(u)); }}>
@@ -287,7 +340,7 @@ export default function EditBatch() {
                       </select>
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
+                      <button
                         onClick={() => handleRemoveMember(index)}
                         className="h-9 px-5 bg-[#023347] text-white rounded-xl text-xs font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5"
                       >
@@ -307,16 +360,16 @@ export default function EditBatch() {
 
         {/* Footer Buttons */}
         <div style={{ marginTop: "28px", display: "flex", justifyContent: "flex-end", gap: "12px" }}>
-          <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
+          <button
             onClick={() => navigate(-1)}
             className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5"
           >
             Cancel
           </button>
-          <button className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5 duration-200 hover:-translate-y-1 hover:shadow-md active:scale-95"
+          <button
+            className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5 duration-200 active:scale-95"
             onClick={handleSaveAll}
             disabled={loading}
-           
           >
             {loading ? "Saving..." : "Update Everything"}
           </button>
@@ -352,7 +405,8 @@ export default function EditBatch() {
                   placeholder="9876543210"
                   className="eb-input"
                   value={memberForm.reg}
-                  onChange={(e) => setMemberForm(prev => ({ ...prev, reg: e.target.value }))}
+                  maxLength={10}
+                  onChange={(e) => setMemberForm(prev => ({ ...prev, reg: handlePhoneInput(e.target.value) }))}
                 />
               </div>
               <div>
@@ -383,17 +437,49 @@ export default function EditBatch() {
               </div>
             </div>
             <div style={{ display: "flex", justifyContent: "flex-end", gap: 12 }}>
-              <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
+              <button
                 onClick={() => { setShowAddModal(false); setMemberForm({ name: "", reg: "", role: "", year: "" }); }}
                 className="h-11 px-6 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5"
               >
                 Cancel
               </button>
-              <button className="h-11 px-6 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5 duration-200 hover:-translate-y-1 hover:shadow-md active:scale-95"
+              <button
+                className="h-11 px-6 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5 active:scale-95"
                 onClick={handleAddMemberSubmit}
-               
               >
                 Add to List
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Confirm Remove Modal ── */}
+      {confirmDelete && (
+        <div
+          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50, padding: "0 16px" }}
+          onClick={() => setConfirmDelete(null)}
+        >
+          <div
+            style={{ background: "#fff", borderRadius: 14, padding: 32, width: "100%", maxWidth: 400, boxSizing: "border-box" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{ fontSize: 17, fontWeight: 700, color: "#111827", marginBottom: 10 }}>Remove Member</h3>
+            <p style={{ fontSize: 14, color: "#4b5563", marginBottom: 24 }}>
+              Are you sure you want to remove <strong>{confirmDelete.name}</strong> from this batch?
+            </p>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 12 }}>
+              <button
+                onClick={() => setConfirmDelete(null)}
+                className="h-11 px-6 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-gray-600 transition-all transform hover:-translate-y-0.5"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmRemoveMember}
+                className="h-11 px-6 bg-red-600 text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5"
+              >
+                Yes, Remove
               </button>
             </div>
           </div>
