@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import sequelize from "./config/database.js";
+import sequelize, { withDbRetry } from "./config/database.js";
 import verifyAdminToken from "./middleware/verifyAdminToken.js";
 
 import activityFetchWithBatchRoutes from "./routes/activityFetchWithBatchRoutes.js";
@@ -72,19 +72,20 @@ import AdminDeleteSpecificActivityRoutes from "./routes/Admin_DeleteSpecificActi
 
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
-sequelize.authenticate()
-  .then(() => {
-    console.log("Database connected successfully");
-  })
-  .catch((error) => {
-    console.error("Unable to connect to database:", error);
-  });
+app.get("/api/health", async (req, res) => {
+  try {
+    await withDbRetry(() => sequelize.authenticate(), { label: "Health check database ping" });
+    res.status(200).json({ ok: true });
+  } catch (error) {
+    res.status(503).json({ ok: false, message: "Database unavailable" });
+  }
+});
 
 app.use("/api", activityFetchWithBatchRoutes);
 app.use("/api", activityFetchWithSpecificBatchRoutes);
@@ -152,6 +153,18 @@ app.use("/api", AdminDenyProblemSolverRequestRoutes);
 app.use("/api", AdminDeleteSpecificBatchActivityRoutes);
 app.use("/api", AdminDeleteSpecificActivityRoutes);
 
-app.listen(3000, () => {
-  console.log("Server running on port 3000");
-});
+const startServer = async () => {
+  try {
+    await withDbRetry(() => sequelize.authenticate(), { label: "Initial database connection" });
+    console.log("Database connected successfully");
+
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("Unable to connect to database:", error);
+    process.exit(1);
+  }
+};
+
+startServer();

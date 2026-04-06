@@ -1,4 +1,4 @@
-import transporter, { verificationMailFrom } from "../config/mailer.js";
+import transporter, { isMailerConfigured, verificationMailFrom } from "../config/mailer.js";
 
 export const otpStore = {};
 
@@ -10,6 +10,12 @@ export const sendOtp = async (req, res) => {
 
         if (!email) {
             return res.status(400).json({ message: "Email is required" });
+        }
+
+        if (!isMailerConfigured) {
+            return res.status(503).json({
+                message: "OTP email service is not configured on the server. Add SMTP credentials in backend/.env and restart the backend."
+            });
         }
 
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -69,7 +75,9 @@ await transporter.sendMail({
     } catch (error) {
 
         console.error("Error sending OTP:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        res.status(500).json({
+            message: error?.message || "Unable to send OTP right now."
+        });
 
     }
 

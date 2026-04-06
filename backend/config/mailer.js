@@ -9,7 +9,9 @@ const smtpPass =
   process.env.SMTP_PASS ||
   process.env.BREVO_API_KEY;
 
-if (!smtpUser || !smtpPass) {
+export const isMailerConfigured = Boolean(smtpUser && smtpPass);
+
+if (!isMailerConfigured) {
   console.warn(
     "Mail transporter is not fully configured. Set BREVO_SMTP_LOGIN and BREVO_SMTP_PASSWORD (or BREVO_API_KEY)."
   );

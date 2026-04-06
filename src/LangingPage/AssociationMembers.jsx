@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { ChevronLeft } from "lucide-react"; 
 import { API_BASE } from "../config/api";
 
 const ROLE_ORDER = [
@@ -34,6 +35,8 @@ export default function AssociationMembers() {
   const [selectedImage, setSelectedImage] = useState(null);
   const sectionRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [showFloatingBack, setShowFloatingBack] = useState(false);
+
   const orderedMembers = sortMembersByRole(batchDetails?.members || []);
 
   // 1. FETCH ALL BATCHES
@@ -58,6 +61,13 @@ export default function AssociationMembers() {
       }
     };
     fetchBatches();
+
+    const handleScroll = () => {
+      if (window.scrollY > 300) setShowFloatingBack(true);
+      else setShowFloatingBack(false);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [batchYear]);
 
   // 2. FETCH SPECIFIC BATCH DETAILS
@@ -101,41 +111,51 @@ export default function AssociationMembers() {
       ref={sectionRef} 
       className="relative min-h-screen bg-[#FDFCFB] text-[#023347] font-sans selection:bg-[#D4AF37]/20 overflow-x-hidden"
     >
-      {/* --- AMBIENT DEPTH LAYER (God Ray) --- */}
+      {/* --- FLOATING MOBILE BACK BUTTON --- */}
+      <button
+        onClick={() => navigate(-1)}
+        className={`fixed bottom-8 right-6 z-[100] flex md:hidden items-center justify-center w-14 h-14 bg-[#023347] text-[#D4AF37] rounded-full shadow-2xl border border-[#D4AF37]/30 transition-all duration-500 transform ${
+          showFloatingBack ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0"
+        }`}
+      >
+        <ChevronLeft size={28} />
+      </button>
+
+      {/* --- AMBIENT DEPTH LAYER --- */}
       <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-[#D4AF37]/5 via-transparent to-transparent pointer-events-none" />
 
       {/* --- IMAGE LIGHTBOX --- */}
       {selectedImage && (
-       <div 
-  className="fixed inset-0 z-[5000] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 cursor-zoom-out animate-in fade-in duration-300"
-  onClick={() => setSelectedImage(null)}
->
-  <button
-    onClick={(e) => { e.stopPropagation(); setSelectedImage(null); }}
-    className="absolute top-4 right-4 text-white bg-white/10 hover:bg-white/25 transition-all duration-200 rounded-full w-9 h-9 flex items-center justify-center z-10"
-  >
-    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M18 6L6 18M6 6l12 12" />
-    </svg>
-  </button>
-  <img 
-    src={selectedImage} 
-    alt="Full View" 
-    className="max-w-full max-h-[95vh] rounded-md shadow-2xl object-contain" 
-  />
-</div>
+        <div 
+          className="fixed inset-0 z-[5000] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 cursor-zoom-out animate-in fade-in duration-300"
+          onClick={() => setSelectedImage(null)}
+        >
+          <button
+            onClick={(e) => { e.stopPropagation(); setSelectedImage(null); }}
+            className="absolute top-4 right-4 text-white bg-white/10 hover:bg-white/25 transition-all duration-200 rounded-full w-9 h-9 flex items-center justify-center z-10"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+          <img 
+            src={selectedImage} 
+            alt="Full View" 
+            className="max-w-full max-h-[95vh] rounded-md shadow-2xl object-contain" 
+          />
+        </div>
       )}
 
+      {/* RESTORED ORIGINAL PADDING FOR DESKTOP (md:px-12 md:py-16) */}
       <main className="relative z-10 mx-auto max-w-[1500px] px-5 py-12 md:px-12 md:py-16">
         
-        {/* --- PROFESSIONAL HEADER --- */}
+        {/* --- HEADER --- */}
         <header className="mb-16 flex flex-col md:flex-row items-start md:items-end justify-between gap-8 border-b border-[#023347]/5 pb-10">
           <div className="max-w-2xl">
             <div className="flex items-center gap-4 mb-4">
               <span className={`text-[10px] font-bold tracking-[0.5em] uppercase text-[#D4AF37] transition-all duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
                 The Members Who Shape Our Community
               </span>
-              
             </div>
             
             <h1 className={`text-3xl md:text-6xl font-semibold text-[#023347] tracking-tight transition-all duration-[1200ms] ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}>
@@ -147,17 +167,16 @@ export default function AssociationMembers() {
             onClick={() => navigate(-1)}
             className="landing-btn-primary landing-btn-compact-mobile"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
+            <ChevronLeft size={16} className="transition-transform group-hover:-translate-x-1" />
             Return Home
           </button>
         </header>
 
-        {/* --- BATCH OVERVIEW --- */}
+        {/* --- BATCH OVERVIEW (Fixed Image Visibility) --- */}
         {batchDetails?.batch_info && (
           <section className={`mb-12 flex flex-col md:flex-row gap-10 items-start transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}>
-            <div className="w-full md:w-80 relative group aspect-video rounded-[2rem] overflow-hidden border border-black/5 shadow-sm cursor-zoom-in shrink-0">
+            {/* Added 'h-auto' and 'min-h-[200px]' to ensure visibility on mobile */}
+            <div className="w-full md:w-80 relative group h-auto aspect-video md:aspect-[4/3] rounded-[2rem] overflow-hidden border border-black/5 shadow-sm cursor-zoom-in shrink-0 bg-black/5">
               <img
                 src={batchDetails.batch_info.image_url || "https://via.placeholder.com/600x400"}
                 alt="Batch"
@@ -190,9 +209,8 @@ export default function AssociationMembers() {
           ))}
         </nav>
 
-        {/* --- PRESTIGE TABLE LAYOUT --- */}
+        {/* --- TABLE LAYOUT --- */}
         <div className="w-full space-y-3 mb-20">
-          {/* Table Header Row */}
           <div className="hidden md:grid grid-cols-12 gap-4 px-10 py-4 text-[10px] font-bold uppercase tracking-[0.3em] text-[#023347]/40">
             <div className="col-span-1">No.</div>
             <div className="col-span-5">Member Name</div>
@@ -201,14 +219,13 @@ export default function AssociationMembers() {
           </div>
 
           {loading ? (
-             [...Array(8)].map((_, i) => <div key={i} className="h-16 bg-black/5 rounded-2xl animate-pulse" />)
+              [...Array(8)].map((_, i) => <div key={i} className="h-16 bg-black/5 rounded-2xl animate-pulse" />)
           ) : orderedMembers.map((member, idx) => (
             <div 
               key={idx}
               className={`group relative grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-white/[0.02] backdrop-blur-[4px] border border-black/5 rounded-2xl overflow-hidden px-6 md:px-10 py-5 transition-all duration-700 hover:border-[#D4AF37]/40 hover:shadow-2xl hover:-translate-y-1.5 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
               style={{ transitionDelay: `${idx * 40}ms` }}
             >
-              {/* The Prestige Pillar */}
               <div className="absolute left-0 top-0 w-full md:w-1 h-1 md:h-full bg-[#023347] group-hover:bg-[#D4AF37] transition-all duration-500" />
               
               <div className="col-span-1 text-[11px] font-mono text-[#D4AF37]/60 transition-colors group-hover:text-[#D4AF37]">
@@ -252,6 +269,11 @@ export default function AssociationMembers() {
         .font-serif { font-family: 'Playfair Display', serif; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #FDFCFB; }
+        ::-webkit-scrollbar-thumb { background: #02334715; border-radius: 20px; border: 3px solid #FDFCFB; }
+        ::-webkit-scrollbar-thumb:hover { background: #D4AF37; }
+
         .animate-in {
           animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }

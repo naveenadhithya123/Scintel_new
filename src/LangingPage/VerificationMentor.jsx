@@ -6,6 +6,7 @@ export default function Verification() {
   const [showOTP, setShowOTP] = useState(false);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState(null); // 'success' or 'error'
+  const [statusMessage, setStatusMessage] = useState("Unable to verify. Please retry.");
   const [isVisible, setIsVisible] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -37,14 +38,17 @@ export default function Verification() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: formData.email }),
       });
+      const result = await response.json().catch(() => ({}));
       if (response.ok) {
         setShowOTP(true);
         setStatus(null);
       } else {
+        setStatusMessage(result.message || "Unable to verify. Please retry.");
         setStatus("error");
         setTimeout(() => setStatus(null), 5000);
       }
     } catch (error) {
+      setStatusMessage("Unable to reach the OTP service right now.");
       setStatus("error");
     } finally {
       setLoading(false);
@@ -111,7 +115,7 @@ export default function Verification() {
             <div className="w-1.5 h-16 bg-[#8E2424]" />
             <div className="px-6 py-4 text-left">
               <p className="text-[10px] font-bold tracking-[0.3em] text-[#8E2424] uppercase">System Interruption</p>
-              <p className="text-[13px] text-[#023347]/80 mt-1">Unable to verify. Please retry.</p>
+              <p className="text-[13px] text-[#023347]/80 mt-1">{statusMessage}</p>
             </div>
           </div>
         )}

@@ -14,7 +14,7 @@ function EventRegister() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [isDownloading, setIsDownloading] = useState(false);
 
-  // Helper to format dates (e.g., "March 27, 2026")
+  // Helper to format dates
   const formatDate = (dateString) => {
     if (!dateString || dateString.startsWith("0000")) return "NA";
     const date = new Date(dateString);
@@ -108,7 +108,7 @@ function EventRegister() {
         <p className="text-[#023347]/60 max-w-md mb-8">{error}</p>
         <button 
           onClick={() => navigate("/")} 
-          className="landing-btn-primary"
+          className="bg-[#023347] text-white px-8 py-3 rounded-full font-bold uppercase tracking-widest text-[10px] hover:bg-[#D4AF37] transition-all"
         >
           Return to Events
         </button>
@@ -129,6 +129,7 @@ function EventRegister() {
 
   return (
     <div className="relative min-h-screen bg-[#FDFCFB] text-[#023347] font-sans selection:bg-[#D4AF37]/20 overflow-x-hidden">
+      {/* Background Gradient */}
       <div className="absolute top-0 left-0 w-full h-[300px] md:h-[500px] bg-gradient-to-b from-[#D4AF37]/10 to-transparent pointer-events-none" />
 
       {selectedImage && (
@@ -173,7 +174,7 @@ function EventRegister() {
           </div>
           <button 
             onClick={() => navigate(-1)} 
-            className="landing-btn-secondary"
+            className="group flex items-center gap-2 px-6 py-3 rounded-full border border-[#023347]/20 text-[10px] font-bold uppercase tracking-widest hover:bg-[#023347] hover:text-white transition-all"
           >
             <ChevronLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
             Back to Deck
@@ -183,8 +184,8 @@ function EventRegister() {
         {/* Card Module */}
         <div className={`flex flex-col lg:flex-row bg-white/60 backdrop-blur-xl border border-black/5 rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl transition-all duration-[1200ms] ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20"}`}>
           
-          {/* Image Section */}
-          <div className="relative w-full aspect-video overflow-hidden bg-[#023347]/5 group lg:w-[450px] lg:aspect-auto xl:w-[550px]">
+          {/* Image Section - FIXED FOR MOBILE VIEW */}
+          <div className="relative w-full overflow-hidden bg-[#023347]/5 group lg:w-[450px] xl:w-[550px] flex items-center justify-center border-b lg:border-b-0 lg:border-r border-[#023347]/5">
             {event?.brochure_url ? (
               <button
                 type="button"
@@ -195,14 +196,15 @@ function EventRegister() {
                 <img src={event.brochure_url} alt={event.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
               </button>
             ) : (
-              <div className="h-full w-full flex items-center justify-center text-[#D4AF37]/30 font-bold uppercase text-[9px] tracking-widest">Visual Pending</div>
+              <div className="h-48 lg:h-full w-full flex items-center justify-center text-[#D4AF37]/30 font-bold uppercase text-[9px] tracking-widest">
+                Visual Pending
+              </div>
             )}
           </div>
 
           {/* Details Section */}
           <div className="flex-1 p-6 md:p-10 xl:p-14">
             <div className="mb-8 md:mb-10">
-              
               <h2 className="text-2xl md:text-5xl text-[#023347] font-semibold leading-tight">{event?.title}</h2>
             </div>
 
@@ -212,13 +214,12 @@ function EventRegister() {
                   <FileText size={14} />
                   <h4 className="text-[9px] md:text-[10px] font-bold tracking-widest uppercase">Abstract</h4>
                 </div>
-                {/* ✅ FIX: whitespace-pre-wrap preserves line breaks and paragraph spacing from the admin input */}
                 <p className="text-[#023347]/70 text-base md:text-lg leading-relaxed font-sans italic whitespace-pre-wrap">
                   {event?.description || event?.short_description || "Further details are currently being finalized by the department."}
                 </p>
               </section>
 
-              {/* Enhanced Data Grid with Registration Dates */}
+              {/* Data Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
                 {[
                   { label: "Registration Opens", val: formatDate(event?.registration_start_date), icon: <Clock size={14}/> },
@@ -245,7 +246,7 @@ function EventRegister() {
                     href={event.event_link} 
                     target="_blank" 
                     rel="noreferrer" 
-                    className="landing-btn-primary flex-1"
+                    className="flex-1 flex items-center justify-center gap-2 bg-[#023347] text-white py-4 rounded-2xl text-[11px] font-bold tracking-widest uppercase hover:bg-[#D4AF37] transition-all shadow-xl shadow-[#023347]/10"
                   >
                     Secure Registration <ExternalLink size={14} />
                   </a>
