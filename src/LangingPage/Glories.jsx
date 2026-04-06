@@ -137,7 +137,23 @@ function Glories() {
           }}
         >
           {loading ? (
-             <div className="w-full text-center py-20">Loading Milestones...</div>
+            <div className="flex-none w-full snap-start snap-always shrink-0">
+               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 md:gap-10 px-2 pb-10">
+                 {[...Array(cardsPerPage)].map((_, i) => (
+                    <article key={`skeleton-${i}`} className="w-full">
+                      <div className="relative p-3 rounded-[2rem] border-2 border-transparent bg-[#023347]/5 animate-pulse h-[360px]">
+                        <div className="relative aspect-video rounded-[1.5rem] bg-[#023347]/10 w-full h-[180px]"></div>
+                        <div className="mt-6 px-4 pb-4">
+                          <div className="h-4 bg-[#023347]/10 rounded w-1/3 mb-4"></div>
+                          <div className="h-6 bg-[#023347]/10 rounded w-3/4 mb-4"></div>
+                          <div className="h-4 bg-[#023347]/10 rounded w-full mb-2"></div>
+                          <div className="h-4 bg-[#023347]/10 rounded w-5/6"></div>
+                        </div>
+                      </div>
+                    </article>
+                 ))}
+               </div>
+            </div>
           ) : pages.length > 0 ? (
             pages.map((pageCards, pageIndex) => (
               <div key={pageIndex} className="flex-none w-full snap-start snap-always shrink-0">
@@ -147,10 +163,14 @@ function Glories() {
                     return (
                       <article
                         key={item.id || absoluteIndex}
-                        className={`w-full group transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}
-                        style={{ transitionDelay: `${(index % 4) * 100}ms` }}
+                        className={`w-full group transition-all duration-1000 ease-out ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}
+                        style={{ 
+                          transitionDelay: `${(index % 4) * 100}ms`,
+                          animation: isVisible ? `gentle-float ${4 + (index % 3)}s ease-in-out infinite alternate` : 'none',
+                          animationDelay: `${index * 0.2}s`
+                        }}
                       >
-                        <div className="relative p-3 rounded-[2rem] border-2 border-[#023347]/10 bg-white/80 backdrop-blur-md transition-all duration-500 hover:border-[#D4AF37]/50 hover:-translate-y-2">
+                        <div className="relative p-3 rounded-[2rem] border-2 border-slate-200 bg-white/60 backdrop-blur-md transition-all duration-700 group-hover:border-[#D4AF37] group-hover:shadow-xl md:group-hover:-translate-y-2 group-hover:bg-white/90">
                           <div
                             className="relative aspect-video rounded-[1.5rem] overflow-hidden cursor-zoom-in"
                             onClick={() => setSelectedImage(item.image_url || item.img)}
@@ -158,14 +178,14 @@ function Glories() {
                             <img
                               src={item.image_url || item.img}
                               alt={item.title}
-                              className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110"
+                              className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-105"
                             />
                           </div>
 
                           <div className="mt-6 px-4 pb-4">
                             <span className="text-[9px] font-bold text-[#D4AF37] tracking-widest uppercase block mb-2">Milestone {absoluteIndex + 1}</span>
-                            <h3 className="text-xl font-bold text-[#023347] mb-2 line-clamp-1">{item.title}</h3>
-                            <p className="text-[13px] text-[#023347]/60 leading-relaxed line-clamp-3">{item.description}</p>
+                            <h3 className="text-xl font-bold text-[#023347] mb-2 group-hover:text-[#B8860B] transition-colors">{item.title}</h3>
+                            <p className="text-[13px] text-[#023347]/60 leading-relaxed">{item.description}</p>
                           </div>
                         </div>
                       </article>
@@ -186,6 +206,10 @@ function Glories() {
         @keyframes shimmer { 100% { transform: translateX(200%); } }
         .animate-in { animation: fade-in-scale 0.4s ease-out forwards; }
         @keyframes fade-in-scale { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        @keyframes gentle-float {
+          0% { transform: translateY(0px); }
+          100% { transform: translateY(-12px); }
+        }
       `}</style>
     </div>
   );
