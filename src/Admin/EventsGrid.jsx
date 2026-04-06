@@ -1,9 +1,48 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import AdminSidebar from './AdminSidebar';
 import { API_BASE } from '../config/api';
 /* ─── Toast ─────────────────────────────────────────────────────────────── */
 function Toast({ toasts, removeToast }) {
+  return (
+    <div style={{ position: 'fixed', top: 28, right: 32, zIndex: 9999, display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {toasts.map(t => (
+        <div key={t.id} style={{
+          display: 'flex', alignItems: 'flex-start', gap: 12,
+          backgroundColor: '#023347', color: '#fff',
+          padding: '14px 22px', borderRadius: 12,
+          minWidth: 300, maxWidth: 420,
+          boxShadow: '0 8px 32px rgba(2,51,71,0.25)',
+          animation: 'toastIn 0.3s ease',
+        }}>
+          <span style={{
+            width: 26, height: 26, borderRadius: '50%',
+            backgroundColor: t.type === 'error' ? '#ef4444' : t.type === 'warning' ? '#f59e0b' : '#2A8E9E',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+          }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              {t.type === 'error'
+                ? <path d="M18 6 6 18M6 6l12 12" />
+                : t.type === 'warning'
+                  ? <path d="M12 8v5m0 4h.01" />
+                  : <polyline points="20 6 9 17 4 12" />}
+            </svg>
+          </span>
+          <div style={{ flex: 1 }}>
+            {t.title ? <p style={{ margin: 0, fontWeight: 700, fontSize: 14, color: '#fff' }}>{t.title}</p> : null}
+            {t.message ? <p style={{ margin: t.title ? '4px 0 0' : 0, fontSize: 13, color: '#d7e7ec', lineHeight: 1.4 }}>{t.message}</p> : null}
+          </div>
+          <button
+            onClick={() => removeToast(t.id)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9bd3e0', fontSize: 20, lineHeight: 1, marginLeft: 6, padding: 0 }}
+          >
+            ×
+          </button>
+        </div>
+      ))}
+      <style>{`@keyframes toastIn { from { opacity:0; transform:translateY(-16px) scale(0.96); } to { opacity:1; transform:translateY(0) scale(1); } }`}</style>
+    </div>
+  );
   return (
     <div style={{ position: 'fixed', top: 24, right: 28, zIndex: 9999, display: 'flex', flexDirection: 'column', gap: 10 }}>
       {toasts.map(t => (
@@ -186,6 +225,7 @@ function EventCard({ event, onEdit, onDelete }) {
 export default function EventsGrid() {
   const { year } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -214,6 +254,19 @@ export default function EventsGrid() {
   };
 
   useEffect(() => { if (year) fetchEvents(); }, [year]);
+
+  useEffect(() => {
+    const navigationToast = location.state?.toast;
+    if (!navigationToast) return;
+
+    showToast(
+      navigationToast.type || 'success',
+      navigationToast.title || 'Success',
+      navigationToast.message || ''
+    );
+
+    navigate(location.pathname, { replace: true, state: null });
+  }, [location.pathname, location.state, navigate]);
 
   const handleDeleteConfirm = async () => {
     const { id, title } = deleteTarget;

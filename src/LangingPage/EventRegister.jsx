@@ -11,6 +11,8 @@ function EventRegister() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   // Helper to format dates
   const formatDate = (dateString) => {
@@ -61,6 +63,43 @@ function EventRegister() {
     window.scrollTo(0, 0);
   }, [id, type]);
 
+  const handleBrochureDownload = async () => {
+    if (!event?.brochure_url || isDownloading) return;
+
+    const brochureUrl = event.brochure_url;
+    const fallbackName = `${(event?.title || "brochure").trim().replace(/[^a-z0-9]+/gi, "-").replace(/^-+|-+$/g, "") || "brochure"}.pdf`;
+
+    try {
+      setIsDownloading(true);
+      const response = await fetch(brochureUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to download brochure: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = blobUrl;
+      anchor.download = brochureUrl.split("/").pop()?.split("?")[0] || fallbackName;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (downloadError) {
+      console.error("Brochure download failed:", downloadError);
+      const anchor = document.createElement("a");
+      anchor.href = brochureUrl;
+      anchor.setAttribute("download", fallbackName);
+      anchor.setAttribute("target", "_blank");
+      anchor.setAttribute("rel", "noreferrer");
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   if (error) {
     return (
       <div className="min-h-screen bg-[#FDFCFB] flex flex-col items-center justify-center p-6 text-center">
@@ -93,6 +132,34 @@ function EventRegister() {
       {/* Background Gradient */}
       <div className="absolute top-0 left-0 w-full h-[300px] md:h-[500px] bg-gradient-to-b from-[#D4AF37]/10 to-transparent pointer-events-none" />
 
+      {selectedImage && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 cursor-zoom-out transition-all duration-500"
+          onClick={() => setSelectedImage(null)}
+        >
+          <button
+            type="button"
+            className="absolute top-6 right-6 md:top-8 md:right-8 text-white/50 hover:text-white transition-colors duration-300"
+            onClick={() => setSelectedImage(null)}
+          >
+            <svg className="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          <div
+            className="relative flex max-h-[95vh] max-w-[95vw] items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={selectedImage}
+              alt={event?.title || "Brochure preview"}
+              className="max-h-[95vh] max-w-[95vw] h-auto w-auto object-contain animate-in shadow-2xl"
+            />
+          </div>
+        </div>
+      )}
+
       <main className="relative z-10 mx-auto max-w-[1400px] px-4 py-8 md:px-12 md:py-12">
         
         {/* Header */}
@@ -120,11 +187,14 @@ function EventRegister() {
           {/* Image Section - FIXED FOR MOBILE VIEW */}
           <div className="relative w-full overflow-hidden bg-[#023347]/5 group lg:w-[450px] xl:w-[550px] flex items-center justify-center border-b lg:border-b-0 lg:border-r border-[#023347]/5">
             {event?.brochure_url ? (
-              <img 
-                src={event.brochure_url} 
-                alt={event.title} 
-                className="w-full h-auto lg:h-full lg:object-cover object-contain transition-transform duration-700 group-hover:scale-105" 
-              />
+              <button
+                type="button"
+                className="h-full w-full cursor-zoom-in"
+                onClick={() => setSelectedImage(event.brochure_url)}
+                aria-label={`Preview brochure for ${event.title}`}
+              >
+                <img src={event.brochure_url} alt={event.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+              </button>
             ) : (
               <div className="h-48 lg:h-full w-full flex items-center justify-center text-[#D4AF37]/30 font-bold uppercase text-[9px] tracking-widest">
                 Visual Pending
@@ -182,14 +252,16 @@ function EventRegister() {
                   </a>
                 )}
                 {event?.brochure_url && (
-                  <a 
-                    href={event.brochure_url} 
-                    target="_blank" 
-                    rel="noreferrer" 
-                    className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl text-[11px] font-bold tracking-widest uppercase transition-all border border-[#023347]/10 ${!event?.event_link ? "bg-[#023347] text-white hover:bg-[#D4AF37]" : "bg-white text-[#023347] hover:bg-[#023347]/5"}`}
+                  <button
+                    type="button"
+                    onClick={handleBrochureDownload}
+                    disabled={isDownloading}
+                    className={`flex-1 ${!event?.event_link ? "landing-btn-primary" : "landing-btn-secondary"} ${
+                      !event?.event_link ? "w-full" : "w-full"
+                    } active:scale-95 disabled:cursor-not-allowed disabled:opacity-70`}
                   >
-                    Download Brochure
-                  </a>
+                    {isDownloading ? "Downloading..." : "Download Brochure"}
+                  </button>
                 )}
               </div>
             </div>
@@ -201,6 +273,13 @@ function EventRegister() {
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500;600;700&display=swap');
         .font-serif { font-family: 'Playfair Display', serif; }
         .font-sans { font-family: 'Inter', sans-serif; }
+        .animate-in {
+          animation: fade-in-scale 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes fade-in-scale {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
       `}</style>
     </div>
   );
