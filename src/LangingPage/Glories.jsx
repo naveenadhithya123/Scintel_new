@@ -42,10 +42,17 @@ function Glories() {
   // 3. RESPONSIVE CARDS PER PAGE
   useEffect(() => {
     const updateCardsPerPage = () => {
-      const nextCardsPerPage = window.innerWidth < 768 ? 2 : 6;
-      setCardsPerPage(nextCardsPerPage);
-      setActiveIndex(0);
-      scrollRef.current?.scrollTo({ left: 0, behavior: "auto" });
+      // Only reset scroll when cardsPerPage actually changes
+      // (mobile browser chrome show/hide triggers resize which would reset slide)
+      const nextCardsPerPage = window.innerWidth < 768 ? 1 : 6;
+      setCardsPerPage(prev => {
+        if (prev !== nextCardsPerPage) {
+          setActiveIndex(0);
+          scrollRef.current?.scrollTo({ left: 0, behavior: "auto" });
+          return nextCardsPerPage;
+        }
+        return prev;
+      });
     };
 
     updateCardsPerPage();
@@ -108,7 +115,7 @@ function Glories() {
             </h1>
           </div>
 
-          <div className={`flex gap-3 transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+          <div className={`hidden md:flex gap-3 transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
             <button
               onClick={() => scrollToPage(activeIndex - 1)}
               disabled={activeIndex === 0}
@@ -132,7 +139,7 @@ function Glories() {
           onScroll={handleScroll}
           className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar pt-6"
           style={{ 
-            touchAction: "pan-y",
+            touchAction: "pan-x",
             WebkitOverflowScrolling: "touch" // Smooth momentum for iOS
           }}
         >
