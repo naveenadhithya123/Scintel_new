@@ -55,11 +55,18 @@ export default function UpcomingEvents() {
 
   useEffect(() => {
     const updateCardsPerPage = () => {
-      // Logic: 2 cards for mobile, 4 for desktop (as per your previous logic)
-      const nextCardsPerPage = window.innerWidth < 768 ? 2 : 4;
-      setCardsPerPage(nextCardsPerPage);
-      setActiveIndex(0);
-      scrollRef.current?.scrollTo({ left: 0, behavior: "auto" });
+      // 1 card per swipe on mobile, 4 for desktop
+      // Only reset scroll when cardsPerPage actually changes
+      // (mobile browser chrome show/hide triggers resize which would reset slide)
+      const nextCardsPerPage = window.innerWidth < 768 ? 1 : 4;
+      setCardsPerPage(prev => {
+        if (prev !== nextCardsPerPage) {
+          setActiveIndex(0);
+          scrollRef.current?.scrollTo({ left: 0, behavior: "auto" });
+          return nextCardsPerPage;
+        }
+        return prev;
+      });
     };
     updateCardsPerPage();
     window.addEventListener("resize", updateCardsPerPage);
@@ -111,7 +118,7 @@ export default function UpcomingEvents() {
             </h2>
           </div>
 
-          <div className={`flex gap-3 transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+          <div className={`hidden md:flex gap-3 transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
             <button 
               onClick={() => scrollToPage(activeIndex - 1)} 
               disabled={activeIndex === 0}
@@ -135,7 +142,7 @@ export default function UpcomingEvents() {
           ref={scrollRef} 
           onScroll={handleScroll}
           className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar pt-4"
-          style={{ touchAction: "pan-y", WebkitOverflowScrolling: 'touch' }}
+          style={{ touchAction: "pan-x", WebkitOverflowScrolling: 'touch' }}
         >
           {loading ? (
             <div className="flex-none w-full snap-start snap-always shrink-0">
