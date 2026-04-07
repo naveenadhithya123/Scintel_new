@@ -115,7 +115,7 @@ export default function UpcomingEvents() {
             <button 
               onClick={() => scrollToPage(activeIndex - 1)} 
               disabled={activeIndex === 0}
-              className={`flex items-center justify-center w-12 h-12 rounded-full border-2 border-[#023347]/20 text-[#023347] transition-all ${activeIndex === 0 ? 'opacity-20 cursor-not-allowed' : 'hover:border-[#D4AF37] hover:text-[#D4AF37]'}`}
+              className={`flex items-center justify-center w-12 h-12 rounded-full border-[1.5px] border-[#023347]/20 text-[#023347] transition-all ${activeIndex === 0 ? 'opacity-20 cursor-not-allowed' : 'hover:border-[#D4AF37] hover:text-[#D4AF37]'}`}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             </button>
@@ -142,7 +142,7 @@ export default function UpcomingEvents() {
                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-2 pb-12">
                  {[...Array(cardsPerPage)].map((_, i) => (
                     <article key={`skeleton-${i}`} className="w-full">
-                      <div className="flex flex-col sm:flex-row bg-[#023347]/5 backdrop-blur-md rounded-[2rem] border-2 border-transparent h-[200px] animate-pulse">
+                      <div className="flex flex-col sm:flex-row bg-[#023347]/5 backdrop-blur-md rounded-[2rem] border-[1.5px] border-transparent h-[200px] animate-pulse">
                         <div className="w-full sm:w-[200px] h-[200px] sm:h-[196px] bg-[#023347]/10 rounded-t-[2rem] sm:rounded-tr-none sm:rounded-l-[2rem]"></div>
                         <div className="p-8 flex flex-col justify-between flex-1">
                           <div>
@@ -161,7 +161,7 @@ export default function UpcomingEvents() {
             pages.map((pageCards, pageIndex) => (
               /* 4. Added snap-start and flex-shrink-0 to ensure pages align perfectly */
               <div key={pageIndex} className="flex-none w-full snap-start snap-always shrink-0">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-2 pb-12">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-2 pb-2">
                   {pageCards.map((event, idx) => (
                     <article 
                       key={event.id || idx} 
@@ -172,7 +172,7 @@ export default function UpcomingEvents() {
                         animationDelay: `${idx * 0.2}s`
                       }}
                     >
-                      <div className="flex flex-col sm:flex-row bg-white/60 backdrop-blur-md rounded-[2rem] border-2 border-slate-200 transition-all duration-700 overflow-hidden h-full group-hover:border-[#D4AF37] group-hover:shadow-xl md:group-hover:-translate-y-2 group-hover:bg-white/95">
+                      <div className="flex flex-col sm:flex-row bg-white/60 backdrop-blur-md rounded-[2rem] border-[1.5px] border-[#023347]/10 transition-all duration-700 overflow-hidden h-full group-hover:border-[#D4AF37]/50 group-hover:shadow-xl md:group-hover:-translate-y-2 group-hover:bg-white/95">
                         <div className="w-full sm:w-[200px] h-[200px] sm:h-auto bg-[#023347]/5 pointer-events-none overflow-hidden">
                           {event.brochure_url && <img src={event.brochure_url} className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-105" alt="" />}
                         </div>
@@ -198,6 +198,24 @@ export default function UpcomingEvents() {
             <div className="w-full py-20 text-center text-[#023347]/40 uppercase text-xs tracking-widest">No upcoming events.</div>
           )}
         </div>
+
+        {/* PAGINATION DOTS */}
+        {pages.length > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-3 pb-2">
+            {pages.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => scrollToPage(i)}
+                className={`h-2 rounded-full transition-all duration-400 ${
+                  activeIndex === i
+                    ? 'w-7 bg-[#023347]'
+                    : 'w-2 bg-[#023347]/25'
+                }`}
+              />
+            ))}
+          </div>
+        )}
+
       </section>
 
       <style jsx>{`

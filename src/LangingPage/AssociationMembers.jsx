@@ -224,7 +224,11 @@ export default function AssociationMembers() {
             <div 
               key={idx}
               className={`group relative grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-white/[0.02] backdrop-blur-[4px] border border-black/5 rounded-2xl overflow-hidden px-6 md:px-10 py-5 transition-all duration-700 hover:border-[#D4AF37]/40 hover:shadow-2xl hover:-translate-y-1.5 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
-              style={{ transitionDelay: `${idx * 40}ms` }}
+              style={{ 
+                transitionDelay: `${idx * 40}ms`,
+                animation: isVisible ? `gentle-float ${4 + (idx % 3)}s ease-in-out infinite alternate` : 'none',
+                animationDelay: `${idx * 0.15}s`
+              }}
             >
               <div className="absolute left-0 top-0 w-full md:w-1 h-1 md:h-full bg-[#023347] group-hover:bg-[#D4AF37] transition-all duration-500" />
               
@@ -268,6 +272,11 @@ export default function AssociationMembers() {
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;500;600;700&display=swap');
         .font-serif { font-family: 'Playfair Display', serif; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
+
+        @keyframes gentle-float {
+          0% { transform: translateY(0px); }
+          100% { transform: translateY(-8px); }
+        }
         
         ::-webkit-scrollbar { width: 10px; }
         ::-webkit-scrollbar-track { background: #FDFCFB; }

@@ -87,7 +87,7 @@ function Home() {
 
       <section className="relative z-30 mx-auto -mt-16 max-w-[1500px] px-4 pb-24 sm:px-6 md:-mt-24 md:pb-40">
         <div
-          className={`rounded-[2rem] border-2 border-black/5 bg-white p-6 shadow-[0_50px_100px_-20px_rgba(2,51,71,0.12)] transition-all duration-[1.2s] sm:p-8 md:p-20 ${
+          className={`rounded-[2rem] border-[1.5px] border-[#023347]/10 bg-white p-6 shadow-[0_50px_100px_-20px_rgba(2,51,71,0.12)] transition-all duration-[1.2s] sm:p-8 md:p-20 ${
             loaded ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'
           }`}
         >
@@ -106,7 +106,7 @@ function Home() {
             {objectives.map((obj, i) => (
               <div
                 key={obj.title}
-                className="group rounded-[2rem] border-2 border-[#023347]/10 bg-[#FDFCFB]/50 p-6 transition-all duration-700 hover:-translate-y-3 hover:border-[#D4AF37]/50 hover:bg-white hover:shadow-2xl hover:shadow-[#D4AF37]/10 sm:p-8 md:p-10"
+                className="group rounded-[2rem] border-[1.5px] border-[#023347]/10 bg-[#FDFCFB]/50 p-6 transition-all duration-700 hover:-translate-y-3 hover:border-[#D4AF37]/50 hover:bg-white hover:shadow-2xl hover:shadow-[#D4AF37]/10 sm:p-8 md:p-10"
                 style={{ animation: `gentle-float ${5 + i}s ease-in-out infinite alternate` }}
               >
                 <div className="mb-10 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#023347]/5 text-[#023347] shadow-sm transition-all duration-500 group-hover:bg-[#023347] group-hover:text-white">
