@@ -112,7 +112,7 @@ function Glories() {
             <button
               onClick={() => scrollToPage(activeIndex - 1)}
               disabled={activeIndex === 0}
-              className={`flex items-center justify-center w-12 h-12 md:w-14 md:h-14 rounded-full border-2 border-[#023347]/20 text-[#023347] transition-all ${activeIndex === 0 ? 'opacity-20 cursor-not-allowed' : 'hover:border-[#D4AF37] hover:text-[#D4AF37]'}`}
+              className={`flex items-center justify-center w-12 h-12 md:w-14 md:h-14 rounded-full border-[1.5px] border-[#023347]/20 text-[#023347] transition-all ${activeIndex === 0 ? 'opacity-20 cursor-not-allowed' : 'hover:border-[#D4AF37] hover:text-[#D4AF37]'}`}
             >
               <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
             </button>
@@ -141,7 +141,7 @@ function Glories() {
                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 md:gap-10 px-2 pb-10">
                  {[...Array(cardsPerPage)].map((_, i) => (
                     <article key={`skeleton-${i}`} className="w-full">
-                      <div className="relative p-3 rounded-[2rem] border-2 border-transparent bg-[#023347]/5 animate-pulse h-[360px]">
+                      <div className="relative p-3 rounded-[2rem] border-[1.5px] border-transparent bg-[#023347]/5 animate-pulse h-[360px]">
                         <div className="relative aspect-video rounded-[1.5rem] bg-[#023347]/10 w-full h-[180px]"></div>
                         <div className="mt-6 px-4 pb-4">
                           <div className="h-4 bg-[#023347]/10 rounded w-1/3 mb-4"></div>
@@ -157,7 +157,7 @@ function Glories() {
           ) : pages.length > 0 ? (
             pages.map((pageCards, pageIndex) => (
               <div key={pageIndex} className="flex-none w-full snap-start snap-always shrink-0">
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 md:gap-10 px-2 pb-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 md:gap-10 px-2 pb-2">
                   {pageCards.map((item, index) => {
                     const absoluteIndex = pageIndex * cardsPerPage + index;
                     return (
@@ -170,7 +170,7 @@ function Glories() {
                           animationDelay: `${index * 0.2}s`
                         }}
                       >
-                        <div className="relative p-3 rounded-[2rem] border-2 border-slate-200 bg-white/60 backdrop-blur-md transition-all duration-700 group-hover:border-[#D4AF37] group-hover:shadow-xl md:group-hover:-translate-y-2 group-hover:bg-white/90">
+                        <div className="relative p-3 rounded-[2rem] border-[1.5px] border-[#023347]/10 bg-white/60 backdrop-blur-md transition-all duration-700 group-hover:border-[#D4AF37]/50 group-hover:shadow-xl md:group-hover:-translate-y-2 group-hover:bg-white/90">
                           <div
                             className="relative aspect-video rounded-[1.5rem] overflow-hidden cursor-zoom-in"
                             onClick={() => setSelectedImage(item.image_url || item.img)}
@@ -198,6 +198,24 @@ function Glories() {
             <div className="w-full py-20 text-center text-[#023347]/40 uppercase text-xs tracking-widest">No entries found.</div>
           )}
         </div>
+
+        {/* PAGINATION DOTS */}
+        {pages.length > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-3 pb-2">
+            {pages.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => scrollToPage(i)}
+                className={`h-2 rounded-full transition-all duration-400 ${
+                  activeIndex === i
+                    ? 'w-7 bg-[#023347]'
+                    : 'w-2 bg-[#023347]/25'
+                }`}
+              />
+            ))}
+          </div>
+        )}
+
       </section>
 
       <style jsx>{`

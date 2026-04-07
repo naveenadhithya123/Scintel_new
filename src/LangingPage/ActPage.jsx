@@ -102,7 +102,9 @@ function Activities() {
                 key={item.id || index}
                 className={`group relative flex flex-col md:flex-row bg-white/[0.02] backdrop-blur-[4px] border border-black/5 rounded-[2rem] overflow-hidden transition-all duration-700 hover:border-[#D4AF37]/40 hover:shadow-2xl hover:-translate-y-1.5 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}
                 style={{ 
-                  transitionDelay: `${index * 100}ms`
+                  transitionDelay: `${index * 100}ms`,
+                  animation: isVisible ? `gentle-float ${5 + (index % 3)}s ease-in-out infinite alternate` : 'none',
+                  animationDelay: `${index * 0.3}s`
                 }}
               >
                 <div className="w-full md:w-3 h-3 md:h-auto bg-[#023347] group-hover:bg-[#D4AF37] transition-colors duration-500" />
@@ -150,6 +152,11 @@ function Activities() {
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
         .font-poppins { font-family: 'Poppins', sans-serif; }
         
+        @keyframes gentle-float {
+          0% { transform: translateY(0px); }
+          100% { transform: translateY(-10px); }
+        }
+
         ::-webkit-scrollbar { width: 10px; }
         ::-webkit-scrollbar-track { background: #FDFCFB; }
         ::-webkit-scrollbar-thumb { 
