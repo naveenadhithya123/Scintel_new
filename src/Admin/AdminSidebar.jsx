@@ -126,7 +126,7 @@ export default function AdminSidebar({ children }) {
   };
 
   return (
-    <div className="flex h-screen bg-[#f4f7f9] font-sans overflow-hidden relative">
+    <div className="flex h-screen bg-[#f4f7f9] overflow-hidden relative" style={{ fontFamily: "'Poppins', sans-serif" }}>
 
       {/* Mobile overlay */}
       {isMenuOpen && (
@@ -183,7 +183,7 @@ export default function AdminSidebar({ children }) {
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="lg:hidden bg-white border-b border-gray-200 p-4 flex items-center justify-between">
-          <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95" onClick={() => setIsMenuOpen(true)} className="text-[#023347]">
+          <button className="text-[#023347] transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95" onClick={() => setIsMenuOpen(true)}>
             <MenuIcon />
           </button>
           <h1 className="text-lg font-bold text-[#023347]">Admin Portal</h1>

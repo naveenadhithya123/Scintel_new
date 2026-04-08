@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminSidebar from "./AdminSidebar";
 import { API_BASE } from "../config/api";
@@ -22,6 +22,8 @@ const sortMembersByRole = (members = []) =>
   });
 
 const TOAST_CSS = `
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
   @keyframes am-toast-in {
     from { opacity: 0; transform: translateY(-16px) scale(0.96); }
     to   { opacity: 1; transform: translateY(0) scale(1); }
@@ -34,6 +36,7 @@ const TOAST_CSS = `
     box-shadow: 0 8px 32px rgba(2,51,71,0.25);
     font-size: 14px; font-weight: 600;
     animation: am-toast-in 0.3s ease forwards;
+    font-family: 'Poppins', sans-serif;
   }
   .am-toast-icon {
     width: 26px; height: 26px; border-radius: 50%; background: #2A8E9E;
@@ -43,6 +46,9 @@ const TOAST_CSS = `
     background: none; border: none; color: #9bd3e0;
     cursor: pointer; font-size: 20px; line-height: 1; margin-left: 6px; padding: 0;
   }
+
+  /* Poppins for ALL text content on this page */
+  *, *::before, *::after { font-family: 'Poppins', sans-serif !important; }
 `;
 
 function MemberToast({ message, onClose }) {
@@ -71,6 +77,8 @@ export default function AdminMembers() {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [toast, setToast] = useState(null);
+  const [isVisible, setIsVisible] = useState(false);   // ← NEW
+  const sectionRef = useRef(null);                      // ← NEW
 
   const showToast = (msg) => setToast(msg);
 
@@ -158,6 +166,18 @@ export default function AdminMembers() {
     }
   }, [selectedBatchId]);
 
+  // ← NEW: IntersectionObserver for title entrance animation
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setIsVisible(true); },
+      { threshold: 0.1 }
+    );
+    if (sectionRef.current) observer.observe(sectionRef.current);
+    return () => {
+      if (sectionRef.current) observer.unobserve(sectionRef.current);
+    };
+  }, []);
+
   return (
     <AdminSidebar>
       <style>{TOAST_CSS}</style>
@@ -183,32 +203,35 @@ export default function AdminMembers() {
         }
       `}</style>
 
-      <div style={{ flex: 1, overflowY: "auto", padding: "36px 40px" }}>
+      <div ref={sectionRef} style={{ flex: 1, overflowY: "auto", padding: "36px 40px" }}>  {/* ← ref added */}
 
         {/* Header: title left, 3 buttons right */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "28px", flexWrap: "wrap", gap: "12px" }}>
-          <h1 style={{ fontSize: "22px", fontWeight: 700, color: "#1f2937", margin: 0 }}>Association Members</h1>
+          {/* ← UPDATED: matches Announcement title style exactly */}
+          <h1 className={`text-3xl font-extrabold text-[#023347] transition-all duration-1000 ${isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}>
+            Association Members
+          </h1>
           <div className="am-header-btns" style={{ display: "flex", gap: "12px" }}>
-            {/* Remove Batch — Delete style */}
-            <button className="h-11 px-6 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none duration-200 hover:-translate-y-1 hover:shadow-md active:scale-95"
+            {/* Remove Batch — Danger style */}
+            <button
+              className="bg-[#023347] text-white px-6 py-2 rounded-lg text-sm font-semibold transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md active:scale-95 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               onClick={handleDeleteBatch}
               disabled={!selectedBatch || deleting}
-             
             >
               {deleting ? "Removing..." : "Remove Batch"}
             </button>
-            {/* Edit — Edit style */}
-            <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
+            {/* Edit Batch — Primary style */}
+            <button
+              className="bg-[#023347] text-white px-6 py-2 rounded-lg text-sm font-semibold transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md active:scale-95 hover:bg-[#2A8E9E] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               onClick={() => batchDetails && navigate("/admin/edit-batch", { state: { batch: batchDetails } })}
               disabled={!batchDetails}
-              className="h-11 px-6 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               Edit Batch
             </button>
-            {/* Add Batch — Edit style */}
-            <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
+            {/* Add Batch — Primary style */}
+            <button
+              className="inline-flex items-center gap-2 bg-[#023347] text-white px-5 py-2.5 rounded-[10px] text-sm font-semibold transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md hover:bg-[#2A8E9E] active:scale-95"
               onClick={() => navigate("/admin/add-batch")}
-              className="h-11 px-6 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5"
             >
               Add Batch
             </button>
@@ -268,7 +291,7 @@ export default function AdminMembers() {
                   <tbody className="divide-y divide-gray-100">
                     {orderedMembers.length > 0 ? (
                       orderedMembers.map((member) => (
-                       <tr key={member.member_id} className="hover:bg-[#f4fafb] transition-colors duration-200">
+                        <tr key={member.member_id} className="hover:bg-[#f4fafb] transition-colors duration-200">
                           <td className="px-6 py-5 text-[#023347] font-bold text-center">{member.name}</td>
                           <td className="px-6 py-5 text-center text-gray-600 text-sm">{member.register_number || member.phone_number}</td>
                           <td className="px-6 py-5 text-center text-gray-600 text-sm">{member.role}</td>

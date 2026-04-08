@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminSidebar from './AdminSidebar';
 import {API_BASE} from '../config/api';
+
 /* ─── Toast ─────────────────────────────────────────────────────────────── */
 function Toast({ toasts, removeToast }) {
   return (
@@ -14,6 +15,7 @@ function Toast({ toasts, removeToast }) {
           minWidth: 300, maxWidth: 420,
           boxShadow: '0 8px 32px rgba(2,51,71,0.25)',
           animation: 'toastIn 0.3s ease',
+          fontFamily: "'Poppins', sans-serif",
         }}>
           <span style={{
             width: 26, height: 26, borderRadius: '50%',
@@ -43,30 +45,6 @@ function Toast({ toasts, removeToast }) {
       <style>{`@keyframes toastIn { from { opacity:0; transform:translateY(-16px) scale(0.96); } to { opacity:1; transform:translateY(0) scale(1); } }`}</style>
     </div>
   );
-  return (
-    <div style={{ position: 'fixed', top: 28, right: 32, zIndex: 9999, display: 'flex', flexDirection: 'column', gap: 10 }}>
-      {toasts.map(t => (
-        <div key={t.id} style={{
-          display: 'flex', alignItems: 'flex-start', gap: 12,
-          backgroundColor: '#023347', color: '#fff', borderRadius: 12, padding: '14px 22px',
-          minWidth: 300, maxWidth: 420,
-          boxShadow: '0 8px 32px rgba(2,51,71,0.25)',
-          animation: 'toastIn 0.3s ease',
-        }}>
-          <span style={{ fontSize: 20, lineHeight: 1 }}>
-            {t.type === 'success' ? '✅' : t.type === 'error' ? '❌' : '⚠️'}
-          </span>
-          <div style={{ flex: 1 }}>
-            <p style={{ margin: 0, fontWeight: 700, fontSize: 14, color: '#023347' }}>{t.title}</p>
-            <p style={{ margin: '4px 0 0', fontSize: 13, color: '#64748b', lineHeight: 1.4 }}>{t.message}</p>
-          </div>
-          <button onClick={() => removeToast(t.id)}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: 18, lineHeight: 1, padding: 0 }}>×</button>
-        </div>
-      ))}
-      <style>{`@keyframes toastIn { from { opacity:0; transform:translateX(30px); } to { opacity:1; transform:translateX(0); } }`}</style>
-    </div>
-  );
 }
 
 function useToast() {
@@ -92,6 +70,7 @@ function DeleteModal({ open, yearLabel, onConfirm, onCancel }) {
       <div style={{
         background: '#fff', borderRadius: 16, padding: '36px 32px 28px',
         width: 400, boxShadow: '0 12px 40px rgba(0,0,0,0.2)', textAlign: 'center',
+        fontFamily: "'Poppins', sans-serif",
       }} onClick={e => e.stopPropagation()}>
         <div style={{
           width: 56, height: 56, borderRadius: '50%', backgroundColor: '#fef2f2',
@@ -116,7 +95,7 @@ function DeleteModal({ open, yearLabel, onConfirm, onCancel }) {
           width: '100%', padding: '12px 0', borderRadius: 10,
           backgroundColor: '#ef4444', color: '#fff',
           border: 'none', fontWeight: 600, fontSize: 15, cursor: 'pointer', marginBottom: 10,
-          transition: 'all 0.2s',
+          transition: 'all 0.2s', fontFamily: "'Poppins', sans-serif",
         }}
           onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(239,68,68,0.3)'; }}
           onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = ''; }}
@@ -129,7 +108,7 @@ function DeleteModal({ open, yearLabel, onConfirm, onCancel }) {
           width: '100%', padding: '11px 0', borderRadius: 10,
           backgroundColor: '#fff', color: '#374151',
           border: '1.5px solid #e2e8f0', fontWeight: 500, fontSize: 14, cursor: 'pointer',
-          transition: 'all 0.2s',
+          transition: 'all 0.2s', fontFamily: "'Poppins', sans-serif",
         }}
           onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'; }}
           onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = ''; }}
@@ -150,6 +129,8 @@ export default function ActivitiesAdmin() {
   const [loading, setLoading] = useState(true);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const { toasts, removeToast, showToast } = useToast();
+  const [isVisible, setIsVisible] = useState(false);   // ← NEW
+  const sectionRef = useRef(null);                      // ← NEW
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -173,6 +154,18 @@ export default function ActivitiesAdmin() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
+  // ← NEW: IntersectionObserver for title entrance animation
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setIsVisible(true); },
+      { threshold: 0.1 }
+    );
+    if (sectionRef.current) observer.observe(sectionRef.current);
+    return () => {
+      if (sectionRef.current) observer.unobserve(sectionRef.current);
+    };
+  }, []);
+
   const handleDeleteConfirm = async () => {
     const year = deleteTarget?.year;
     setDeleteTarget(null);
@@ -194,6 +187,12 @@ export default function ActivitiesAdmin() {
 
   return (
     <AdminSidebar>
+      {/* ← NEW: Poppins font for all text */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+        *, *::before, *::after { font-family: 'Poppins', sans-serif !important; }
+      `}</style>
+
       <Toast toasts={toasts} removeToast={removeToast} />
 
       <DeleteModal
@@ -204,13 +203,15 @@ export default function ActivitiesAdmin() {
       />
 
       <div className="flex-1 overflow-y-auto h-screen custom-scrollbar">
-        <div className="flex flex-col py-8 px-4 md:px-12">
+        <div ref={sectionRef} className="flex flex-col py-8 px-4 md:px-12">  {/* ← ref added */}
 
           {/* Header */}
           <header className="mb-8 flex-shrink-0">
             <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
-              <h2 className="text-2xl md:text-3xl font-bold text-[#023347]">Activities</h2>
-              {/* ✅ CHANGED: styled to match Edit button */}
+              {/* ← UPDATED: matches Announcement title style exactly */}
+              <h2 className={`text-3xl font-extrabold text-[#023347] transition-all duration-1000 ${isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}>
+                Activities
+              </h2>
               <button
                 onClick={() => navigate('/admin/activities/add-new-year')}
                 className="inline-flex items-center gap-2 bg-[#023347] text-white px-5 py-2.5 rounded-[10px] text-sm font-semibold transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md hover:bg-[#2A8E9E] active:scale-95"
