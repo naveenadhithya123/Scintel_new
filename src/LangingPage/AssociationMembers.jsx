@@ -99,7 +99,7 @@ export default function AssociationMembers() {
   useEffect(() => {
     const currentSection = sectionRef.current;
     const observer = new IntersectionObserver(
-      ([entry]) => setIsVisible(entry.isIntersecting),
+      ([entry]) => { if (entry.isIntersecting) setIsVisible(true); },
       { threshold: 0.1 }
     );
     if (currentSection) observer.observe(currentSection);

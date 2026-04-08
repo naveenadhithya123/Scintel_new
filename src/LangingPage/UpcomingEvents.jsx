@@ -142,7 +142,7 @@ export default function UpcomingEvents() {
           ref={scrollRef} 
           onScroll={handleScroll}
           className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar pt-4"
-          style={{ touchAction: "pan-x", WebkitOverflowScrolling: 'touch' }}
+          style={{ touchAction: "auto", WebkitOverflowScrolling: 'touch' }}
         >
           {loading ? (
             <div className="flex-none w-full snap-start snap-always shrink-0">

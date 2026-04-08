@@ -139,7 +139,7 @@ function Glories() {
           onScroll={handleScroll}
           className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar pt-6"
           style={{ 
-            touchAction: "pan-x",
+            touchAction: "auto",
             WebkitOverflowScrolling: "touch" // Smooth momentum for iOS
           }}
         >
