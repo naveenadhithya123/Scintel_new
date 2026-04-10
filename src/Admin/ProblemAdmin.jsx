@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import AdminSidebar from "./AdminSidebar";
 import { API_BASE } from "../config/api";
 
 const TOAST_CSS = `
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
   @keyframes pb-toast-in {
     from { opacity: 0; transform: translateY(-16px) scale(0.96); }
     to   { opacity: 1; transform: translateY(0) scale(1); }
@@ -15,6 +17,7 @@ const TOAST_CSS = `
     box-shadow: 0 8px 32px rgba(2,51,71,0.25);
     font-size: 14px; font-weight: 600;
     animation: pb-toast-in 0.3s ease forwards;
+    font-family: 'Poppins', sans-serif;
   }
   .pb-toast-icon {
     width: 26px; height: 26px; border-radius: 50%; background: #2A8E9E;
@@ -23,6 +26,11 @@ const TOAST_CSS = `
   .pb-toast-close {
     background: none; border: none; color: #9bd3e0;
     cursor: pointer; font-size: 20px; line-height: 1; margin-left: 6px; padding: 0;
+    transition: all 0.2s ease;
+  }
+  .pb-toast-close:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
   }
   @keyframes pb-spin { to { transform: rotate(360deg); } }
   .pb-spinner {
@@ -30,6 +38,35 @@ const TOAST_CSS = `
     border: 2px solid rgba(255,255,255,0.35);
     border-top-color: #fff; border-radius: 50%;
     animation: pb-spin 0.7s linear infinite; flex-shrink: 0;
+  }
+
+  /* Poppins for ALL text content on this page */
+  *, *::before, *::after { font-family: 'Poppins', sans-serif !important; }
+
+  /* Tab buttons — Poppins only, NO lift */
+  .pb-tab {
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+
+  /* Hover lift — action buttons only */
+  .pb-btn {
+    font-family: 'Poppins', sans-serif;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    cursor: pointer;
+  }
+  .pb-btn:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(2, 51, 71, 0.25);
+  }
+  .pb-btn:active:not(:disabled) {
+    transform: translateY(-1px) scale(0.97);
+    box-shadow: 0 4px 10px rgba(2, 51, 71, 0.2);
+  }
+  .pb-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 `;
 
@@ -46,7 +83,7 @@ function ProblemToast({ message, onClose }) {
         </svg>
       </span>
       {message}
-      <button className="pb-toast-close transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md active:scale-95" onClick={onClose}>×</button>
+      <button className="pb-toast-close" onClick={onClose}>×</button>
     </div>
   );
 }
@@ -93,8 +130,10 @@ const ProblemAdmin = () => {
   const [activeTab, setActiveTab] = useState('Problems List');
   const [selectedProblem, setSelectedProblem] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [actionLoading, setActionLoading] = useState(null); // tracks which endpoint is loading
+  const [actionLoading, setActionLoading] = useState(null);
   const [toast, setToast] = useState(null);
+  const [isVisible, setIsVisible] = useState(false);   // ← NEW
+  const sectionRef = useRef(null);                      // ← NEW
 
   const showToast = (msg) => setToast(msg);
 
@@ -116,6 +155,18 @@ const ProblemAdmin = () => {
     };
     window.addEventListener('reset-view', handleResetView);
     return () => window.removeEventListener('reset-view', handleResetView);
+  }, []);
+
+  // ← NEW: IntersectionObserver for title entrance animation
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setIsVisible(true); },
+      { threshold: 0.1 }
+    );
+    if (sectionRef.current) observer.observe(sectionRef.current);
+    return () => {
+      if (sectionRef.current) observer.unobserve(sectionRef.current);
+    };
   }, []);
 
   const refreshData = () => {
@@ -223,8 +274,8 @@ const ProblemAdmin = () => {
   const renderContent = () => {
     if (selectedProblem) {
       const type = selectedProblem.viewType;
-      const id = type === 'problem' ? selectedProblem.problem_id : 
-                 type === 'request' ? selectedProblem.problem_creation_request_id : 
+      const id = type === 'problem' ? selectedProblem.problem_id :
+                 type === 'request' ? selectedProblem.problem_creation_request_id :
                  selectedProblem.problem_solver_request_id;
 
       return (
@@ -244,7 +295,7 @@ const ProblemAdmin = () => {
                 </span>
               )}
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-12 mb-10 border-b pb-8 text-sm md:text-base">
               {selectedProblem.name && (
                 <div className="flex items-center"><span className="font-bold text-[#023347] min-w-[120px]">Submitted By:</span><span className="text-gray-600">{selectedProblem.name}</span></div>
@@ -311,25 +362,24 @@ const ProblemAdmin = () => {
               </div>
             )}
           </div>
-          
-          {/* ── ONLY THESE BUTTONS CHANGED ── */}
+
           <div className="flex flex-wrap justify-end gap-4 pb-10 flex-shrink-0">
 
             {/* Back */}
-            <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
+            <button
+              className="pb-btn h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:bg-[#2A8E9E]"
               onClick={() => setSelectedProblem(null)}
               disabled={!!actionLoading}
-              className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Back
             </button>
 
             {type === 'problem' && (
-              <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
+              <button
+                className="pb-btn h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:bg-red-700"
+                style={{ display: 'flex', alignItems: 'center', gap: 8 }}
                 onClick={() => handleAction(`current-problems/${id}`, 'DELETE', 'Problem removed successfully.')}
                 disabled={!!actionLoading}
-                className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ display: 'flex', alignItems: 'center', gap: 8 }}
               >
                 {actionLoading === `current-problems/${id}` && <span className="pb-spinner" />}
                 {actionLoading === `current-problems/${id}` ? 'Removing...' : 'Remove Problem'}
@@ -338,20 +388,20 @@ const ProblemAdmin = () => {
 
             {type === 'request' && (
               <>
-                <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
+                <button
+                  className="pb-btn h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:bg-red-700"
+                  style={{ display: 'flex', alignItems: 'center', gap: 8 }}
                   onClick={() => handleAction(`problem-requests/${id}`, 'DELETE', 'Request denied.')}
                   disabled={!!actionLoading}
-                  className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{ display: 'flex', alignItems: 'center', gap: 8 }}
                 >
                   {actionLoading === `problem-requests/${id}` && <span className="pb-spinner" />}
                   {actionLoading === `problem-requests/${id}` ? 'Denying...' : 'Deny'}
                 </button>
-                <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
+                <button
+                  className="pb-btn h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:bg-[#2A8E9E]"
+                  style={{ display: 'flex', alignItems: 'center', gap: 8 }}
                   onClick={() => handleAction(`problem-requests/accept/${id}`, 'POST', 'Added to list successfully.')}
                   disabled={!!actionLoading}
-                  className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{ display: 'flex', alignItems: 'center', gap: 8 }}
                 >
                   {actionLoading === `problem-requests/accept/${id}` && <span className="pb-spinner" />}
                   {actionLoading === `problem-requests/accept/${id}` ? 'Adding...' : 'Add to List'}
@@ -361,20 +411,20 @@ const ProblemAdmin = () => {
 
             {type === 'lock' && (
               <>
-                <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
+                <button
+                  className="pb-btn h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:bg-red-700"
+                  style={{ display: 'flex', alignItems: 'center', gap: 8 }}
                   onClick={() => handleAction(`problem-solver-requests/deny/${id}`, 'DELETE', 'Solver declined.')}
                   disabled={!!actionLoading}
-                  className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-red-700 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{ display: 'flex', alignItems: 'center', gap: 8 }}
                 >
                   {actionLoading === `problem-solver-requests/deny/${id}` && <span className="pb-spinner" />}
                   {actionLoading === `problem-solver-requests/deny/${id}` ? 'Denying...' : 'Deny Solver'}
                 </button>
-                <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
+                <button
+                  className="pb-btn h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:bg-[#2A8E9E]"
+                  style={{ display: 'flex', alignItems: 'center', gap: 8 }}
                   onClick={() => handleAction(`problem-solver-requests/accept/${id}`, 'POST', 'Solver approved successfully.')}
                   disabled={!!actionLoading}
-                  className="h-11 px-8 bg-[#023347] text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg hover:bg-[#2A8E9E] transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{ display: 'flex', alignItems: 'center', gap: 8 }}
                 >
                   {actionLoading === `problem-solver-requests/accept/${id}` && <span className="pb-spinner" />}
                   {actionLoading === `problem-solver-requests/accept/${id}` ? 'Approving...' : 'Approve Solver'}
@@ -387,15 +437,18 @@ const ProblemAdmin = () => {
     }
 
     return (
-      <div className="flex flex-col h-screen p-4 md:p-6">
+      <div ref={sectionRef} className="flex flex-col h-screen p-4 md:p-6">  {/* ← ref added */}
         <header className="mb-6 flex-shrink-0">
-          <h2 className="text-xl md:text-2xl font-bold text-[#023347] mb-4">Admin Dashboard</h2>
+          {/* ← UPDATED: matches Announcement title style exactly */}
+          <h2 className={`text-3xl font-extrabold text-[#023347] mb-4 transition-all duration-1000 ${isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}>
+            Admin Dashboard
+          </h2>
           <div className="flex space-x-4 md:space-x-8 border-b border-gray-200 overflow-x-auto no-scrollbar">
             {tabs.map((tab) => (
-              <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
+              <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`pb-2 text-xs md:text-sm font-semibold transition-colors relative whitespace-nowrap ${activeTab === tab ? 'text-[#023347]' : 'text-gray-500 hover:text-gray-700'}`}
+                className={`pb-tab pb-2 text-xs md:text-sm font-semibold relative whitespace-nowrap ${activeTab === tab ? 'text-[#023347]' : 'text-gray-500 hover:text-gray-700'}`}
               >
                 {tab}
                 {activeTab === tab && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-[#2A8E9E]"></div>}
@@ -430,16 +483,26 @@ const ProblemAdmin = () => {
                           </span>
                         </td>
                         <td className="px-6 py-5 text-center">
-                          <button onClick={() => handleViewDetail(row.problem_id, 'problem')} className="bg-[#023347] text-white px-6 py-2 rounded-lg text-sm transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md hover:bg-[#2A8E9E] active:scale-95">View Details</button>
+                          <button
+                            className="pb-btn bg-[#023347] text-white px-6 py-2 rounded-lg text-sm hover:bg-[#2A8E9E]"
+                            onClick={() => handleViewDetail(row.problem_id, 'problem')}
+                          >
+                            View Details
+                          </button>
                         </td>
                       </tr>
                     ))}
                     {activeTab === 'Problem Request' && requestData.map((row) => (
-                     <tr key={row.problem_creation_request_id} className="hover:bg-[#f4fafb] transition-colors duration-200">
+                      <tr key={row.problem_creation_request_id} className="hover:bg-[#f4fafb] transition-colors duration-200">
                         <td className="px-6 py-5 text-[#023347] font-bold text-center">{row.title}</td>
                         <td className="px-6 py-5 text-center text-gray-600 text-sm">{row.name}</td>
                         <td className="px-6 py-5 text-center">
-                          <button onClick={() => handleViewDetail(row.problem_creation_request_id, 'request')} className="bg-[#023347] text-white px-6 py-2 rounded-lg text-sm transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md hover:bg-[#2A8E9E] active:scale-95">Review Request</button>
+                          <button
+                            className="pb-btn bg-[#023347] text-white px-6 py-2 rounded-lg text-sm hover:bg-[#2A8E9E]"
+                            onClick={() => handleViewDetail(row.problem_creation_request_id, 'request')}
+                          >
+                            Review Request
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -448,7 +511,12 @@ const ProblemAdmin = () => {
                         <td className="px-6 py-5 text-[#023347] font-bold text-center">{row.title}</td>
                         <td className="px-6 py-5 text-center text-gray-600 text-sm">{row.name}</td>
                         <td className="px-6 py-5 text-center">
-                          <button onClick={() => handleViewDetail(row.problem_solver_request_id, 'lock')} className="bg-[#023347] text-white px-6 py-2 rounded-lg text-sm transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md hover:bg-[#2A8E9E] active:scale-95">Review Solver</button>
+                          <button
+                            className="pb-btn bg-[#023347] text-white px-6 py-2 rounded-lg text-sm hover:bg-[#2A8E9E]"
+                            onClick={() => handleViewDetail(row.problem_solver_request_id, 'lock')}
+                          >
+                            Review Solver
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -473,5 +541,4 @@ const ProblemAdmin = () => {
   );
 };
 
-export default ProblemAdmin; 
-
+export default ProblemAdmin;

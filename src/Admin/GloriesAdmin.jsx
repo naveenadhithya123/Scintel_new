@@ -340,6 +340,8 @@ export default function GloriesAdmin() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [toast, setToast] = useState(null);
+  const [isVisible, setIsVisible] = useState(false);   // ← NEW
+  const sectionRef = useRef(null);                      // ← NEW
 
   const showToast = (msg) => { setToast(msg); };
 
@@ -351,7 +353,18 @@ export default function GloriesAdmin() {
       if (e.detail === '/admin/glories') setView('list');
     };
     window.addEventListener('reset-view', handleResetView);
-    return () => window.removeEventListener('reset-view', handleResetView);
+
+    // ← NEW: IntersectionObserver for title entrance animation
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setIsVisible(true); },
+      { threshold: 0.1 }
+    );
+    if (sectionRef.current) observer.observe(sectionRef.current);
+
+    return () => {
+      window.removeEventListener('reset-view', handleResetView);
+      if (sectionRef.current) observer.unobserve(sectionRef.current);
+    };
   }, []);
 
   const loadData = async () => {
@@ -432,11 +445,11 @@ export default function GloriesAdmin() {
         <DeleteModal glory={deleteTarget} loading={deleteLoading} onCancel={() => !deleteLoading && setDeleteTarget(null)} onConfirm={handleConfirmDelete} />
       )}
 
-      <main className="gl-form-main">
+      <main className="gl-form-main" ref={sectionRef}>  {/* ← ref added */}
         <div className="gl-list-header">
-          <h1 style={{ fontSize: "22px", fontWeight: 700 }}>Glories</h1>
+          {/* ← UPDATED: matches Announcement title style exactly */}
+          <h1 className={`text-3xl font-extrabold text-[#023347] transition-all duration-1000 ${isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}>Glories</h1>
           
-          {/* Simplified button using the new .gl-add-btn class */}
           <button onClick={() => setView("add")} className="gl-add-btn transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md active:scale-95">
             + Add Glory
           </button>

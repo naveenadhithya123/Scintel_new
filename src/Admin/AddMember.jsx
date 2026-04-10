@@ -136,7 +136,7 @@ export default function AddMember() {
         style={{ flex: 1, padding: "40px", display: "flex", flexDirection: "column", overflowY: "auto" }}
       >
         <div style={{ marginBottom: 48 }}>
-          <h1 style={{ fontSize: 22, fontWeight: 600, color: "#1f2937", marginBottom: 8 }}>
+          <h1 className="text-3xl font-extrabold text-[#023347]" style={{ marginBottom: 8 }}>
             Add Member
           </h1>
           <p style={{ fontSize: 14, color: "#6b7280" }}>
@@ -200,18 +200,18 @@ export default function AddMember() {
         </div>
 
         <div className="am-btn-row">
-          <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
+          <button
             type="button"
             onClick={() => navigate(-1)}
-            style={{ ...btnStyle, background: "#f3f4f6", color: "#374151", border: "1px solid #d1d5db" }}
+            className="bg-[#023347] text-white px-6 py-2 rounded-lg text-sm font-semibold transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md active:scale-95 hover:bg-red-700"
           >
             Cancel
           </button>
-          <button className="transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg active:scale-95"
+          <button
             type="button"
             disabled={isSubmitting}
             onClick={handleAdd}
-            style={btnStyle}
+            className="bg-[#023347] text-white px-6 py-2 rounded-lg text-sm font-semibold transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md active:scale-95 hover:bg-[#2A8E9E] disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
           >
             {isSubmitting ? "Adding..." : "Add Member"}
           </button>

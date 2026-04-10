@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import AdminSidebar from "./AdminSidebar";
 import { API_BASE } from "../config/api";
 
@@ -16,6 +16,7 @@ const Toast = ({ toasts, removeToast }) => (
           boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
           borderLeft: `4px solid ${t.type === "success" ? "#22c55e" : t.type === "error" ? "#ef4444" : "#f59e0b"}`,
           animation: "slideIn 0.3s ease",
+          fontFamily: "'Poppins', sans-serif",
         }}
       >
         <span style={{ fontSize: "20px", lineHeight: 1 }}>
@@ -68,11 +69,24 @@ export default function SuggestionAdmin() {
   const [rejectionMessage, setRejectionMessage] = useState("");
 
   const { toasts, removeToast, showToast } = useToast();
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef(null);
 
   useEffect(() => {
     if (view === "list") fetchDashboardSuggestions();
     else if (view === "history") fetchHistorySuggestions();
   }, [view, dashboardTab, historyTab]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setIsVisible(true); },
+      { threshold: 0.1 }
+    );
+    if (sectionRef.current) observer.observe(sectionRef.current);
+    return () => {
+      if (sectionRef.current) observer.unobserve(sectionRef.current);
+    };
+  }, []);
 
   const fetchDashboardSuggestions = async () => {
     setLoading(true);
@@ -197,10 +211,12 @@ export default function SuggestionAdmin() {
     }
   };
 
+  // transition covers ALL properties so transform animates alongside color
   const btnBase = {
     height: "44px", padding: "0 28px", backgroundColor: "#023347",
     color: "#ffffff", borderRadius: "10px", border: "none", cursor: "pointer",
-    fontSize: "14px", fontWeight: 600, transition: "background-color 0.2s",
+    fontSize: "14px", fontWeight: 600, transition: "all 0.2s ease",
+    fontFamily: "'Poppins', sans-serif",
   };
 
   const btnDelete = { ...btnBase, backgroundColor: "#023347" };
@@ -208,29 +224,37 @@ export default function SuggestionAdmin() {
   const renderDetailCard = () => (
     <div className="animate-fadeIn">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-        <h1 style={{ color: "#023347", fontSize: "24px", fontWeight: 800 }}>Suggestion Description</h1>
+        <h1 style={{ color: "#023347", fontSize: "24px", fontWeight: 800, fontFamily: "'Poppins', sans-serif" }}>Suggestion Description</h1>
         <button
           onClick={() => setView(prevView === "history" ? "history" : "list")}
           style={{ ...btnBase }}
-          onMouseEnter={e => e.currentTarget.style.backgroundColor = "#2A8E9E"}
-          onMouseLeave={e => e.currentTarget.style.backgroundColor = "#023347"}
+          onMouseEnter={e => {
+            e.currentTarget.style.backgroundColor = "#2A8E9E";
+            e.currentTarget.style.transform = "translateY(-3px)";
+            e.currentTarget.style.boxShadow = "0 8px 20px rgba(2,51,71,0.25)";
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.backgroundColor = "#023347";
+            e.currentTarget.style.transform = "";
+            e.currentTarget.style.boxShadow = "";
+          }}
         >
           ← Back to List
         </button>
       </div>
 
       <div style={{ backgroundColor: "#FFFFFF", borderRadius: "20px", border: "1px solid #e2e8ec", padding: "40px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
-        <h2 style={{ fontSize: "22px", fontWeight: 800, color: "#023347", marginBottom: "24px" }}>
+        <h2 style={{ fontSize: "22px", fontWeight: 800, color: "#023347", marginBottom: "24px", fontFamily: "'Poppins', sans-serif" }}>
           {selectedItem.title}
         </h2>
 
         <div style={{ backgroundColor: "#F8FAFC", padding: "25px", borderRadius: "15px", marginBottom: "24px" }}>
-          <p style={{ margin: 0, color: "#1e293b", lineHeight: "1.6", whiteSpace: "pre-wrap" }}>
+          <p style={{ margin: 0, color: "#1e293b", lineHeight: "1.6", whiteSpace: "pre-wrap", fontFamily: "'Poppins', sans-serif" }}>
             {selectedItem.description || selectedItem.suggestion}
           </p>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", padding: "20px", backgroundColor: "#F8FAFC", borderRadius: "15px", marginBottom: "30px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", padding: "20px", backgroundColor: "#F8FAFC", borderRadius: "15px", marginBottom: "30px", fontFamily: "'Poppins', sans-serif" }}>
           <div><strong>Name:</strong> {selectedItem.name}</div>
           <div><strong>Email:</strong> {selectedItem.email}</div>
           <div><strong>Year/Sec:</strong> {selectedItem.year} {selectedItem.section ? `- ${selectedItem.section}` : ""}</div>
@@ -242,8 +266,16 @@ export default function SuggestionAdmin() {
             <button
               onClick={() => setShowRejectModal(true)}
               style={{ ...btnDelete }}
-              onMouseEnter={e => e.currentTarget.style.backgroundColor = "#dc2626"}
-              onMouseLeave={e => e.currentTarget.style.backgroundColor = "#023347"}
+              onMouseEnter={e => {
+                e.currentTarget.style.backgroundColor = "#dc2626";
+                e.currentTarget.style.transform = "translateY(-3px)";
+                e.currentTarget.style.boxShadow = "0 8px 20px rgba(2,51,71,0.25)";
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.backgroundColor = "#023347";
+                e.currentTarget.style.transform = "";
+                e.currentTarget.style.boxShadow = "";
+              }}
             >
               Delete Record
             </button>
@@ -253,8 +285,20 @@ export default function SuggestionAdmin() {
                 onClick={handleAcknowledge}
                 disabled={actionLoading}
                 style={{ ...btnBase, opacity: actionLoading ? 0.7 : 1, cursor: actionLoading ? "not-allowed" : "pointer" }}
-                onMouseEnter={e => { if (!actionLoading) e.currentTarget.style.backgroundColor = "#2A8E9E"; }}
-                onMouseLeave={e => { if (!actionLoading) e.currentTarget.style.backgroundColor = "#023347"; }}
+                onMouseEnter={e => {
+                  if (!actionLoading) {
+                    e.currentTarget.style.backgroundColor = "#2A8E9E";
+                    e.currentTarget.style.transform = "translateY(-3px)";
+                    e.currentTarget.style.boxShadow = "0 8px 20px rgba(2,51,71,0.25)";
+                  }
+                }}
+                onMouseLeave={e => {
+                  if (!actionLoading) {
+                    e.currentTarget.style.backgroundColor = "#023347";
+                    e.currentTarget.style.transform = "";
+                    e.currentTarget.style.boxShadow = "";
+                  }
+                }}
               >
                 {actionLoading ? "Processing..." : "Acknowledge"}
               </button>
@@ -264,8 +308,20 @@ export default function SuggestionAdmin() {
               onClick={handleResolve}
               disabled={actionLoading}
               style={{ ...btnBase, opacity: actionLoading ? 0.7 : 1, cursor: actionLoading ? "not-allowed" : "pointer" }}
-              onMouseEnter={e => { if (!actionLoading) e.currentTarget.style.backgroundColor = "#2A8E9E"; }}
-              onMouseLeave={e => { if (!actionLoading) e.currentTarget.style.backgroundColor = "#023347"; }}
+              onMouseEnter={e => {
+                if (!actionLoading) {
+                  e.currentTarget.style.backgroundColor = "#2A8E9E";
+                  e.currentTarget.style.transform = "translateY(-3px)";
+                  e.currentTarget.style.boxShadow = "0 8px 20px rgba(2,51,71,0.25)";
+                }
+              }}
+              onMouseLeave={e => {
+                if (!actionLoading) {
+                  e.currentTarget.style.backgroundColor = "#023347";
+                  e.currentTarget.style.transform = "";
+                  e.currentTarget.style.boxShadow = "";
+                }
+              }}
             >
               {actionLoading ? "Saving..." : "Resolved"}
             </button>
@@ -277,7 +333,7 @@ export default function SuggestionAdmin() {
 
   const renderRejectModal = () => (
     <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }}>
-      <div style={{ backgroundColor: "#fff", borderRadius: "20px", padding: "40px", width: "100%", maxWidth: "500px", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
+      <div style={{ backgroundColor: "#fff", borderRadius: "20px", padding: "40px", width: "100%", maxWidth: "500px", boxShadow: "0 20px 60px rgba(0,0,0,0.2)", fontFamily: "'Poppins', sans-serif" }}>
         <h2 style={{ fontSize: "20px", fontWeight: 800, color: "#023347", marginBottom: "8px" }}>Reject Suggestion</h2>
         <p style={{ color: "#6b7280", fontSize: "14px", marginBottom: "20px" }}>Provide a reason for rejection. This will be sent to the user's email.</p>
         <textarea
@@ -285,14 +341,22 @@ export default function SuggestionAdmin() {
           onChange={(e) => setRejectionMessage(e.target.value)}
           placeholder="Type the rejection message here..."
           rows={5}
-          style={{ width: "100%", padding: "15px", borderRadius: "12px", border: "1.5px solid #e2e8ec", backgroundColor: "#F8FAFC", outline: "none", fontSize: "14px", resize: "none", boxSizing: "border-box" }}
+          style={{ width: "100%", padding: "15px", borderRadius: "12px", border: "1.5px solid #e2e8ec", backgroundColor: "#F8FAFC", outline: "none", fontSize: "14px", resize: "none", boxSizing: "border-box", fontFamily: "'Poppins', sans-serif" }}
         />
         <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "24px" }}>
           <button
             onClick={() => setShowRejectModal(false)}
             style={{ ...btnBase }}
-            onMouseEnter={e => e.currentTarget.style.backgroundColor = "#dc2626"}
-            onMouseLeave={e => e.currentTarget.style.backgroundColor = "#023347"}
+            onMouseEnter={e => {
+              e.currentTarget.style.backgroundColor = "#dc2626";
+              e.currentTarget.style.transform = "translateY(-3px)";
+              e.currentTarget.style.boxShadow = "0 8px 20px rgba(2,51,71,0.25)";
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.backgroundColor = "#023347";
+              e.currentTarget.style.transform = "";
+              e.currentTarget.style.boxShadow = "";
+            }}
           >
             Cancel
           </button>
@@ -300,8 +364,20 @@ export default function SuggestionAdmin() {
             onClick={handleRejectSubmit}
             disabled={actionLoading}
             style={{ ...btnBase, opacity: actionLoading ? 0.7 : 1, cursor: actionLoading ? "not-allowed" : "pointer" }}
-            onMouseEnter={e => { if (!actionLoading) e.currentTarget.style.backgroundColor = "#2A8E9E"; }}
-            onMouseLeave={e => { if (!actionLoading) e.currentTarget.style.backgroundColor = "#023347"; }}
+            onMouseEnter={e => {
+              if (!actionLoading) {
+                e.currentTarget.style.backgroundColor = "#2A8E9E";
+                e.currentTarget.style.transform = "translateY(-3px)";
+                e.currentTarget.style.boxShadow = "0 8px 20px rgba(2,51,71,0.25)";
+              }
+            }}
+            onMouseLeave={e => {
+              if (!actionLoading) {
+                e.currentTarget.style.backgroundColor = "#023347";
+                e.currentTarget.style.transform = "";
+                e.currentTarget.style.boxShadow = "";
+              }
+            }}
           >
             {actionLoading ? "Sending..." : "Send"}
           </button>
@@ -329,12 +405,12 @@ export default function SuggestionAdmin() {
       {showRejectModal && renderRejectModal()}
       <AdminSidebar />
 
-      <main style={{ flex: 1, padding: "32px 40px", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+      <main ref={sectionRef} style={{ flex: 1, padding: "32px 40px", overflow: "hidden", display: "flex", flexDirection: "column" }}>
         {view === "list" || view === "history" ? (
           <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
 
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexShrink: 0 }}>
-              <h1 style={{ color: "#023347", fontSize: "24px", fontWeight: 800 }}>
+              <h1 className={`text-3xl font-extrabold text-[#023347] transition-all duration-1000 ${isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}>
                 {view === "list" ? "Suggestions Dashboard" : "Suggestion Records"}
               </h1>
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
@@ -343,15 +419,23 @@ export default function SuggestionAdmin() {
                   placeholder="Search..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  style={{ padding: "10px 16px", borderRadius: "12px", border: "1.5px solid #e2e8ec", outline: "none", width: "220px", height: "44px", boxSizing: "border-box", transition: "border-color 0.2s" }}
+                  style={{ padding: "10px 16px", borderRadius: "12px", border: "1.5px solid #e2e8ec", outline: "none", width: "220px", height: "44px", boxSizing: "border-box", transition: "border-color 0.2s", fontFamily: "'Poppins', sans-serif" }}
                   onFocus={e => e.currentTarget.style.borderColor = "#2A8E9E"}
                   onBlur={e => e.currentTarget.style.borderColor = "#e2e8ec"}
                 />
                 <button
                   onClick={() => setView(view === "list" ? "history" : "list")}
                   style={{ ...btnBase, whiteSpace: "nowrap" }}
-                  onMouseEnter={e => e.currentTarget.style.backgroundColor = "#2A8E9E"}
-                  onMouseLeave={e => e.currentTarget.style.backgroundColor = "#023347"}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.backgroundColor = "#2A8E9E";
+                    e.currentTarget.style.transform = "translateY(-3px)";
+                    e.currentTarget.style.boxShadow = "0 8px 20px rgba(2,51,71,0.25)";
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.backgroundColor = "#023347";
+                    e.currentTarget.style.transform = "";
+                    e.currentTarget.style.boxShadow = "";
+                  }}
                 >
                   {view === "list" ? "View History" : "← Dashboard"}
                 </button>
@@ -418,9 +502,17 @@ export default function SuggestionAdmin() {
                           <td style={{ padding: "16px", textAlign: "center" }}>
                             <button
                               onClick={() => handleViewDetail(item.suggestion_id || item.record_id, view)}
-                              style={{ padding: "8px 20px", backgroundColor: "#023347", color: "white", borderRadius: "8px", border: "none", cursor: "pointer", fontSize: "13px", fontWeight: 600, transition: "background-color 0.2s" }}
-                              onMouseEnter={e => e.currentTarget.style.backgroundColor = "#2A8E9E"}
-                              onMouseLeave={e => e.currentTarget.style.backgroundColor = "#023347"}
+                              style={{ padding: "8px 20px", backgroundColor: "#023347", color: "white", borderRadius: "8px", border: "none", cursor: "pointer", fontSize: "13px", fontWeight: 600, transition: "all 0.2s ease", fontFamily: "'Poppins', sans-serif" }}
+                              onMouseEnter={e => {
+                                e.currentTarget.style.backgroundColor = "#2A8E9E";
+                                e.currentTarget.style.transform = "translateY(-3px)";
+                                e.currentTarget.style.boxShadow = "0 8px 20px rgba(2,51,71,0.25)";
+                              }}
+                              onMouseLeave={e => {
+                                e.currentTarget.style.backgroundColor = "#023347";
+                                e.currentTarget.style.transform = "";
+                                e.currentTarget.style.boxShadow = "";
+                              }}
                             >
                               View
                             </button>
@@ -453,6 +545,7 @@ const TabBtn = ({ active, label, onClick }) => (
       background: "none", border: "none",
       borderBottom: active ? "2px solid #023347" : "2px solid transparent",
       marginBottom: "-2px", cursor: "pointer",
+      fontFamily: "'Poppins', sans-serif",
     }}
   >
     {label}

@@ -208,13 +208,16 @@ export default function AddBatch() {
         .ab-modal h3 { font-size: 17px; font-weight: 700; color: #111827; margin-bottom: 20px; }
         .ab-modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
         .ab-modal-btns { display: flex; justify-content: flex-end; gap: 12px; }
-        .ab-btn-save { height: 44px; padding: 0 32px; background: #023347; color: #fff; border-radius: 12px; border: none; font-weight: 600; font-size: 14px; cursor: pointer; font-family: inherit; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: all 0.2s; }
-        .ab-btn-save:hover:not(:disabled) { background: #2A8E9E; box-shadow: 0 4px 14px rgba(0,0,0,0.2); transform: translateY(-2px); }
-        .ab-btn-save:disabled { opacity: 0.7; cursor: not-allowed; }
-        .ab-btn-cancel { height: 44px; padding: 0 32px; background: #023347; color: #fff; border-radius: 12px; border: none; font-weight: 600; font-size: 14px; cursor: pointer; font-family: inherit; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: all 0.2s; }
-        .ab-btn-cancel:hover:not(:disabled) { background: #b91c1c; box-shadow: 0 4px 14px rgba(0,0,0,0.2); transform: translateY(-2px); }
-        .ab-btn-add-member { height: 36px; padding: 0 16px; background: #023347; color: #fff; border-radius: 10px; border: none; font-weight: 600; font-size: 13px; cursor: pointer; font-family: inherit; box-shadow: 0 2px 6px rgba(0,0,0,0.15); transition: all 0.2s; }
-        .ab-btn-add-member:hover { background: #2A8E9E; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transform: translateY(-1px); }
+        .ab-btn-save { display: inline-flex; align-items: center; gap: 8px; background: #023347; color: #fff; padding: 8px 24px; border-radius: 8px; border: none; font-weight: 600; font-size: 14px; cursor: pointer; font-family: inherit; transition: all 0.2s; transform: translateY(0); box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+        .ab-btn-save:hover:not(:disabled) { background: #2A8E9E; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transform: translateY(-4px); }
+        .ab-btn-save:active { transform: scale(0.95); }
+        .ab-btn-save:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+        .ab-btn-cancel { display: inline-flex; align-items: center; gap: 8px; background: #023347; color: #fff; padding: 8px 24px; border-radius: 8px; border: none; font-weight: 600; font-size: 14px; cursor: pointer; font-family: inherit; transition: all 0.2s; transform: translateY(0); box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+        .ab-btn-cancel:hover:not(:disabled) { background: #b91c1c; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transform: translateY(-4px); }
+        .ab-btn-cancel:active { transform: scale(0.95); }
+        .ab-btn-add-member { display: inline-flex; align-items: center; gap: 8px; background: #023347; color: #fff; padding: 8px 20px; border-radius: 8px; border: none; font-weight: 600; font-size: 13px; cursor: pointer; font-family: inherit; transition: all 0.2s; transform: translateY(0); box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+        .ab-btn-add-member:hover { background: #2A8E9E; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transform: translateY(-4px); }
+        .ab-btn-add-member:active { transform: scale(0.95); }
         @media (max-width: 768px) {
           .ab-top-form { flex-direction: column; gap: 20px; }
           .ab-upload-box { width: 100%; min-width: unset; height: 180px; }
@@ -224,7 +227,7 @@ export default function AddBatch() {
       `}</style>
 
       <div style={{ flex: 1, padding: "40px", overflowY: "auto" }}>
-        <h1 style={{ fontSize: 22, fontWeight: 600, color: "#111827", marginBottom: 24 }}>Add New Batch</h1>
+        <h1 className="text-3xl font-extrabold text-[#023347]" style={{ marginBottom: 24 }}>Add New Batch</h1>
 
         <div className="ab-top-form">
           {/* Upload Box */}
